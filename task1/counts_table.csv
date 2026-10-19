@@ -1,5 +1,0 @@
-dataset,stage,pairs,ligands,targets
-DAVIS,original,30056,68,379
-DAVIS,cleaned,25772,68,379
-KIBA,original,118254,2068,229
-KIBA,cleaned,117657,2068,229
