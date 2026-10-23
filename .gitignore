@@ -1,0 +1,7 @@
+*.tbl
+*.csv
+*.dump
+clean_csv/
+TPC-H*/
+.env
+__pycache__/
