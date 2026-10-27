@@ -7,7 +7,7 @@ There are two routes:
 - **Part A: Quick setup (everyone).** Install PostgreSQL 18 and restore the shared dump file. About 15 minutes.
 - **Part B: How the dump was made.** Generating, cleaning and loading the data from scratch. Only needed if you want to rebuild the data yourself or want to describe the method in the report.
 
-Dump file (zipped, it contains `tpch.dump`, about 307 MB): https://drive.google.com/file/d/1cnBDXl8NAOVEDzpfanOU6kaCVvR8YcqG/view?usp=drive_link
+Dump file (zipped, it contains `tpch.dump`, about 307 MB): https://drive.google.com/file/d/1K6Dt6kxy5pLPHruLYdg4yMeunAxuXpBa/view?usp=sharing
 
 
 
@@ -184,4 +184,30 @@ WHERE l_partkey = p_partkey
 
 The plan should be: Seq Scan on `lineitem`, Seq Scan on `part` feeding a Hash, a Hash Join, then Aggregate, Gather, Aggregate. If your plan differs, check that `ANALYZE` has run and that you are on PostgreSQL 18.
 
+## Part C: Gemini API key (for the AI plan)
 
+The program asks Google Gemini for the AI agent's query plan (free tier). 
+
+1. **Get a free key.** Sign in at https://aistudio.google.com/apikey with a Google account and click Create API key. Copy the key.
+2. **Create a file named `.env`** in the project folder (next to `preprocessing.py`) with these lines:
+
+   ```
+   GEMINI_API_KEY=paste-your-key-here
+   PGPASSWORD=your-postgres-password
+   ```
+
+   On Windows, Notepad may save it as `.env.txt`. In the Save dialog, set "Save as type" to "All files" and type the name `.env`. 
+3. **Test it** from Command Prompt in the project folder:
+
+   ```
+   pip install -r requirements.txt
+   python preprocessing.py --ai "SELECT count(*) FROM nation"
+   ```
+
+   It prints the PostgreSQL plan, and after 10 to 60 seconds the AI plan. Both should be `Aggregate` over `Seq Scan [nation]`.
+
+Notes:
+
+- The default model is `gemini-3.5-flash`. When it is busy or over its free quota, the program tries other free Gemini models by itself. To force a model, add `GEMINI_MODEL=model-name` to `.env`.
+- AI answers are saved in the `.ai_cache` folder, so running the same query again is instant and uses no quota. Add `--no-cache` to ask Gemini again, or delete the folder to start fresh.
+- If you see `No Gemini model could answer`, the free models are busy: wait a minute and retry. `Gemini rejected the API key` means the key in `.env` is wrong.
