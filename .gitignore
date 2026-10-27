@@ -4,4 +4,7 @@
 clean_csv/
 TPC-H*/
 .env
+.venv
 __pycache__/
+*.zip
+.ai_cache/
