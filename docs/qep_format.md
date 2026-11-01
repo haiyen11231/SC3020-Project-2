@@ -57,6 +57,16 @@ ai_plan, ai_text = get_ai_plan(conn, "SELECT count(*) FROM lineitem")  # needs G
 
 The Gemini API key is read from the `GEMINI_API_KEY` environment variable, or from a `.env` file next to `preprocessing.py` containing `GEMINI_API_KEY=...` (the `.env` file is git-ignored). Get a free key at https://aistudio.google.com/apikey.
 
+## Comparing two plans
+
+`comparison.py` compares the two plans and returns which nodes correspond, a status and colour for every node, the explanations, and the difference rate. See `comparison.md` for the API (node paths, statuses, metrics) and the algorithm.
+
+```python
+from comparison import compare_plans
+result = compare_plans(pg_plan, ai_plan)
+print(result.explanation_text())
+```
+
 ## Errors
 
 Every function in `preprocessing.py` raises `PlanError` when something goes wrong (wrong password, missing database, invalid or empty SQL). Its message is short and safe to show to the user as it is, so the GUI should catch it and display the text instead of crashing:
