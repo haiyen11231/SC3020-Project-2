@@ -1,0 +1,1178 @@
+{
+ "id": "C3",
+ "category": "C. Multi-way join",
+ "purpose": "5-way join, cheapest offer for small brass parts from European suppliers",
+ "sql": "SELECT p.p_partkey, p.p_mfgr, s.s_name, ps.ps_supplycost\nFROM part p\nJOIN partsupp ps ON ps.ps_partkey = p.p_partkey\nJOIN supplier s  ON s.s_suppkey = ps.ps_suppkey\nJOIN nation n    ON n.n_nationkey = s.s_nationkey\nJOIN region r    ON r.r_regionkey = n.n_regionkey\nWHERE p.p_size = 3\n  AND p.p_type LIKE '%BRASS'\n  AND r.r_name = 'EUROPE'\nORDER BY ps.ps_supplycost\nLIMIT 50",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Limit",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 10462.79,
+    "Total Cost": 10578.17,
+    "Plan Rows": 50,
+    "Plan Width": 62,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Nested Loop",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Join Type": "Inner",
+      "Startup Cost": 10462.79,
+      "Total Cost": 11879.59,
+      "Plan Rows": 614,
+      "Plan Width": 62,
+      "Disabled": false,
+      "Inner Unique": true,
+      "Join Filter": "(r.r_regionkey = n.n_regionkey)",
+      "Plans": [
+       {
+        "Node Type": "Nested Loop",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Join Type": "Inner",
+        "Startup Cost": 10462.79,
+        "Total Cost": 11832.45,
+        "Plan Rows": 3072,
+        "Plan Width": 66,
+        "Disabled": false,
+        "Inner Unique": true,
+        "Plans": [
+         {
+          "Node Type": "Nested Loop",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Join Type": "Inner",
+          "Startup Cost": 10462.65,
+          "Total Cost": 11753.31,
+          "Plan Rows": 3072,
+          "Plan Width": 66,
+          "Disabled": false,
+          "Inner Unique": true,
+          "Plans": [
+           {
+            "Node Type": "Gather Merge",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 10462.36,
+            "Total Cost": 10820.15,
+            "Plan Rows": 3072,
+            "Plan Width": 40,
+            "Disabled": false,
+            "Workers Planned": 2,
+            "Plans": [
+             {
+              "Node Type": "Sort",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 9462.34,
+              "Total Cost": 9465.54,
+              "Plan Rows": 1280,
+              "Plan Width": 40,
+              "Disabled": false,
+              "Sort Key": [
+               "ps.ps_supplycost"
+              ],
+              "Plans": [
+               {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.42,
+                "Total Cost": 9396.28,
+                "Plan Rows": 1280,
+                "Plan Width": 40,
+                "Disabled": false,
+                "Inner Unique": false,
+                "Plans": [
+                 {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": true,
+                  "Async Capable": false,
+                  "Relation Name": "part",
+                  "Alias": "p",
+                  "Startup Cost": 0.0,
+                  "Total Cost": 5370.0,
+                  "Plan Rows": 320,
+                  "Plan Width": 30,
+                  "Disabled": false,
+                  "Filter": "(((p_type)::text ~~ '%BRASS'::text) AND (p_size = 3))"
+                 },
+                 {
+                  "Node Type": "Index Scan",
+                  "Parent Relationship": "Inner",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Scan Direction": "Forward",
+                  "Index Name": "partsupp_pkey",
+                  "Relation Name": "partsupp",
+                  "Alias": "ps",
+                  "Startup Cost": 0.42,
+                  "Total Cost": 12.54,
+                  "Plan Rows": 4,
+                  "Plan Width": 14,
+                  "Disabled": false,
+                  "Index Cond": "(ps_partkey = p.p_partkey)"
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Inner",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "supplier_pkey",
+            "Relation Name": "supplier",
+            "Alias": "s",
+            "Startup Cost": 0.29,
+            "Total Cost": 0.3,
+            "Plan Rows": 1,
+            "Plan Width": 34,
+            "Disabled": false,
+            "Index Cond": "(s_suppkey = ps.ps_suppkey)"
+           }
+          ]
+         },
+         {
+          "Node Type": "Memoize",
+          "Parent Relationship": "Inner",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 0.15,
+          "Total Cost": 0.17,
+          "Plan Rows": 1,
+          "Plan Width": 8,
+          "Disabled": false,
+          "Cache Key": "s.s_nationkey",
+          "Cache Mode": "logical",
+          "Plans": [
+           {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "nation_pkey",
+            "Relation Name": "nation",
+            "Alias": "n",
+            "Startup Cost": 0.14,
+            "Total Cost": 0.16,
+            "Plan Rows": 1,
+            "Plan Width": 8,
+            "Disabled": false,
+            "Index Cond": "(n_nationkey = s.s_nationkey)"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "Node Type": "Materialize",
+        "Parent Relationship": "Inner",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 1.07,
+        "Plan Rows": 1,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Relation Name": "region",
+          "Alias": "r",
+          "Startup Cost": 0.0,
+          "Total Cost": 1.06,
+          "Plan Rows": 1,
+          "Plan Width": 4,
+          "Disabled": false,
+          "Filter": "(r_name = 'EUROPE'::bpchar)"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 10578.17,
+  "rows": 50,
+  "children": [
+   {
+    "node_type": "Nested Loop",
+    "raw_type": "Nested Loop",
+    "relation": null,
+    "index_name": null,
+    "join_type": "Inner",
+    "conditions": {
+     "Join Filter": "(r.r_regionkey = n.n_regionkey)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 11879.59,
+    "rows": 614,
+    "children": [
+     {
+      "node_type": "Nested Loop",
+      "raw_type": "Nested Loop",
+      "relation": null,
+      "index_name": null,
+      "join_type": "Inner",
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 11832.45,
+      "rows": 3072,
+      "children": [
+       {
+        "node_type": "Nested Loop",
+        "raw_type": "Nested Loop",
+        "relation": null,
+        "index_name": null,
+        "join_type": "Inner",
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer"
+        },
+        "cost": 11753.31,
+        "rows": 3072,
+        "children": [
+         {
+          "node_type": "Gather Merge",
+          "raw_type": "Gather Merge",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer"
+          },
+          "cost": 10820.15,
+          "rows": 3072,
+          "children": [
+           {
+            "node_type": "Sort",
+            "raw_type": "Sort",
+            "relation": null,
+            "index_name": null,
+            "join_type": null,
+            "conditions": {},
+            "keys": [
+             "ps.ps_supplycost"
+            ],
+            "extra": {
+             "Parent Relationship": "Outer"
+            },
+            "cost": 9465.54,
+            "rows": 1280,
+            "children": [
+             {
+              "node_type": "Nested Loop",
+              "raw_type": "Nested Loop",
+              "relation": null,
+              "index_name": null,
+              "join_type": "Inner",
+              "conditions": {},
+              "keys": [],
+              "extra": {
+               "Parent Relationship": "Outer"
+              },
+              "cost": 9396.28,
+              "rows": 1280,
+              "children": [
+               {
+                "node_type": "Seq Scan",
+                "raw_type": "Seq Scan",
+                "relation": "part",
+                "index_name": null,
+                "join_type": null,
+                "conditions": {
+                 "Filter": "(((p_type)::text ~~ '%BRASS'::text) AND (p_size = 3))"
+                },
+                "keys": [],
+                "extra": {
+                 "Parent Relationship": "Outer",
+                 "Alias": "p"
+                },
+                "cost": 5370.0,
+                "rows": 320,
+                "children": [],
+                "source": "postgres"
+               },
+               {
+                "node_type": "Index Scan",
+                "raw_type": "Index Scan",
+                "relation": "partsupp",
+                "index_name": "partsupp_pkey",
+                "join_type": null,
+                "conditions": {
+                 "Index Cond": "(ps_partkey = p.p_partkey)"
+                },
+                "keys": [],
+                "extra": {
+                 "Parent Relationship": "Inner",
+                 "Scan Direction": "Forward",
+                 "Alias": "ps"
+                },
+                "cost": 12.54,
+                "rows": 4,
+                "children": [],
+                "source": "postgres"
+               }
+              ],
+              "source": "postgres"
+             }
+            ],
+            "source": "postgres"
+           }
+          ],
+          "source": "postgres"
+         },
+         {
+          "node_type": "Index Scan",
+          "raw_type": "Index Scan",
+          "relation": "supplier",
+          "index_name": "supplier_pkey",
+          "join_type": null,
+          "conditions": {
+           "Index Cond": "(s_suppkey = ps.ps_suppkey)"
+          },
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Inner",
+           "Scan Direction": "Forward",
+           "Alias": "s"
+          },
+          "cost": 0.3,
+          "rows": 1,
+          "children": [],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       },
+       {
+        "node_type": "Memoize",
+        "raw_type": "Memoize",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Inner"
+        },
+        "cost": 0.17,
+        "rows": 1,
+        "children": [
+         {
+          "node_type": "Index Scan",
+          "raw_type": "Index Scan",
+          "relation": "nation",
+          "index_name": "nation_pkey",
+          "join_type": null,
+          "conditions": {
+           "Index Cond": "(n_nationkey = s.s_nationkey)"
+          },
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer",
+           "Scan Direction": "Forward",
+           "Alias": "n"
+          },
+          "cost": 0.16,
+          "rows": 1,
+          "children": [],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     },
+     {
+      "node_type": "Materialize",
+      "raw_type": "Materialize",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Inner"
+      },
+      "cost": 1.07,
+      "rows": 1,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "region",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "(r_name = 'EUROPE'::bpchar)"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "r"
+        },
+        "cost": 1.06,
+        "rows": 1,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Limit\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 50,\n  \"parent_relationship\": null,\n  \"reason\": \"The query requires a limit on the sorted result set.\",\n  \"children\": [\n    {\n      \"node_type\": \"Sort\",\n      \"relation\": null,\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {},\n      \"keys\": [\"ps.ps_supplycost\"],\n      \"estimated_rows\": 160,\n      \"parent_relationship\": null,\n      \"reason\": \"Sorting is required to satisfy the ORDER BY clause.\",\n      \"children\": [\n        {\n          \"node_type\": \"Hash Join\",\n          \"relation\": null,\n          \"index_name\": null,\n          \"join_type\": \"Inner\",\n          \"strategy\": null,\n          \"conditions\": {\n            \"Hash Cond\": \"ps.ps_suppkey = s.s_suppkey\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 160,\n          \"parent_relationship\": null,\n          \"reason\": \"Hash join is efficient for joining partsupp with supplier.\",\n          \"children\": [\n            {\n              \"node_type\": \"Hash Join\",\n              \"relation\": null,\n              \"index_name\": null,\n              \"join_type\": \"Inner\",\n              \"strategy\": null,\n              \"conditions\": {\n                \"Hash Cond\": \"ps.ps_partkey = p.p_partkey\"\n              },\n              \"keys\": [],\n              \"estimated_rows\": 160,\n              \"parent_relationship\": null,\n              \"reason\": \"Hash join is efficient for joining partsupp with filtered part.\",\n              \"children\": [\n                {\n                  \"node_type\": \"Seq Scan\",\n                  \"relation\": \"partsupp\",\n                  \"index_name\": null,\n                  \"join_type\": null,\n                  \"strategy\": null,\n                  \"conditions\": {},\n                  \"keys\": [],\n                  \"estimated_rows\": 800000,\n                  \"parent_relationship\": null,\n                  \"reason\": \"Full scan of partsupp is necessary as there is no filter.\",\n                  \"children\": []\n                },\n                {\n                  \"node_type\": \"Hash\",\n                  \"relation\": null,\n                  \"index_name\": null,\n                  \"join_type\": null,\n                  \"strategy\": null,\n                  \"conditions\": {},\n                  \"keys\": [],\n                  \"estimated_rows\": 4000,\n                  \"parent_relationship\": null,\n                  \"reason\": \"Hash table for part filter.\",\n                  \"children\": [\n                    {\n                      \"node_type\": \"Seq Scan\",\n                      \"relation\": \"part\",\n                      \"index_name\": null,\n                      \"join_type\": null,\n                      \"strategy\": null,\n                      \"conditions\": {\n                        \"Filter\": \"p_size = 3 AND p_type LIKE '%BRASS'\"\n                      },\n                      \"keys\": [],\n                      \"estimated_rows\": 4000,\n                      \"parent_relationship\": null,\n                      \"reason\": \"Filtering part table by size and type.\",\n                      \"children\": []\n                    }\n                  ]\n                }\n              ]\n            },\n            {\n              \"node_type\": \"Hash\",\n              \"relation\": null,\n              \"index_name\": null,\n              \"join_type\": null,\n              \"strategy\": null,\n              \"conditions\": {},\n              \"keys\": [],\n              \"estimated_rows\": 400,\n              \"parent_relationship\": null,\n              \"reason\": \"Hash table for supplier joined with filtered nation/region.\",\n              \"children\": [\n                {\n                  \"node_type\": \"Hash Join\",\n                  \"relation\": null,\n                  \"index_name\": null,\n                  \"join_type\": \"Inner\",\n                  \"strategy\": null,\n                  \"conditions\": {\n                    \"Hash Cond\": \"s.s_nationkey = n.n_nationkey\"\n                  },\n                  \"keys\": [],\n                  \"estimated_rows\": 400,\n                  \"parent_relationship\": null,\n                  \"reason\": \"Joining supplier with filtered nation.\",\n                  \"children\": [\n                    {\n                      \"node_type\": \"Seq Scan\",\n                      \"relation\": \"supplier\",\n                      \"index_name\": null,\n                      \"join_type\": null,\n                      \"strategy\": null,\n                      \"conditions\": {},\n                      \"keys\": [],\n                      \"estimated_rows\": 10000,\n                      \"parent_relationship\": null,\n                      \"reason\": \"Full scan of supplier.\",\n                      \"children\": []\n                    },\n                    {\n                      \"node_type\": \"Hash\",\n                      \"relation\": null,\n                      \"index_name\": null,\n                      \"join_type\": null,\n                      \"strategy\": null,\n                      \"conditions\": {},\n                      \"keys\": [],\n                      \"estimated_rows\": 5,\n                      \"parent_relationship\": null,\n                      \"reason\": \"Hash table for nation filtered by region.\",\n                      \"children\": [\n                        {\n                          \"node_type\": \"Hash Join\",\n                          \"relation\": null,\n                          \"index_name\": null,\n                          \"join_type\": \"Inner\",\n                          \"strategy\": null,\n                          \"conditions\": {\n                            \"Hash Cond\": \"n.n_regionkey = r.r_regionkey\"\n                          },\n                          \"keys\": [],\n                          \"estimated_rows\": 5,\n                          \"parent_relationship\": null,\n                          \"reason\": \"Joining nation with filtered region.\",\n                          \"children\": [\n                            {\n                              \"node_type\": \"Seq Scan\",\n                              \"relation\": \"nation\",\n                              \"index_name\": null,\n                              \"join_type\": null,\n                              \"strategy\": null,\n                              \"conditions\": {},\n                              \"keys\": [],\n                              \"estimated_rows\": 25,\n                              \"parent_relationship\": null,\n                              \"reason\": \"Full scan of nation.\",\n                              \"children\": []\n                            },\n                            {\n                              \"node_type\": \"Hash\",\n                              \"relation\": null,\n                              \"index_name\": null,\n                              \"join_type\": null,\n                              \"strategy\": null,\n                              \"conditions\": {},\n                              \"keys\": [],\n                              \"estimated_rows\": 1,\n                              \"parent_relationship\": null,\n                              \"reason\": \"Hash table for region filter.\",\n                              \"children\": [\n                                {\n                                  \"node_type\": \"Seq Scan\",\n                                  \"relation\": \"region\",\n                                  \"index_name\": null,\n                                  \"join_type\": null,\n                                  \"strategy\": null,\n                                  \"conditions\": {\n                                    \"Filter\": \"r_name = 'EUROPE'\"\n                                  },\n                                  \"keys\": [],\n                                  \"estimated_rows\": 1,\n                                  \"parent_relationship\": null,\n                                  \"reason\": \"Filtering region by name.\",\n                                  \"children\": []\n                                }\n                              ]\n                            }\n                          ]\n                        }\n                      ]\n                    }\n                  ]\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query requires a limit on the sorted result set.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 50.0,
+  "children": [
+   {
+    "node_type": "Sort",
+    "raw_type": "Sort",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "ps.ps_supplycost"
+    ],
+    "extra": {
+     "AI Reason": "Sorting is required to satisfy the ORDER BY clause."
+    },
+    "cost": null,
+    "rows": 160.0,
+    "children": [
+     {
+      "node_type": "Hash Join",
+      "raw_type": "Hash Join",
+      "relation": null,
+      "index_name": null,
+      "join_type": "Inner",
+      "conditions": {
+       "Hash Cond": "ps.ps_suppkey = s.s_suppkey"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Hash join is efficient for joining partsupp with supplier."
+      },
+      "cost": null,
+      "rows": 160.0,
+      "children": [
+       {
+        "node_type": "Hash Join",
+        "raw_type": "Hash Join",
+        "relation": null,
+        "index_name": null,
+        "join_type": "Inner",
+        "conditions": {
+         "Hash Cond": "ps.ps_partkey = p.p_partkey"
+        },
+        "keys": [],
+        "extra": {
+         "AI Reason": "Hash join is efficient for joining partsupp with filtered part."
+        },
+        "cost": null,
+        "rows": 160.0,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "partsupp",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Full scan of partsupp is necessary as there is no filter."
+          },
+          "cost": null,
+          "rows": 800000.0,
+          "children": [],
+          "source": "ai"
+         },
+         {
+          "node_type": "Hash",
+          "raw_type": "Hash",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Hash table for part filter."
+          },
+          "cost": null,
+          "rows": 4000.0,
+          "children": [
+           {
+            "node_type": "Seq Scan",
+            "raw_type": "Seq Scan",
+            "relation": "part",
+            "index_name": null,
+            "join_type": null,
+            "conditions": {
+             "Filter": "p_size = 3 AND p_type LIKE '%BRASS'"
+            },
+            "keys": [],
+            "extra": {
+             "AI Reason": "Filtering part table by size and type."
+            },
+            "cost": null,
+            "rows": 4000.0,
+            "children": [],
+            "source": "ai"
+           }
+          ],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       },
+       {
+        "node_type": "Hash",
+        "raw_type": "Hash",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Hash table for supplier joined with filtered nation/region."
+        },
+        "cost": null,
+        "rows": 400.0,
+        "children": [
+         {
+          "node_type": "Hash Join",
+          "raw_type": "Hash Join",
+          "relation": null,
+          "index_name": null,
+          "join_type": "Inner",
+          "conditions": {
+           "Hash Cond": "s.s_nationkey = n.n_nationkey"
+          },
+          "keys": [],
+          "extra": {
+           "AI Reason": "Joining supplier with filtered nation."
+          },
+          "cost": null,
+          "rows": 400.0,
+          "children": [
+           {
+            "node_type": "Seq Scan",
+            "raw_type": "Seq Scan",
+            "relation": "supplier",
+            "index_name": null,
+            "join_type": null,
+            "conditions": {},
+            "keys": [],
+            "extra": {
+             "AI Reason": "Full scan of supplier."
+            },
+            "cost": null,
+            "rows": 10000.0,
+            "children": [],
+            "source": "ai"
+           },
+           {
+            "node_type": "Hash",
+            "raw_type": "Hash",
+            "relation": null,
+            "index_name": null,
+            "join_type": null,
+            "conditions": {},
+            "keys": [],
+            "extra": {
+             "AI Reason": "Hash table for nation filtered by region."
+            },
+            "cost": null,
+            "rows": 5.0,
+            "children": [
+             {
+              "node_type": "Hash Join",
+              "raw_type": "Hash Join",
+              "relation": null,
+              "index_name": null,
+              "join_type": "Inner",
+              "conditions": {
+               "Hash Cond": "n.n_regionkey = r.r_regionkey"
+              },
+              "keys": [],
+              "extra": {
+               "AI Reason": "Joining nation with filtered region."
+              },
+              "cost": null,
+              "rows": 5.0,
+              "children": [
+               {
+                "node_type": "Seq Scan",
+                "raw_type": "Seq Scan",
+                "relation": "nation",
+                "index_name": null,
+                "join_type": null,
+                "conditions": {},
+                "keys": [],
+                "extra": {
+                 "AI Reason": "Full scan of nation."
+                },
+                "cost": null,
+                "rows": 25.0,
+                "children": [],
+                "source": "ai"
+               },
+               {
+                "node_type": "Hash",
+                "raw_type": "Hash",
+                "relation": null,
+                "index_name": null,
+                "join_type": null,
+                "conditions": {},
+                "keys": [],
+                "extra": {
+                 "AI Reason": "Hash table for region filter."
+                },
+                "cost": null,
+                "rows": 1.0,
+                "children": [
+                 {
+                  "node_type": "Seq Scan",
+                  "raw_type": "Seq Scan",
+                  "relation": "region",
+                  "index_name": null,
+                  "join_type": null,
+                  "conditions": {
+                   "Filter": "r_name = 'EUROPE'"
+                  },
+                  "keys": [],
+                  "extra": {
+                   "AI Reason": "Filtering region by name."
+                  },
+                  "cost": null,
+                  "rows": 1.0,
+                  "children": [],
+                  "source": "ai"
+                 }
+                ],
+                "source": "ai"
+               }
+              ],
+              "source": "ai"
+             }
+            ],
+            "source": "ai"
+           }
+          ],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.7931,
+   "ted_rate": 0.6552,
+   "pg_nodes": 14,
+   "ai_nodes": 15,
+   "matched_pairs": 8,
+   "identical_pairs": 3,
+   "changed_pairs": 5,
+   "postgres_only_nodes": 6,
+   "ai_only_nodes": 7,
+   "access_method_agreement": 0.4,
+   "join_algorithm_agreement": 0.0,
+   "join_order_agreement": 0.3333,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "NL(NL(NL(NL(part, partsupp), supplier), nation), region)",
+   "ai": "HJ(HJ(partsupp, part), HJ(supplier, HJ(nation, region)))"
+  },
+  "differences": [
+   {
+    "category": "Join order",
+    "text": "The join order differs. PostgreSQL builds the intermediate result(s) {nation, part, partsupp, supplier}; {part, partsupp, supplier}, which the AI plan does not. The AI builds {nation, region}; {nation, region, supplier}, which PostgreSQL does not. This changes the size of every intermediate result.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Join algorithm",
+    "text": "The join of (part, partsupp, supplier, nation, region): PostgreSQL uses Nested Loop of (part, partsupp, supplier, nation) with (region). The AI uses Hash Join of (partsupp, part) with (supplier, nation, region). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Hash join is efficient for joining partsupp with supplier.\"",
+    "pg_path": "0.0",
+    "ai_path": "0.0.0"
+   },
+   {
+    "category": "Conditions",
+    "text": "Nested Loop of (part, partsupp, supplier, nation) with (region): PostgreSQL applies r_regionkey = n_regionkey here, the AI does not. The AI applies ps_suppkey = s_suppkey here, PostgreSQL does not.",
+    "pg_path": "0.0",
+    "ai_path": "0.0.0"
+   },
+   {
+    "category": "Join algorithm",
+    "text": "The join of (part, partsupp): PostgreSQL uses Nested Loop of (part) with (partsupp). The AI uses Hash Join of (partsupp) with (part). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Hash join is efficient for joining partsupp with filtered part.\"",
+    "pg_path": "0.0.0.0.0.0.0",
+    "ai_path": "0.0.0.0"
+   },
+   {
+    "category": "Join input order",
+    "text": "Join of (part, partsupp): outer and inner inputs are swapped. PostgreSQL's outer input is (part).",
+    "pg_path": "0.0.0.0.0.0.0",
+    "ai_path": "0.0.0.0"
+   },
+   {
+    "category": "Access method",
+    "text": "Table partsupp: PostgreSQL uses Index Scan on partsupp using partsupp_pkey. The AI uses Seq Scan on partsupp. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of partsupp is necessary as there is no filter.\"",
+    "pg_path": "0.0.0.0.0.0.0.1",
+    "ai_path": "0.0.0.0.0"
+   },
+   {
+    "category": "Access method",
+    "text": "Table supplier: PostgreSQL uses Index Scan on supplier using supplier_pkey. The AI uses Seq Scan on supplier. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of supplier.\"",
+    "pg_path": "0.0.0.0.1",
+    "ai_path": "0.0.0.1.0.0"
+   },
+   {
+    "category": "Access method",
+    "text": "Table nation: PostgreSQL uses Index Scan on nation using nation_pkey. The AI uses Seq Scan on nation. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of nation.\"",
+    "pg_path": "0.0.0.1.0",
+    "ai_path": "0.0.0.1.0.1.0.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Nested Loop of (part, partsupp, supplier) with (nation) (for every outer row, searches the inner input for matches).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Nested Loop of (part, partsupp) with (supplier) (for every outer row, searches the inner input for matches).",
+    "pg_path": "0.0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (part, partsupp) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.0.0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Sort over (part, partsupp) (sorts its input).",
+    "pg_path": "0.0.0.0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Memoize over (nation) (caches inner results for repeated parameter values).",
+    "pg_path": "0.0.0.1",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Materialize over (region) (stores its input in memory so it can be re-read cheaply).",
+    "pg_path": "0.0.1",
+    "ai_path": null
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Sort over (partsupp, part, supplier, nation, region) (sorts its input). The AI's reason: \"Sorting is required to satisfy the ORDER BY clause.\"",
+    "pg_path": null,
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash over (part) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for part filter.\"",
+    "pg_path": null,
+    "ai_path": "0.0.0.0.1"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash over (supplier, nation, region) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for supplier joined with filtered nation/region.\"",
+    "pg_path": null,
+    "ai_path": "0.0.0.1"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash Join of (supplier) with (nation, region) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"Joining supplier with filtered nation.\"",
+    "pg_path": null,
+    "ai_path": "0.0.0.1.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash over (nation, region) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for nation filtered by region.\"",
+    "pg_path": null,
+    "ai_path": "0.0.0.1.0.1"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash Join of (nation) with (region) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"Joining nation with filtered region.\"",
+    "pg_path": null,
+    "ai_path": "0.0.0.1.0.1.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash over (region) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for region filter.\"",
+    "pg_path": null,
+    "ai_path": "0.0.0.1.0.1.0.1"
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on part.",
+   "Both plans use Seq Scan on region."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "The join of (part, partsupp, supplier, nation, region): PostgreSQL uses Nested Loop of (part, partsupp, supplier, nation) with (region). The AI uses Hash Join of (partsupp, part) with (supplier, nation, region). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Hash join is efficient for joining partsupp with supplier.\"",
+     "Nested Loop of (part, partsupp, supplier, nation) with (region): PostgreSQL applies r_regionkey = n_regionkey here, the AI does not. The AI applies ps_suppkey = s_suppkey here, PostgreSQL does not."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Nested Loop of (part, partsupp, supplier) with (nation) (for every outer row, searches the inner input for matches)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Nested Loop of (part, partsupp) with (supplier) (for every outer row, searches the inner input for matches)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (part, partsupp) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Sort over (part, partsupp) (sorts its input)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0",
+    "ai_path": "0.0.0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "The join of (part, partsupp): PostgreSQL uses Nested Loop of (part) with (partsupp). The AI uses Hash Join of (partsupp) with (part). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Hash join is efficient for joining partsupp with filtered part.\"",
+     "Join of (part, partsupp): outer and inner inputs are swapped. PostgreSQL's outer input is (part)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0.0",
+    "ai_path": "0.0.0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0.1",
+    "ai_path": "0.0.0.0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table partsupp: PostgreSQL uses Index Scan on partsupp using partsupp_pkey. The AI uses Seq Scan on partsupp. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of partsupp is necessary as there is no filter.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.1",
+    "ai_path": "0.0.0.1.0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table supplier: PostgreSQL uses Index Scan on supplier using supplier_pkey. The AI uses Seq Scan on supplier. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of supplier.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.0.1",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Memoize over (nation) (caches inner results for repeated parameter values)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.1.0",
+    "ai_path": "0.0.0.1.0.1.0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table nation: PostgreSQL uses Index Scan on nation using nation_pkey. The AI uses Seq Scan on nation. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of nation.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.1",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Materialize over (region) (stores its input in memory so it can be re-read cheaply)."
+    ]
+   },
+   {
+    "pg_path": "0.0.1.0",
+    "ai_path": "0.0.0.1.0.1.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Sort over (partsupp, part, supplier, nation, region) (sorts its input). The AI's reason: \"Sorting is required to satisfy the ORDER BY clause.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.0.0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash over (part) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for part filter.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash over (supplier, nation, region) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for supplier joined with filtered nation/region.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.0.1.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash Join of (supplier) with (nation, region) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"Joining supplier with filtered nation.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.0.1.0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash over (nation, region) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for nation filtered by region.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.0.1.0.1.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash Join of (nation) with (region) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"Joining nation with filtered region.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.0.1.0.1.0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash over (region) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for region filter.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "changed",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "postgres_only",
+    "0.0.0.0.0": "postgres_only",
+    "0.0.0.0.0.0": "postgres_only",
+    "0.0.0.0.0.0.0": "changed",
+    "0.0.0.0.0.0.0.0": "same",
+    "0.0.0.0.0.0.0.1": "changed",
+    "0.0.0.0.1": "changed",
+    "0.0.0.1": "postgres_only",
+    "0.0.0.1.0": "changed",
+    "0.0.1": "postgres_only",
+    "0.0.1.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0.0": "changed",
+    "0.0.0.0": "changed",
+    "0.0.0.0.1.0": "same",
+    "0.0.0.0.0": "changed",
+    "0.0.0.1.0.0": "changed",
+    "0.0.0.1.0.1.0.0": "changed",
+    "0.0.0.1.0.1.0.1.0": "same",
+    "0.0": "ai_only",
+    "0.0.0.0.1": "ai_only",
+    "0.0.0.1": "ai_only",
+    "0.0.0.1.0": "ai_only",
+    "0.0.0.1.0.1": "ai_only",
+    "0.0.0.1.0.1.0": "ai_only",
+    "0.0.0.1.0.1.0.1": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 79% (tree edit distance rate: 66%). 3 of 14 PostgreSQL nodes have an identical counterpart in the AI plan's 15 nodes.\n\nPostgreSQL join order: NL(NL(NL(NL(part, partsupp), supplier), nation), region)\nAI join order:         HJ(HJ(partsupp, part), HJ(supplier, HJ(nation, region)))\n\nDIFFERENCES\n1. [Join order] The join order differs. PostgreSQL builds the intermediate result(s) {nation, part, partsupp, supplier}; {part, partsupp, supplier}, which the AI plan does not. The AI builds {nation, region}; {nation, region, supplier}, which PostgreSQL does not. This changes the size of every intermediate result.\n2. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge). The AI plan runs in a single process.\n3. [Join algorithm] The join of (part, partsupp, supplier, nation, region): PostgreSQL uses Nested Loop of (part, partsupp, supplier, nation) with (region). The AI uses Hash Join of (partsupp, part) with (supplier, nation, region). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Hash join is efficient for joining partsupp with supplier.\"\n4. [Conditions] Nested Loop of (part, partsupp, supplier, nation) with (region): PostgreSQL applies r_regionkey = n_regionkey here, the AI does not. The AI applies ps_suppkey = s_suppkey here, PostgreSQL does not.\n5. [Join algorithm] The join of (part, partsupp): PostgreSQL uses Nested Loop of (part) with (partsupp). The AI uses Hash Join of (partsupp) with (part). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Hash join is efficient for joining partsupp with filtered part.\"\n6. [Join input order] Join of (part, partsupp): outer and inner inputs are swapped. PostgreSQL's outer input is (part).\n7. [Access method] Table partsupp: PostgreSQL uses Index Scan on partsupp using partsupp_pkey. The AI uses Seq Scan on partsupp. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of partsupp is necessary as there is no filter.\"\n8. [Access method] Table supplier: PostgreSQL uses Index Scan on supplier using supplier_pkey. The AI uses Seq Scan on supplier. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of supplier.\"\n9. [Access method] Table nation: PostgreSQL uses Index Scan on nation using nation_pkey. The AI uses Seq Scan on nation. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of nation.\"\n10. [Missing operator] Only the PostgreSQL plan has Nested Loop of (part, partsupp, supplier) with (nation) (for every outer row, searches the inner input for matches).\n11. [Missing operator] Only the PostgreSQL plan has Nested Loop of (part, partsupp) with (supplier) (for every outer row, searches the inner input for matches).\n12. [Missing operator] Only the PostgreSQL plan has Gather Merge over (part, partsupp) (collects sorted rows from parallel workers, keeping the order).\n13. [Missing operator] Only the PostgreSQL plan has Sort over (part, partsupp) (sorts its input).\n14. [Missing operator] Only the PostgreSQL plan has Memoize over (nation) (caches inner results for repeated parameter values).\n15. [Missing operator] Only the PostgreSQL plan has Materialize over (region) (stores its input in memory so it can be re-read cheaply).\n16. [Extra operator] Only the AI plan has Sort over (partsupp, part, supplier, nation, region) (sorts its input). The AI's reason: \"Sorting is required to satisfy the ORDER BY clause.\"\n17. [Extra operator] Only the AI plan has Hash over (part) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for part filter.\"\n18. [Extra operator] Only the AI plan has Hash over (supplier, nation, region) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for supplier joined with filtered nation/region.\"\n19. [Extra operator] Only the AI plan has Hash Join of (supplier) with (nation, region) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"Joining supplier with filtered nation.\"\n20. [Extra operator] Only the AI plan has Hash over (nation, region) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for nation filtered by region.\"\n21. [Extra operator] Only the AI plan has Hash Join of (nation) with (region) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"Joining nation with filtered region.\"\n22. [Extra operator] Only the AI plan has Hash over (region) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for region filter.\"\n\nSIMILARITIES\n- Both plans use Seq Scan on part.\n- Both plans use Seq Scan on region.",
+ "timings": {
+  "postgres": 0.014,
+  "ai": 5.273,
+  "comparison": 0.004
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.7931,
+  "ted_rate": 0.6552,
+  "pg_nodes": 14,
+  "ai_nodes": 15,
+  "identical_pairs": 3,
+  "changed_pairs": 5,
+  "postgres_only_nodes": 6,
+  "ai_only_nodes": 7,
+  "access_method_agreement": 0.4,
+  "join_algorithm_agreement": 0.0,
+  "join_order_agreement": 0.3333,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Join order",
+  "Parallelism",
+  "Join algorithm",
+  "Conditions",
+  "Join algorithm",
+  "Join input order",
+  "Access method",
+  "Access method",
+  "Access method",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator",
+  "Extra operator",
+  "Extra operator",
+  "Extra operator",
+  "Extra operator",
+  "Extra operator",
+  "Extra operator",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 2,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.7931,
+   0.7931
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

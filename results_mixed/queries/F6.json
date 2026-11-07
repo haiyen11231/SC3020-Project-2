@@ -1,0 +1,383 @@
+{
+ "id": "F6",
+ "category": "F. Subquery",
+ "purpose": "Correlated scalar subquery (PostgreSQL does not unnest it: SubPlan per row)",
+ "sql": "SELECT s.s_name, s.s_acctbal\nFROM supplier s\nWHERE s.s_acctbal > (SELECT avg(s2.s_acctbal) + 4000 FROM supplier s2\n                     WHERE s2.s_nationkey = s.s_nationkey)",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Seq Scan",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Relation Name": "supplier",
+    "Alias": "s",
+    "Startup Cost": 0.0,
+    "Total Cost": 3490498.0,
+    "Plan Rows": 3333,
+    "Plan Width": 32,
+    "Disabled": false,
+    "Filter": "(s_acctbal > (SubPlan 1))",
+    "Plans": [
+     {
+      "Node Type": "Aggregate",
+      "Strategy": "Plain",
+      "Partial Mode": "Simple",
+      "Parent Relationship": "SubPlan",
+      "Subplan Name": "SubPlan 1",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 349.0,
+      "Total Cost": 349.01,
+      "Plan Rows": 1,
+      "Plan Width": 32,
+      "Disabled": false,
+      "Plans": [
+       {
+        "Node Type": "Seq Scan",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Relation Name": "supplier",
+        "Alias": "s2",
+        "Startup Cost": 0.0,
+        "Total Cost": 348.0,
+        "Plan Rows": 400,
+        "Plan Width": 6,
+        "Disabled": false,
+        "Filter": "(s_nationkey = s.s_nationkey)"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Seq Scan",
+  "raw_type": "Seq Scan",
+  "relation": "supplier",
+  "index_name": null,
+  "join_type": null,
+  "conditions": {
+   "Filter": "(s_acctbal > (SubPlan 1))"
+  },
+  "keys": [],
+  "extra": {
+   "Alias": "s"
+  },
+  "cost": 3490498.0,
+  "rows": 3333,
+  "children": [
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Strategy": "Plain",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "SubPlan",
+     "Subplan Name": "SubPlan 1"
+    },
+    "cost": 349.01,
+    "rows": 1,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "supplier",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "(s_nationkey = s.s_nationkey)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer",
+       "Alias": "s2"
+      },
+      "cost": 348.0,
+      "rows": 400,
+      "children": [],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Hash Join\",\n  \"join_type\": \"Inner\",\n  \"conditions\": {\n    \"Join Filter\": \"s.s_acctbal > (subplan_1.avg + 4000)\"\n  },\n  \"estimated_rows\": 3333,\n  \"reason\": \"The query requires a correlated subquery to calculate the average account balance per nation, which is then compared against each supplier's balance.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"supplier\",\n      \"estimated_rows\": 10000,\n      \"conditions\": {\n        \"Filter\": null\n      },\n      \"keys\": [],\n      \"children\": []\n    },\n    {\n      \"node_type\": \"Subquery Scan\",\n      \"parent_relationship\": \"SubPlan\",\n      \"estimated_rows\": 25,\n      \"reason\": \"The subquery calculates the average account balance per nation.\",\n      \"children\": [\n        {\n          \"node_type\": \"Aggregate\",\n          \"strategy\": \"Hashed\",\n          \"keys\": [\n            \"s2.s_nationkey\"\n          ],\n          \"estimated_rows\": 25,\n          \"reason\": \"Grouping by nation to calculate the average.\",\n          \"children\": [\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"supplier\",\n              \"estimated_rows\": 10000,\n              \"conditions\": {},\n              \"keys\": [],\n              \"children\": []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Join Filter": "s.s_acctbal > (subplan_1.avg + 4000)"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query requires a correlated subquery to calculate the average account balance per nation, which is then compared against each supplier's balance.",
+   "Warning": "a join needs 2 inputs, the AI gave 1"
+  },
+  "cost": null,
+  "rows": 3333.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "supplier",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {},
+    "cost": null,
+    "rows": 10000.0,
+    "children": [],
+    "source": "ai"
+   },
+   {
+    "node_type": "Subquery Scan",
+    "raw_type": "Subquery Scan",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "The subquery calculates the average account balance per nation.",
+     "Parent Relationship": "SubPlan"
+    },
+    "cost": null,
+    "rows": 25.0,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "s2.s_nationkey"
+      ],
+      "extra": {
+       "Strategy": "Hashed",
+       "AI Reason": "Grouping by nation to calculate the average."
+      },
+      "cost": null,
+      "rows": 25.0,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "supplier",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {},
+        "cost": null,
+        "rows": 10000.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.5,
+   "ted_rate": 0.5,
+   "pg_nodes": 3,
+   "ai_nodes": 5,
+   "matched_pairs": 3,
+   "identical_pairs": 1,
+   "changed_pairs": 2,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 2,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 25.0,
+   "max_q_error": 25.0
+  },
+  "join_order": {
+   "postgres": "supplier[supplier]",
+   "ai": "supplier[supplier]"
+  },
+  "differences": [
+   {
+    "category": "Subquery",
+    "text": "PostgreSQL evaluates the subquery over (supplier) as a separate SubPlan (checked for each row) used by Seq Scan on supplier.",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Conditions",
+    "text": "These conditions appear in the AI plan but nowhere in the PostgreSQL plan: s_acctbal > avg + 4000.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Invalid AI node",
+    "text": "Hash Join over (supplier): a join needs 2 inputs, the AI gave 1.",
+    "pg_path": null,
+    "ai_path": "0"
+   },
+   {
+    "category": "Cardinality estimate",
+    "text": "The largest disagreement on row estimates is at Aggregate (Plain) over (supplier): PostgreSQL estimates 1 rows, the AI 25 (factor 25.0). Row estimates drive operator choice.",
+    "pg_path": "0.0",
+    "ai_path": "0.1.0"
+   },
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Plain) over (supplier): PostgreSQL uses Plain aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Grouping by nation to calculate the average.\"",
+    "pg_path": "0.0",
+    "ai_path": "0.1.0"
+   },
+   {
+    "category": "Conditions",
+    "text": "Seq Scan on supplier: PostgreSQL applies s_nationkey = s_nationkey here, the AI does not.",
+    "pg_path": "0.0.0",
+    "ai_path": "0.1.0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash Join over (supplier) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"The query requires a correlated subquery to calculate the average account balance per nation, which is then compared against each supplier's balance.\"",
+    "pg_path": null,
+    "ai_path": "0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Subquery Scan over (supplier) (reads the result of a subquery). The AI's reason: \"The subquery calculates the average account balance per nation.\"",
+    "pg_path": null,
+    "ai_path": "0.1"
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on supplier."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.1.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Plain) over (supplier): PostgreSQL uses Plain aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Grouping by nation to calculate the average.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": "0.1.0.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Seq Scan on supplier: PostgreSQL applies s_nationkey = s_nationkey here, the AI does not."
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash Join over (supplier) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"The query requires a correlated subquery to calculate the average account balance per nation, which is then compared against each supplier's balance.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Subquery Scan over (supplier) (reads the result of a subquery). The AI's reason: \"The subquery calculates the average account balance per nation.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "changed",
+    "0.0.0": "changed"
+   },
+   "ai": {
+    "0.0": "same",
+    "0.1.0": "changed",
+    "0.1.0.0": "changed",
+    "0": "ai_only",
+    "0.1": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 50% (tree edit distance rate: 50%). 1 of 3 PostgreSQL nodes have an identical counterpart in the AI plan's 5 nodes.\n\nPostgreSQL join order: supplier[supplier]\nAI join order:         supplier[supplier]\n\nDIFFERENCES\n1. [Subquery] PostgreSQL evaluates the subquery over (supplier) as a separate SubPlan (checked for each row) used by Seq Scan on supplier.\n2. [Conditions] These conditions appear in the AI plan but nowhere in the PostgreSQL plan: s_acctbal > avg + 4000.\n3. [Invalid AI node] Hash Join over (supplier): a join needs 2 inputs, the AI gave 1.\n4. [Cardinality estimate] The largest disagreement on row estimates is at Aggregate (Plain) over (supplier): PostgreSQL estimates 1 rows, the AI 25 (factor 25.0). Row estimates drive operator choice.\n5. [Aggregation strategy] Aggregate (Plain) over (supplier): PostgreSQL uses Plain aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Grouping by nation to calculate the average.\"\n6. [Conditions] Seq Scan on supplier: PostgreSQL applies s_nationkey = s_nationkey here, the AI does not.\n7. [Extra operator] Only the AI plan has Hash Join over (supplier) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"The query requires a correlated subquery to calculate the average account balance per nation, which is then compared against each supplier's balance.\"\n8. [Extra operator] Only the AI plan has Subquery Scan over (supplier) (reads the result of a subquery). The AI's reason: \"The subquery calculates the average account balance per nation.\"\n\nSIMILARITIES\n- Both plans use Seq Scan on supplier.",
+ "timings": {
+  "postgres": 0.003,
+  "ai": 5.313,
+  "comparison": 0.002
+ },
+ "ai_warnings": [
+  "a join needs 2 inputs, the AI gave 1"
+ ],
+ "metrics": {
+  "difference_rate": 0.5,
+  "ted_rate": 0.5,
+  "pg_nodes": 3,
+  "ai_nodes": 5,
+  "identical_pairs": 1,
+  "changed_pairs": 2,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 2,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 25.0,
+  "max_q_error": 25.0
+ },
+ "difference_categories": [
+  "Subquery",
+  "Conditions",
+  "Invalid AI node",
+  "Cardinality estimate",
+  "Aggregation strategy",
+  "Conditions",
+  "Extra operator",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.5,
+   0.5,
+   0.5
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

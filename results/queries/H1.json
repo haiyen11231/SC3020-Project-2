@@ -1,0 +1,381 @@
+{
+ "id": "H1",
+ "category": "H. Set operation",
+ "purpose": "UNION with duplicate removal (Append + HashAggregate or Unique)",
+ "sql": "SELECT c_nationkey AS nationkey FROM customer WHERE c_acctbal > 9900\nUNION\nSELECT s_nationkey FROM supplier WHERE s_acctbal > 9900",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Hashed",
+    "Partial Mode": "Simple",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 5833.51,
+    "Total Cost": 5847.52,
+    "Plan Rows": 1401,
+    "Plan Width": 4,
+    "Disabled": false,
+    "Group Key": [
+     "customer.c_nationkey"
+    ],
+    "Planned Partitions": 0,
+    "Plans": [
+     {
+      "Node Type": "Append",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 0.0,
+      "Total Cost": 5830.01,
+      "Plan Rows": 1401,
+      "Plan Width": 4,
+      "Disabled": false,
+      "Subplans Removed": 0,
+      "Plans": [
+       {
+        "Node Type": "Seq Scan",
+        "Parent Relationship": "Member",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Relation Name": "customer",
+        "Alias": "customer",
+        "Startup Cost": 0.0,
+        "Total Cost": 5475.0,
+        "Plan Rows": 1331,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Filter": "(c_acctbal > '9900'::numeric)"
+       },
+       {
+        "Node Type": "Seq Scan",
+        "Parent Relationship": "Member",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Relation Name": "supplier",
+        "Alias": "supplier",
+        "Startup Cost": 0.0,
+        "Total Cost": 348.0,
+        "Plan Rows": 70,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Filter": "(s_acctbal > '9900'::numeric)"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "customer.c_nationkey"
+  ],
+  "extra": {
+   "Strategy": "Hashed",
+   "Partial Mode": "Simple"
+  },
+  "cost": 5847.52,
+  "rows": 1401,
+  "children": [
+   {
+    "node_type": "Append",
+    "raw_type": "Append",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 5830.01,
+    "rows": 1401,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "customer",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "(c_acctbal > '9900'::numeric)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Member",
+       "Alias": "customer"
+      },
+      "cost": 5475.0,
+      "rows": 1331,
+      "children": [],
+      "source": "postgres"
+     },
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "supplier",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "(s_acctbal > '9900'::numeric)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Member",
+       "Alias": "supplier"
+      },
+      "cost": 348.0,
+      "rows": 70,
+      "children": [],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Unique\",\n  \"strategy\": \"Sorted\",\n  \"estimated_rows\": 1500,\n  \"reason\": \"The UNION operator requires duplicate elimination, which is performed by a Unique node over a Sort.\",\n  \"children\": [\n    {\n      \"node_type\": \"Sort\",\n      \"keys\": [\n        \"nationkey\"\n      ],\n      \"estimated_rows\": 1500,\n      \"reason\": \"Sorting is required for the Unique node to perform duplicate elimination.\",\n      \"children\": [\n        {\n          \"node_type\": \"Append\",\n          \"estimated_rows\": 1500,\n          \"reason\": \"The UNION operator is implemented by appending the results of the two subqueries.\",\n          \"children\": [\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"customer\",\n              \"conditions\": {\n                \"Filter\": \"c_acctbal > 9900\"\n              },\n              \"estimated_rows\": 750,\n              \"reason\": \"Sequential scan is chosen for the customer table as there is no index on c_acctbal.\",\n              \"children\": []\n            },\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"supplier\",\n              \"conditions\": {\n                \"Filter\": \"s_acctbal > 9900\"\n              },\n              \"estimated_rows\": 750,\n              \"reason\": \"Sequential scan is chosen for the supplier table as there is no index on s_acctbal.\",\n              \"children\": []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Unique",
+  "raw_type": "Unique",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "AI Reason": "The UNION operator requires duplicate elimination, which is performed by a Unique node over a Sort.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 1500.0,
+  "children": [
+   {
+    "node_type": "Sort",
+    "raw_type": "Sort",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "nationkey"
+    ],
+    "extra": {
+     "AI Reason": "Sorting is required for the Unique node to perform duplicate elimination."
+    },
+    "cost": null,
+    "rows": 1500.0,
+    "children": [
+     {
+      "node_type": "Append",
+      "raw_type": "Append",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "The UNION operator is implemented by appending the results of the two subqueries."
+      },
+      "cost": null,
+      "rows": 1500.0,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "customer",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "c_acctbal > 9900"
+        },
+        "keys": [],
+        "extra": {
+         "AI Reason": "Sequential scan is chosen for the customer table as there is no index on c_acctbal."
+        },
+        "cost": null,
+        "rows": 750.0,
+        "children": [],
+        "source": "ai"
+       },
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "supplier",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "s_acctbal > 9900"
+        },
+        "keys": [],
+        "extra": {
+         "AI Reason": "Sequential scan is chosen for the supplier table as there is no index on s_acctbal."
+        },
+        "cost": null,
+        "rows": 750.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.3333,
+   "ted_rate": 0.2222,
+   "pg_nodes": 4,
+   "ai_nodes": 5,
+   "matched_pairs": 4,
+   "identical_pairs": 3,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 1,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.42,
+   "max_q_error": 10.71
+  },
+  "join_order": {
+   "postgres": "Append(customer, supplier)",
+   "ai": "Append(customer, supplier)"
+  },
+  "differences": [
+   {
+    "category": "Cardinality estimate",
+    "text": "The largest disagreement on row estimates is at Seq Scan on supplier: PostgreSQL estimates 70 rows, the AI 750 (factor 10.7). Row estimates drive operator choice.",
+    "pg_path": "0.0.1",
+    "ai_path": "0.0.0.1"
+   },
+   {
+    "category": "Duplicate elimination",
+    "text": "Above (customer, supplier): PostgreSQL uses Aggregate (Hashed) over (customer, supplier). The AI uses Unique over (customer, supplier). Hashing needs no sort. Unique needs sorted input. Hashing is usually cheaper unless the input is already sorted. The AI's reason: \"The UNION operator requires duplicate elimination, which is performed by a Unique node over a Sort.\"",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Sort over (customer, supplier) (sorts its input). The AI's reason: \"Sorting is required for the Unique node to perform duplicate elimination.\"",
+    "pg_path": null,
+    "ai_path": "0.0"
+   }
+  ],
+  "similarities": [
+   "Both plans use Append over (customer, supplier).",
+   "Both plans use Seq Scan on customer.",
+   "Both plans use Seq Scan on supplier."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Above (customer, supplier): PostgreSQL uses Aggregate (Hashed) over (customer, supplier). The AI uses Unique over (customer, supplier). Hashing needs no sort. Unique needs sorted input. Hashing is usually cheaper unless the input is already sorted. The AI's reason: \"The UNION operator requires duplicate elimination, which is performed by a Unique node over a Sort.\""
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": "0.0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.1",
+    "ai_path": "0.0.0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Sort over (customer, supplier) (sorts its input). The AI's reason: \"Sorting is required for the Unique node to perform duplicate elimination.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed",
+    "0.0": "same",
+    "0.0.0": "same",
+    "0.0.1": "same"
+   },
+   "ai": {
+    "0": "changed",
+    "0.0.0": "same",
+    "0.0.0.0": "same",
+    "0.0.0.1": "same",
+    "0.0": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 33% (tree edit distance rate: 22%). 3 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 5 nodes.\n\nPostgreSQL join order: Append(customer, supplier)\nAI join order:         Append(customer, supplier)\n\nDIFFERENCES\n1. [Cardinality estimate] The largest disagreement on row estimates is at Seq Scan on supplier: PostgreSQL estimates 70 rows, the AI 750 (factor 10.7). Row estimates drive operator choice.\n2. [Duplicate elimination] Above (customer, supplier): PostgreSQL uses Aggregate (Hashed) over (customer, supplier). The AI uses Unique over (customer, supplier). Hashing needs no sort. Unique needs sorted input. Hashing is usually cheaper unless the input is already sorted. The AI's reason: \"The UNION operator requires duplicate elimination, which is performed by a Unique node over a Sort.\"\n3. [Extra operator] Only the AI plan has Sort over (customer, supplier) (sorts its input). The AI's reason: \"Sorting is required for the Unique node to perform duplicate elimination.\"\n\nSIMILARITIES\n- Both plans use Append over (customer, supplier).\n- Both plans use Seq Scan on customer.\n- Both plans use Seq Scan on supplier.",
+ "timings": {
+  "postgres": 0.005,
+  "ai": 1.61,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.3333,
+  "ted_rate": 0.2222,
+  "pg_nodes": 4,
+  "ai_nodes": 5,
+  "identical_pairs": 3,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 1,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.42,
+  "max_q_error": 10.71
+ },
+ "difference_categories": [
+  "Cardinality estimate",
+  "Duplicate elimination",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.3333,
+   0.3333,
+   0.3333
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

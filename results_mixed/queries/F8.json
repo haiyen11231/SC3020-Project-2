@@ -1,0 +1,371 @@
+{
+ "id": "F8",
+ "category": "F. Subquery",
+ "purpose": "Correlated scalar subquery in the SELECT list",
+ "sql": "SELECT n.n_name,\n       (SELECT count(*) FROM supplier s WHERE s.s_nationkey = n.n_nationkey) AS suppliers\nFROM nation n\nWHERE n.n_regionkey = 2",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Seq Scan",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Relation Name": "nation",
+    "Alias": "n",
+    "Startup Cost": 0.0,
+    "Total Cost": 1746.36,
+    "Plan Rows": 5,
+    "Plan Width": 34,
+    "Disabled": false,
+    "Filter": "(n_regionkey = 2)",
+    "Plans": [
+     {
+      "Node Type": "Aggregate",
+      "Strategy": "Plain",
+      "Partial Mode": "Simple",
+      "Parent Relationship": "SubPlan",
+      "Subplan Name": "SubPlan 1",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 349.0,
+      "Total Cost": 349.01,
+      "Plan Rows": 1,
+      "Plan Width": 8,
+      "Disabled": false,
+      "Plans": [
+       {
+        "Node Type": "Seq Scan",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Relation Name": "supplier",
+        "Alias": "s",
+        "Startup Cost": 0.0,
+        "Total Cost": 348.0,
+        "Plan Rows": 400,
+        "Plan Width": 0,
+        "Disabled": false,
+        "Filter": "(s_nationkey = n.n_nationkey)"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Seq Scan",
+  "raw_type": "Seq Scan",
+  "relation": "nation",
+  "index_name": null,
+  "join_type": null,
+  "conditions": {
+   "Filter": "(n_regionkey = 2)"
+  },
+  "keys": [],
+  "extra": {
+   "Alias": "n"
+  },
+  "cost": 1746.36,
+  "rows": 5,
+  "children": [
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Strategy": "Plain",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "SubPlan",
+     "Subplan Name": "SubPlan 1"
+    },
+    "cost": 349.01,
+    "rows": 1,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "supplier",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "(s_nationkey = n.n_nationkey)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer",
+       "Alias": "s"
+      },
+      "cost": 348.0,
+      "rows": 400,
+      "children": [],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Hash Join\",\n  \"join_type\": \"Inner\",\n  \"conditions\": {\n    \"Hash Cond\": \"n.n_nationkey = s.s_nationkey\"\n  },\n  \"estimated_rows\": 5,\n  \"reason\": \"The query joins nation with a correlated subquery which is transformed into a join with an aggregated supplier count.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"nation\",\n      \"conditions\": {\n        \"Filter\": \"n_regionkey = 2\"\n      },\n      \"estimated_rows\": 5,\n      \"reason\": \"Scanning the small nation table with a filter on regionkey.\",\n      \"children\": []\n    },\n    {\n      \"node_type\": \"Hash\",\n      \"estimated_rows\": 10000,\n      \"reason\": \"Building a hash table for the supplier aggregation.\",\n      \"children\": [\n        {\n          \"node_type\": \"Aggregate\",\n          \"strategy\": \"Hashed\",\n          \"keys\": [\n            \"s_nationkey\"\n          ],\n          \"estimated_rows\": 10000,\n          \"reason\": \"Aggregating supplier counts per nation.\",\n          \"children\": [\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"supplier\",\n              \"estimated_rows\": 10000,\n              \"reason\": \"Scanning all suppliers to perform the count.\",\n              \"children\": []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Hash Cond": "n.n_nationkey = s.s_nationkey"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query joins nation with a correlated subquery which is transformed into a join with an aggregated supplier count."
+  },
+  "cost": null,
+  "rows": 5.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "nation",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "n_regionkey = 2"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Scanning the small nation table with a filter on regionkey."
+    },
+    "cost": null,
+    "rows": 5.0,
+    "children": [],
+    "source": "ai"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "Building a hash table for the supplier aggregation."
+    },
+    "cost": null,
+    "rows": 10000.0,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "s_nationkey"
+      ],
+      "extra": {
+       "Strategy": "Hashed",
+       "AI Reason": "Aggregating supplier counts per nation."
+      },
+      "cost": null,
+      "rows": 10000.0,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "supplier",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Scanning all suppliers to perform the count."
+        },
+        "cost": null,
+        "rows": 10000.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.5,
+   "ted_rate": 0.5,
+   "pg_nodes": 3,
+   "ai_nodes": 5,
+   "matched_pairs": 3,
+   "identical_pairs": 1,
+   "changed_pairs": 2,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 2,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": 0.0,
+   "median_q_error": 25.0,
+   "max_q_error": 10000.0
+  },
+  "join_order": {
+   "postgres": "nation[supplier]",
+   "ai": "HJ(nation, supplier)"
+  },
+  "differences": [
+   {
+    "category": "Subquery",
+    "text": "PostgreSQL evaluates the subquery over (supplier) as a separate SubPlan (checked for each row) used by Seq Scan on nation, while the AI turns it into a Hash Join (Hash Join of (nation) with (supplier)).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Cardinality estimate",
+    "text": "The largest disagreement on row estimates is at Aggregate (Plain) over (supplier): PostgreSQL estimates 1 rows, the AI 10,000 (factor 10000.0). Row estimates drive operator choice.",
+    "pg_path": "0.0",
+    "ai_path": "0.1.0"
+   },
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Plain) over (supplier): PostgreSQL uses Plain aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregating supplier counts per nation.\"",
+    "pg_path": "0.0",
+    "ai_path": "0.1.0"
+   },
+   {
+    "category": "Conditions",
+    "text": "Seq Scan on supplier: PostgreSQL applies s_nationkey = n_nationkey here, the AI does not.",
+    "pg_path": "0.0.0",
+    "ai_path": "0.1.0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash Join of (nation) with (supplier) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"The query joins nation with a correlated subquery which is transformed into a join with an aggregated supplier count.\"",
+    "pg_path": null,
+    "ai_path": "0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash over (supplier) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Building a hash table for the supplier aggregation.\"",
+    "pg_path": null,
+    "ai_path": "0.1"
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on nation."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.1.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Plain) over (supplier): PostgreSQL uses Plain aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregating supplier counts per nation.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": "0.1.0.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Seq Scan on supplier: PostgreSQL applies s_nationkey = n_nationkey here, the AI does not."
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash Join of (nation) with (supplier) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"The query joins nation with a correlated subquery which is transformed into a join with an aggregated supplier count.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash over (supplier) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Building a hash table for the supplier aggregation.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "changed",
+    "0.0.0": "changed"
+   },
+   "ai": {
+    "0.0": "same",
+    "0.1.0": "changed",
+    "0.1.0.0": "changed",
+    "0": "ai_only",
+    "0.1": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 50% (tree edit distance rate: 50%). 1 of 3 PostgreSQL nodes have an identical counterpart in the AI plan's 5 nodes.\n\nPostgreSQL join order: nation[supplier]\nAI join order:         HJ(nation, supplier)\n\nDIFFERENCES\n1. [Subquery] PostgreSQL evaluates the subquery over (supplier) as a separate SubPlan (checked for each row) used by Seq Scan on nation, while the AI turns it into a Hash Join (Hash Join of (nation) with (supplier)).\n2. [Cardinality estimate] The largest disagreement on row estimates is at Aggregate (Plain) over (supplier): PostgreSQL estimates 1 rows, the AI 10,000 (factor 10000.0). Row estimates drive operator choice.\n3. [Aggregation strategy] Aggregate (Plain) over (supplier): PostgreSQL uses Plain aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregating supplier counts per nation.\"\n4. [Conditions] Seq Scan on supplier: PostgreSQL applies s_nationkey = n_nationkey here, the AI does not.\n5. [Extra operator] Only the AI plan has Hash Join of (nation) with (supplier) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"The query joins nation with a correlated subquery which is transformed into a join with an aggregated supplier count.\"\n6. [Extra operator] Only the AI plan has Hash over (supplier) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Building a hash table for the supplier aggregation.\"\n\nSIMILARITIES\n- Both plans use Seq Scan on nation.",
+ "timings": {
+  "postgres": 0.001,
+  "ai": 4.091,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.5,
+  "ted_rate": 0.5,
+  "pg_nodes": 3,
+  "ai_nodes": 5,
+  "identical_pairs": 1,
+  "changed_pairs": 2,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 2,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": 0.0,
+  "median_q_error": 25.0,
+  "max_q_error": 10000.0
+ },
+ "difference_categories": [
+  "Subquery",
+  "Cardinality estimate",
+  "Aggregation strategy",
+  "Conditions",
+  "Extra operator",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.5,
+   0.5,
+   0.5
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

@@ -1,0 +1,396 @@
+{
+ "id": "B2",
+ "category": "B. Two-table join",
+ "purpose": "One customer's orders; the join column o_custkey has no index",
+ "sql": "SELECT o.o_orderkey, o.o_orderdate, o.o_totalprice\nFROM customer c\nJOIN orders o ON o.o_custkey = c.c_custkey\nWHERE c.c_custkey = 1234",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Gather",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 1000.42,
+    "Total Cost": 34950.73,
+    "Plan Rows": 17,
+    "Plan Width": 16,
+    "Disabled": false,
+    "Workers Planned": 2,
+    "Single Copy": false,
+    "Plans": [
+     {
+      "Node Type": "Nested Loop",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Join Type": "Inner",
+      "Startup Cost": 0.42,
+      "Total Cost": 33949.03,
+      "Plan Rows": 7,
+      "Plan Width": 16,
+      "Disabled": false,
+      "Inner Unique": false,
+      "Plans": [
+       {
+        "Node Type": "Seq Scan",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": true,
+        "Async Capable": false,
+        "Relation Name": "orders",
+        "Alias": "o",
+        "Startup Cost": 0.0,
+        "Total Cost": 33940.5,
+        "Plan Rows": 7,
+        "Plan Width": 20,
+        "Disabled": false,
+        "Filter": "(o_custkey = 1234)"
+       },
+       {
+        "Node Type": "Materialize",
+        "Parent Relationship": "Inner",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.42,
+        "Total Cost": 8.44,
+        "Plan Rows": 1,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Plans": [
+         {
+          "Node Type": "Index Only Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Scan Direction": "Forward",
+          "Index Name": "customer_pkey",
+          "Relation Name": "customer",
+          "Alias": "c",
+          "Startup Cost": 0.42,
+          "Total Cost": 8.44,
+          "Plan Rows": 1,
+          "Plan Width": 4,
+          "Disabled": false,
+          "Index Cond": "(c_custkey = 1234)"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Gather",
+  "raw_type": "Gather",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 34950.73,
+  "rows": 17,
+  "children": [
+   {
+    "node_type": "Nested Loop",
+    "raw_type": "Nested Loop",
+    "relation": null,
+    "index_name": null,
+    "join_type": "Inner",
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 33949.03,
+    "rows": 7,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "orders",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "(o_custkey = 1234)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer",
+       "Alias": "o"
+      },
+      "cost": 33940.5,
+      "rows": 7,
+      "children": [],
+      "source": "postgres"
+     },
+     {
+      "node_type": "Materialize",
+      "raw_type": "Materialize",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Inner"
+      },
+      "cost": 8.44,
+      "rows": 1,
+      "children": [
+       {
+        "node_type": "Index Only Scan",
+        "raw_type": "Index Only Scan",
+        "relation": "customer",
+        "index_name": "customer_pkey",
+        "join_type": null,
+        "conditions": {
+         "Index Cond": "(c_custkey = 1234)"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Scan Direction": "Forward",
+         "Alias": "c"
+        },
+        "cost": 8.44,
+        "rows": 1,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Nested Loop\",\n  \"join_type\": \"Inner\",\n  \"conditions\": {\n    \"Join Filter\": \"o.o_custkey = c.c_custkey\"\n  },\n  \"estimated_rows\": 18,\n  \"reason\": \"The customer is filtered by a unique key, making a nested loop join with the orders table efficient.\",\n  \"children\": [\n    {\n      \"node_type\": \"Index Scan\",\n      \"relation\": \"customer\",\n      \"index_name\": \"customer_pkey\",\n      \"conditions\": {\n        \"Index Cond\": \"c_custkey = 1234\"\n      },\n      \"estimated_rows\": 1,\n      \"reason\": \"Direct lookup on the primary key of the customer table.\",\n      \"children\": []\n    },\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"orders\",\n      \"conditions\": {\n        \"Filter\": \"o_custkey = 1234\"\n      },\n      \"estimated_rows\": 18,\n      \"reason\": \"Scanning the orders table to find all orders for the specific customer.\",\n      \"children\": []\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Nested Loop",
+  "raw_type": "Nested Loop",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Join Filter": "o.o_custkey = c.c_custkey"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "The customer is filtered by a unique key, making a nested loop join with the orders table efficient.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 18.0,
+  "children": [
+   {
+    "node_type": "Index Scan",
+    "raw_type": "Index Scan",
+    "relation": "customer",
+    "index_name": "customer_pkey",
+    "join_type": null,
+    "conditions": {
+     "Index Cond": "c_custkey = 1234"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Direct lookup on the primary key of the customer table."
+    },
+    "cost": null,
+    "rows": 1.0,
+    "children": [],
+    "source": "ai"
+   },
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "orders",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "o_custkey = 1234"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Scanning the orders table to find all orders for the specific customer."
+    },
+    "cost": null,
+    "rows": 18.0,
+    "children": [],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.625,
+   "ted_rate": 0.5,
+   "pg_nodes": 5,
+   "ai_nodes": 3,
+   "matched_pairs": 3,
+   "identical_pairs": 1,
+   "changed_pairs": 2,
+   "postgres_only_nodes": 2,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 0.5,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": null,
+   "max_q_error": null
+  },
+  "join_order": {
+   "postgres": "NL(orders, customer)",
+   "ai": "NL(customer, orders)"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Join input order",
+    "text": "Join of (orders, customer): outer and inner inputs are swapped. PostgreSQL's outer input is (orders).",
+    "pg_path": "0.0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Conditions",
+    "text": "Nested Loop of (orders) with (customer): The AI applies o_custkey = c_custkey here, PostgreSQL does not.",
+    "pg_path": "0.0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Access method",
+    "text": "Table customer: PostgreSQL uses Index Only Scan on customer using customer_pkey. The AI uses Index Scan on customer using customer_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Direct lookup on the primary key of the customer table.\"",
+    "pg_path": "0.0.1.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (orders, customer) (collects rows from parallel worker processes).",
+    "pg_path": "0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Materialize over (customer) (stores its input in memory so it can be re-read cheaply).",
+    "pg_path": "0.0.1",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Seq Scan on orders."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (orders, customer) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Join of (orders, customer): outer and inner inputs are swapped. PostgreSQL's outer input is (orders).",
+     "Nested Loop of (orders) with (customer): The AI applies o_custkey = c_custkey here, PostgreSQL does not."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": "0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.1",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Materialize over (customer) (stores its input in memory so it can be re-read cheaply)."
+    ]
+   },
+   {
+    "pg_path": "0.0.1.0",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table customer: PostgreSQL uses Index Only Scan on customer using customer_pkey. The AI uses Index Scan on customer using customer_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Direct lookup on the primary key of the customer table.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "postgres_only",
+    "0.0": "changed",
+    "0.0.0": "same",
+    "0.0.1": "postgres_only",
+    "0.0.1.0": "changed"
+   },
+   "ai": {
+    "0": "changed",
+    "0.1": "same",
+    "0.0": "changed"
+   }
+  }
+ },
+ "explanation": "Difference rate: 62% (tree edit distance rate: 50%). 1 of 5 PostgreSQL nodes have an identical counterpart in the AI plan's 3 nodes.\n\nPostgreSQL join order: NL(orders, customer)\nAI join order:         NL(customer, orders)\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.\n2. [Join input order] Join of (orders, customer): outer and inner inputs are swapped. PostgreSQL's outer input is (orders).\n3. [Conditions] Nested Loop of (orders) with (customer): The AI applies o_custkey = c_custkey here, PostgreSQL does not.\n4. [Access method] Table customer: PostgreSQL uses Index Only Scan on customer using customer_pkey. The AI uses Index Scan on customer using customer_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Direct lookup on the primary key of the customer table.\"\n5. [Missing operator] Only the PostgreSQL plan has Gather over (orders, customer) (collects rows from parallel worker processes).\n6. [Missing operator] Only the PostgreSQL plan has Materialize over (customer) (stores its input in memory so it can be re-read cheaply).\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Seq Scan on orders.",
+ "timings": {
+  "postgres": 0.007,
+  "ai": 75.17,
+  "comparison": 0.002
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.625,
+  "ted_rate": 0.5,
+  "pg_nodes": 5,
+  "ai_nodes": 3,
+  "identical_pairs": 1,
+  "changed_pairs": 2,
+  "postgres_only_nodes": 2,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 0.5,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": null,
+  "max_q_error": null
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Join input order",
+  "Conditions",
+  "Access method",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.625,
+   0.625,
+   0.625
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

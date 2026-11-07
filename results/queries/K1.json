@@ -1,0 +1,134 @@
+{
+ "id": "K1",
+ "category": "K. Miscellaneous",
+ "purpose": "No table at all (a single Result node)",
+ "sql": "SELECT 1 + 1 AS two, current_date AS today",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Result",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 0.0,
+    "Total Cost": 0.01,
+    "Plan Rows": 1,
+    "Plan Width": 8,
+    "Disabled": false
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Result",
+  "raw_type": "Result",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 0.01,
+  "rows": 1,
+  "children": [],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Result\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 1,\n  \"parent_relationship\": null,\n  \"reason\": \"The query consists of constant expressions only, which are evaluated by the Result node.\",\n  \"children\": []\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Result",
+  "raw_type": "Result",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query consists of constant expressions only, which are evaluated by the Result node.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 1.0,
+  "children": [],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.0,
+   "ted_rate": 0.0,
+   "pg_nodes": 1,
+   "ai_nodes": 1,
+   "matched_pairs": 1,
+   "identical_pairs": 1,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 0,
+   "access_method_agreement": null,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "Result",
+   "ai": "Result"
+  },
+  "differences": [],
+  "similarities": [
+   "The plans are identical.",
+   "Both plans use Result over (Result)."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same"
+   },
+   "ai": {
+    "0": "same"
+   }
+  }
+ },
+ "explanation": "The two plans are identical in structure, operators and details.\n\nPostgreSQL join order: Result\nAI join order:         Result\n\nSIMILARITIES\n- The plans are identical.\n- Both plans use Result over (Result).",
+ "timings": {
+  "postgres": 0.003,
+  "ai": 1.322,
+  "comparison": 0.0
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.0,
+  "ted_rate": 0.0,
+  "pg_nodes": 1,
+  "ai_nodes": 1,
+  "identical_pairs": 1,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 0,
+  "access_method_agreement": null,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

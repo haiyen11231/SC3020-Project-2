@@ -1,0 +1,315 @@
+{
+ "id": "E3",
+ "category": "E. Sorting / Top-N",
+ "purpose": "Full sort on two keys with a large OFFSET",
+ "sql": "SELECT p_partkey, p_name, p_retailprice\nFROM part\nORDER BY p_retailprice, p_partkey\nLIMIT 10 OFFSET 1000",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Limit",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 10644.86,
+    "Total Cost": 10646.03,
+    "Plan Rows": 10,
+    "Plan Width": 43,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Gather Merge",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 10528.4,
+      "Total Cost": 33821.58,
+      "Plan Rows": 199999,
+      "Plan Width": 43,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Plans": [
+       {
+        "Node Type": "Sort",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 9528.37,
+        "Total Cost": 9736.71,
+        "Plan Rows": 83333,
+        "Plan Width": 43,
+        "Disabled": false,
+        "Sort Key": [
+         "p_retailprice",
+         "p_partkey"
+        ],
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": true,
+          "Async Capable": false,
+          "Relation Name": "part",
+          "Alias": "part",
+          "Startup Cost": 0.0,
+          "Total Cost": 4953.33,
+          "Plan Rows": 83333,
+          "Plan Width": 43,
+          "Disabled": false
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 10646.03,
+  "rows": 10,
+  "children": [
+   {
+    "node_type": "Gather Merge",
+    "raw_type": "Gather Merge",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 33821.58,
+    "rows": 199999,
+    "children": [
+     {
+      "node_type": "Sort",
+      "raw_type": "Sort",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "p_retailprice",
+       "p_partkey"
+      ],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 9736.71,
+      "rows": 83333,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "part",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "part"
+        },
+        "cost": 4953.33,
+        "rows": 83333,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Limit\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {\n    \"Filter\": null\n  },\n  \"keys\": [],\n  \"estimated_rows\": 10,\n  \"parent_relationship\": null,\n  \"reason\": \"The query requires a sorted result set with a limit and offset, which is best handled by a sort followed by a limit node.\",\n  \"children\": [\n    {\n      \"node_type\": \"Sort\",\n      \"relation\": null,\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {},\n      \"keys\": [\n        \"p_retailprice\",\n        \"p_partkey\"\n      ],\n      \"estimated_rows\": 200000,\n      \"parent_relationship\": null,\n      \"reason\": \"The query requires an ORDER BY on p_retailprice and p_partkey, necessitating a sort operation.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"part\",\n          \"index_name\": null,\n          \"join_type\": null,\n          \"strategy\": null,\n          \"conditions\": {\n            \"Filter\": null\n          },\n          \"keys\": [],\n          \"estimated_rows\": 200000,\n          \"parent_relationship\": null,\n          \"reason\": \"A sequential scan is the most efficient way to read all rows from the part table for sorting.\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query requires a sorted result set with a limit and offset, which is best handled by a sort followed by a limit node.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 10.0,
+  "children": [
+   {
+    "node_type": "Sort",
+    "raw_type": "Sort",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "p_retailprice",
+     "p_partkey"
+    ],
+    "extra": {
+     "AI Reason": "The query requires an ORDER BY on p_retailprice and p_partkey, necessitating a sort operation."
+    },
+    "cost": null,
+    "rows": 200000.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "part",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "A sequential scan is the most efficient way to read all rows from the part table for sorting."
+      },
+      "cost": null,
+      "rows": 200000.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.1429,
+   "ted_rate": 0.1429,
+   "pg_nodes": 4,
+   "ai_nodes": 3,
+   "matched_pairs": 3,
+   "identical_pairs": 3,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 1,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "part",
+   "ai": "part"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (part) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on part."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (part) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "postgres_only",
+    "0.0.0": "same",
+    "0.0.0.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same",
+    "0.0.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 14% (tree edit distance rate: 14%). 3 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 3 nodes.\n\nPostgreSQL join order: part\nAI join order:         part\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge). The AI plan runs in a single process.\n2. [Missing operator] Only the PostgreSQL plan has Gather Merge over (part) (collects sorted rows from parallel workers, keeping the order).\n\nSIMILARITIES\n- Both plans use Seq Scan on part.",
+ "timings": {
+  "postgres": 0.002,
+  "ai": 1.793,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.1429,
+  "ted_rate": 0.1429,
+  "pg_nodes": 4,
+  "ai_nodes": 3,
+  "identical_pairs": 3,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 1,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.1429,
+   0.1429,
+   0.1429
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

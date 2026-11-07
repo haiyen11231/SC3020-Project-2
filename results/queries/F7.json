@@ -1,0 +1,610 @@
+{
+ "id": "F7",
+ "category": "F. Subquery",
+ "purpose": "Derived table (subquery in FROM) with aggregation, joined back",
+ "sql": "SELECT c.c_name, t.order_count, t.spent\nFROM (SELECT o_custkey, count(*) AS order_count, sum(o_totalprice) AS spent\n      FROM orders GROUP BY o_custkey HAVING count(*) > 35) t\nJOIN customer c ON c.c_custkey = t.o_custkey",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Hash Join",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Join Type": "Inner",
+    "Startup Cost": 119769.16,
+    "Total Cost": 125262.92,
+    "Plan Rows": 28578,
+    "Plan Width": 59,
+    "Disabled": false,
+    "Inner Unique": true,
+    "Hash Cond": "(c.c_custkey = t.o_custkey)",
+    "Plans": [
+     {
+      "Node Type": "Seq Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Relation Name": "customer",
+      "Alias": "c",
+      "Startup Cost": 0.0,
+      "Total Cost": 5100.0,
+      "Plan Rows": 150000,
+      "Plan Width": 23,
+      "Disabled": false
+     },
+     {
+      "Node Type": "Hash",
+      "Parent Relationship": "Inner",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 119411.93,
+      "Total Cost": 119411.93,
+      "Plan Rows": 28578,
+      "Plan Width": 44,
+      "Disabled": false,
+      "Plans": [
+       {
+        "Node Type": "Subquery Scan",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Alias": "t",
+        "Startup Cost": 91818.54,
+        "Total Cost": 119411.93,
+        "Plan Rows": 28578,
+        "Plan Width": 44,
+        "Disabled": false,
+        "Plans": [
+         {
+          "Node Type": "Aggregate",
+          "Strategy": "Sorted",
+          "Partial Mode": "Finalize",
+          "Parent Relationship": "Subquery",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 91818.54,
+          "Total Cost": 119126.15,
+          "Plan Rows": 28578,
+          "Plan Width": 44,
+          "Disabled": false,
+          "Group Key": [
+           "orders.o_custkey"
+          ],
+          "Filter": "(count(*) > 35)",
+          "Plans": [
+           {
+            "Node Type": "Gather Merge",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 91818.54,
+            "Total Cost": 115782.57,
+            "Plan Rows": 205759,
+            "Plan Width": 44,
+            "Disabled": false,
+            "Workers Planned": 2,
+            "Plans": [
+             {
+              "Node Type": "Sort",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 90818.52,
+              "Total Cost": 91032.85,
+              "Plan Rows": 85733,
+              "Plan Width": 44,
+              "Disabled": false,
+              "Sort Key": [
+               "orders.o_custkey"
+              ],
+              "Plans": [
+               {
+                "Node Type": "Aggregate",
+                "Strategy": "Hashed",
+                "Partial Mode": "Partial",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 73979.56,
+                "Total Cost": 81154.74,
+                "Plan Rows": 85733,
+                "Plan Width": 44,
+                "Disabled": false,
+                "Group Key": [
+                 "orders.o_custkey"
+                ],
+                "Planned Partitions": 4,
+                "Plans": [
+                 {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": true,
+                  "Async Capable": false,
+                  "Relation Name": "orders",
+                  "Alias": "orders",
+                  "Startup Cost": 0.0,
+                  "Total Cost": 32378.0,
+                  "Plan Rows": 625000,
+                  "Plan Width": 12,
+                  "Disabled": false
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Hash Cond": "(c.c_custkey = t.o_custkey)"
+  },
+  "keys": [],
+  "extra": {},
+  "cost": 125262.92,
+  "rows": 28578,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "customer",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Alias": "c"
+    },
+    "cost": 5100.0,
+    "rows": 150000,
+    "children": [],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Inner"
+    },
+    "cost": 119411.93,
+    "rows": 28578,
+    "children": [
+     {
+      "node_type": "Subquery Scan",
+      "raw_type": "Subquery Scan",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer",
+       "Alias": "t"
+      },
+      "cost": 119411.93,
+      "rows": 28578,
+      "children": [
+       {
+        "node_type": "Aggregate",
+        "raw_type": "Aggregate",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "(count(*) > 35)"
+        },
+        "keys": [
+         "orders.o_custkey"
+        ],
+        "extra": {
+         "Strategy": "Sorted",
+         "Partial Mode": "Finalize",
+         "Parent Relationship": "Subquery"
+        },
+        "cost": 119126.15,
+        "rows": 28578,
+        "children": [
+         {
+          "node_type": "Gather Merge",
+          "raw_type": "Gather Merge",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer"
+          },
+          "cost": 115782.57,
+          "rows": 205759,
+          "children": [
+           {
+            "node_type": "Sort",
+            "raw_type": "Sort",
+            "relation": null,
+            "index_name": null,
+            "join_type": null,
+            "conditions": {},
+            "keys": [
+             "orders.o_custkey"
+            ],
+            "extra": {
+             "Parent Relationship": "Outer"
+            },
+            "cost": 91032.85,
+            "rows": 85733,
+            "children": [
+             {
+              "node_type": "Aggregate",
+              "raw_type": "Aggregate",
+              "relation": null,
+              "index_name": null,
+              "join_type": null,
+              "conditions": {},
+              "keys": [
+               "orders.o_custkey"
+              ],
+              "extra": {
+               "Strategy": "Hashed",
+               "Partial Mode": "Partial",
+               "Parent Relationship": "Outer"
+              },
+              "cost": 81154.74,
+              "rows": 85733,
+              "children": [
+               {
+                "node_type": "Seq Scan",
+                "raw_type": "Seq Scan",
+                "relation": "orders",
+                "index_name": null,
+                "join_type": null,
+                "conditions": {},
+                "keys": [],
+                "extra": {
+                 "Parent Relationship": "Outer",
+                 "Alias": "orders"
+                },
+                "cost": 32378.0,
+                "rows": 625000,
+                "children": [],
+                "source": "postgres"
+               }
+              ],
+              "source": "postgres"
+             }
+            ],
+            "source": "postgres"
+           }
+          ],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Hash Join\",\n  \"join_type\": \"Inner\",\n  \"conditions\": {\n    \"Hash Cond\": \"c.c_custkey = t.o_custkey\"\n  },\n  \"estimated_rows\": 17500,\n  \"reason\": \"Hash join is efficient for joining the aggregated orders result with the customer table.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"customer\",\n      \"conditions\": {\n        \"Filter\": null\n      },\n      \"estimated_rows\": 150000,\n      \"reason\": \"Sequential scan is the most efficient way to read the entire customer table.\",\n      \"children\": []\n    },\n    {\n      \"node_type\": \"Hash\",\n      \"estimated_rows\": 17500,\n      \"reason\": \"Hash the aggregated orders result for the hash join.\",\n      \"children\": [\n        {\n          \"node_type\": \"Aggregate\",\n          \"strategy\": \"Hashed\",\n          \"keys\": [\n            \"o_custkey\"\n          ],\n          \"conditions\": {\n            \"Filter\": \"count(*) > 35\"\n          },\n          \"estimated_rows\": 17500,\n          \"reason\": \"Aggregate orders by customer key and filter by count.\",\n          \"children\": [\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"orders\",\n              \"conditions\": {\n                \"Filter\": null\n              },\n              \"estimated_rows\": 1500000,\n              \"reason\": \"Sequential scan is the most efficient way to read the entire orders table for aggregation.\",\n              \"children\": []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Hash Cond": "c.c_custkey = t.o_custkey"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "Hash join is efficient for joining the aggregated orders result with the customer table.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 17500.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "customer",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "Sequential scan is the most efficient way to read the entire customer table."
+    },
+    "cost": null,
+    "rows": 150000.0,
+    "children": [],
+    "source": "ai"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "Hash the aggregated orders result for the hash join."
+    },
+    "cost": null,
+    "rows": 17500.0,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "count(*) > 35"
+      },
+      "keys": [
+       "o_custkey"
+      ],
+      "extra": {
+       "Strategy": "Hashed",
+       "AI Reason": "Aggregate orders by customer key and filter by count."
+      },
+      "cost": null,
+      "rows": 17500.0,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "orders",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Sequential scan is the most efficient way to read the entire orders table for aggregation."
+        },
+        "cost": null,
+        "rows": 1500000.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.3571,
+   "ted_rate": 0.2857,
+   "pg_nodes": 9,
+   "ai_nodes": 5,
+   "matched_pairs": 5,
+   "identical_pairs": 4,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 4,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.63,
+   "max_q_error": 1.63
+  },
+  "join_order": {
+   "postgres": "HJ(customer, orders)",
+   "ai": "HJ(customer, orders)"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Sorted, Finalize) over (orders): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate orders by customer key and filter by count.\"",
+    "pg_path": "0.1.0.0",
+    "ai_path": "0.1.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Subquery Scan over (orders) (reads the result of a subquery).",
+    "pg_path": "0.1.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (orders) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.1.0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Sort over (orders) (sorts its input).",
+    "pg_path": "0.1.0.0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.1.0.0.0.0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Hash Join of (customer) with (orders).",
+   "Both plans use Seq Scan on customer.",
+   "Both plans use Seq Scan on orders."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1",
+    "ai_path": "0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Subquery Scan over (orders) (reads the result of a subquery)."
+    ]
+   },
+   {
+    "pg_path": "0.1.0.0",
+    "ai_path": "0.1.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Sorted, Finalize) over (orders): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate orders by customer key and filter by count.\""
+    ]
+   },
+   {
+    "pg_path": "0.1.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (orders) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.1.0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Sort over (orders) (sorts its input)."
+    ]
+   },
+   {
+    "pg_path": "0.1.0.0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.1.0.0.0.0.0.0",
+    "ai_path": "0.1.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "same",
+    "0.1": "same",
+    "0.1.0": "postgres_only",
+    "0.1.0.0": "changed",
+    "0.1.0.0.0": "postgres_only",
+    "0.1.0.0.0.0": "postgres_only",
+    "0.1.0.0.0.0.0": "postgres_only",
+    "0.1.0.0.0.0.0.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same",
+    "0.1": "same",
+    "0.1.0": "changed",
+    "0.1.0.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 36% (tree edit distance rate: 29%). 4 of 9 PostgreSQL nodes have an identical counterpart in the AI plan's 5 nodes.\n\nPostgreSQL join order: HJ(customer, orders)\nAI join order:         HJ(customer, orders)\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.\n2. [Aggregation strategy] Aggregate (Sorted, Finalize) over (orders): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate orders by customer key and filter by count.\"\n3. [Missing operator] Only the PostgreSQL plan has Subquery Scan over (orders) (reads the result of a subquery).\n4. [Missing operator] Only the PostgreSQL plan has Gather Merge over (orders) (collects sorted rows from parallel workers, keeping the order).\n5. [Missing operator] Only the PostgreSQL plan has Sort over (orders) (sorts its input).\n6. [Missing operator] Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Hash Join of (customer) with (orders).\n- Both plans use Seq Scan on customer.\n- Both plans use Seq Scan on orders.",
+ "timings": {
+  "postgres": 0.003,
+  "ai": 1.755,
+  "comparison": 0.002
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.3571,
+  "ted_rate": 0.2857,
+  "pg_nodes": 9,
+  "ai_nodes": 5,
+  "identical_pairs": 4,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 4,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.63,
+  "max_q_error": 1.63
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Aggregation strategy",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.3571,
+   0.3571,
+   0.3571
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

@@ -1,0 +1,312 @@
+{
+ "id": "A8",
+ "category": "A. Selection / access path",
+ "purpose": "Predicate on a function of a column, which blocks index use and is hard to estimate",
+ "sql": "SELECT count(*)\nFROM orders\nWHERE extract(year FROM o_orderdate) = 1996\n  AND o_orderpriority = '1-URGENT'",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Finalize",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 38067.3,
+    "Total Cost": 38067.31,
+    "Plan Rows": 1,
+    "Plan Width": 8,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Gather",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 38067.09,
+      "Total Cost": 38067.3,
+      "Plan Rows": 2,
+      "Plan Width": 8,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Single Copy": false,
+      "Plans": [
+       {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Partial Mode": "Partial",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 37067.09,
+        "Total Cost": 37067.1,
+        "Plan Rows": 1,
+        "Plan Width": 8,
+        "Disabled": false,
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": true,
+          "Async Capable": false,
+          "Relation Name": "orders",
+          "Alias": "orders",
+          "Startup Cost": 0.0,
+          "Total Cost": 37065.5,
+          "Plan Rows": 635,
+          "Plan Width": 0,
+          "Disabled": false,
+          "Filter": "((o_orderpriority = '1-URGENT'::bpchar) AND (EXTRACT(year FROM o_orderdate) = '1996'::numeric))"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "Partial Mode": "Finalize"
+  },
+  "cost": 38067.31,
+  "rows": 1,
+  "children": [
+   {
+    "node_type": "Gather",
+    "raw_type": "Gather",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 38067.3,
+    "rows": 2,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Strategy": "Plain",
+       "Partial Mode": "Partial",
+       "Parent Relationship": "Outer"
+      },
+      "cost": 37067.1,
+      "rows": 1,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "orders",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "((o_orderpriority = '1-URGENT'::bpchar) AND (EXTRACT(year FROM o_orderdate) = '1996'::numeric))"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "orders"
+        },
+        "cost": 37065.5,
+        "rows": 635,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Plain\",\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 1,\n  \"parent_relationship\": null,\n  \"reason\": \"Aggregate the filtered rows from the orders table.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"orders\",\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {\n        \"Filter\": \"(o_orderpriority = '1-URGENT'::text AND (EXTRACT(year FROM o_orderdate) = 1996::double precision))\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 75000,\n      \"parent_relationship\": null,\n      \"reason\": \"Sequential scan is chosen as there is no index on o_orderdate or o_orderpriority.\",\n      \"children\": []\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "AI Reason": "Aggregate the filtered rows from the orders table.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 1.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "orders",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "(o_orderpriority = '1-URGENT'::text AND (EXTRACT(year FROM o_orderdate) = 1996::double precision))"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Sequential scan is chosen as there is no index on o_orderdate or o_orderpriority."
+    },
+    "cost": null,
+    "rows": 75000.0,
+    "children": [],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.3333,
+   "ted_rate": 0.3333,
+   "pg_nodes": 4,
+   "ai_nodes": 2,
+   "matched_pairs": 2,
+   "identical_pairs": 2,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 2,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "orders",
+   "ai": "orders"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on orders."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 33% (tree edit distance rate: 33%). 2 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 2 nodes.\n\nPostgreSQL join order: orders\nAI join order:         orders\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather), with partial aggregation in each worker. The AI plan runs in a single process.\n2. [Missing operator] Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes).\n3. [Missing operator] Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n\nSIMILARITIES\n- Both plans use Seq Scan on orders.",
+ "timings": {
+  "postgres": 0.013,
+  "ai": 2.552,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.3333,
+  "ted_rate": 0.3333,
+  "pg_nodes": 4,
+  "ai_nodes": 2,
+  "identical_pairs": 2,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 2,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.3333,
+   0.3333,
+   0.3333
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

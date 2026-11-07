@@ -1,0 +1,271 @@
+{
+ "id": "B1",
+ "category": "B. Two-table join",
+ "purpose": "Selective lookup on the outer side, indexed inner side (expected: Nested Loop + Index Scan)",
+ "sql": "SELECT l.l_linenumber, l.l_quantity, p.p_name\nFROM lineitem l\nJOIN part p ON p.p_partkey = l.l_partkey\nWHERE l.l_orderkey = 777",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Nested Loop",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Join Type": "Inner",
+    "Startup Cost": 0.85,
+    "Total Cost": 159.76,
+    "Plan Rows": 15,
+    "Plan Width": 42,
+    "Disabled": false,
+    "Inner Unique": true,
+    "Plans": [
+     {
+      "Node Type": "Index Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Scan Direction": "Forward",
+      "Index Name": "lineitem_pkey",
+      "Relation Name": "lineitem",
+      "Alias": "l",
+      "Startup Cost": 0.43,
+      "Total Cost": 33.2,
+      "Plan Rows": 15,
+      "Plan Width": 13,
+      "Disabled": false,
+      "Index Cond": "(l_orderkey = 777)"
+     },
+     {
+      "Node Type": "Index Scan",
+      "Parent Relationship": "Inner",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Scan Direction": "Forward",
+      "Index Name": "part_pkey",
+      "Relation Name": "part",
+      "Alias": "p",
+      "Startup Cost": 0.42,
+      "Total Cost": 8.44,
+      "Plan Rows": 1,
+      "Plan Width": 37,
+      "Disabled": false,
+      "Index Cond": "(p_partkey = l.l_partkey)"
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Nested Loop",
+  "raw_type": "Nested Loop",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 159.76,
+  "rows": 15,
+  "children": [
+   {
+    "node_type": "Index Scan",
+    "raw_type": "Index Scan",
+    "relation": "lineitem",
+    "index_name": "lineitem_pkey",
+    "join_type": null,
+    "conditions": {
+     "Index Cond": "(l_orderkey = 777)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Scan Direction": "Forward",
+     "Alias": "l"
+    },
+    "cost": 33.2,
+    "rows": 15,
+    "children": [],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Index Scan",
+    "raw_type": "Index Scan",
+    "relation": "part",
+    "index_name": "part_pkey",
+    "join_type": null,
+    "conditions": {
+     "Index Cond": "(p_partkey = l.l_partkey)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Inner",
+     "Scan Direction": "Forward",
+     "Alias": "p"
+    },
+    "cost": 8.44,
+    "rows": 1,
+    "children": [],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Nested Loop\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": \"Inner\",\n  \"strategy\": null,\n  \"conditions\": {\n    \"Join Filter\": \"p.p_partkey = l.l_partkey\"\n  },\n  \"keys\": [],\n  \"estimated_rows\": 4,\n  \"parent_relationship\": null,\n  \"reason\": \"The query filters lineitem by a specific orderkey, making an index scan on lineitem efficient, followed by a nested loop join to the part table.\",\n  \"children\": [\n    {\n      \"node_type\": \"Index Scan\",\n      \"relation\": \"lineitem\",\n      \"index_name\": \"lineitem_pkey\",\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {\n        \"Index Cond\": \"l_orderkey = 777\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 4,\n      \"parent_relationship\": null,\n      \"reason\": \"Direct access to lineitem rows for a specific orderkey using the primary key index.\",\n      \"children\": []\n    },\n    {\n      \"node_type\": \"Index Scan\",\n      \"relation\": \"part\",\n      \"index_name\": \"part_pkey\",\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {\n        \"Index Cond\": \"p_partkey = lineitem.l_partkey\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 1,\n      \"parent_relationship\": null,\n      \"reason\": \"Efficient lookup of part details using the primary key index for each lineitem row.\",\n      \"children\": []\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Nested Loop",
+  "raw_type": "Nested Loop",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Join Filter": "p.p_partkey = l.l_partkey"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query filters lineitem by a specific orderkey, making an index scan on lineitem efficient, followed by a nested loop join to the part table.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 4.0,
+  "children": [
+   {
+    "node_type": "Index Scan",
+    "raw_type": "Index Scan",
+    "relation": "lineitem",
+    "index_name": "lineitem_pkey",
+    "join_type": null,
+    "conditions": {
+     "Index Cond": "l_orderkey = 777"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Direct access to lineitem rows for a specific orderkey using the primary key index."
+    },
+    "cost": null,
+    "rows": 4.0,
+    "children": [],
+    "source": "ai"
+   },
+   {
+    "node_type": "Index Scan",
+    "raw_type": "Index Scan",
+    "relation": "part",
+    "index_name": "part_pkey",
+    "join_type": null,
+    "conditions": {
+     "Index Cond": "p_partkey = lineitem.l_partkey"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Efficient lookup of part details using the primary key index for each lineitem row."
+    },
+    "cost": null,
+    "rows": 1.0,
+    "children": [],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.0,
+   "ted_rate": 0.0,
+   "pg_nodes": 3,
+   "ai_nodes": 3,
+   "matched_pairs": 3,
+   "identical_pairs": 3,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 3.75,
+   "max_q_error": 3.75
+  },
+  "join_order": {
+   "postgres": "NL(lineitem, part)",
+   "ai": "NL(lineitem, part)"
+  },
+  "differences": [],
+  "similarities": [
+   "The plans are identical.",
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Nested Loop of (lineitem) with (part).",
+   "Both plans use Index Scan on lineitem using lineitem_pkey.",
+   "Both plans use Index Scan on part using part_pkey."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1",
+    "ai_path": "0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "same",
+    "0.1": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same",
+    "0.1": "same"
+   }
+  }
+ },
+ "explanation": "The two plans are identical in structure, operators and details.\n\nPostgreSQL join order: NL(lineitem, part)\nAI join order:         NL(lineitem, part)\n\nSIMILARITIES\n- The plans are identical.\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Nested Loop of (lineitem) with (part).\n- Both plans use Index Scan on lineitem using lineitem_pkey.\n- Both plans use Index Scan on part using part_pkey.",
+ "timings": {
+  "postgres": 0.007,
+  "ai": 1.913,
+  "comparison": 0.004
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.0,
+  "ted_rate": 0.0,
+  "pg_nodes": 3,
+  "ai_nodes": 3,
+  "identical_pairs": 3,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 3.75,
+  "max_q_error": 3.75
+ },
+ "difference_categories": [],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

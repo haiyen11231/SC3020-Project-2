@@ -1,0 +1,644 @@
+{
+ "id": "G2",
+ "category": "G. CTE",
+ "purpose": "Recursive CTE (Recursive Union over a WorkTable Scan) joined to a table",
+ "sql": "WITH RECURSIVE days(d) AS (\n    SELECT DATE '1995-03-01'\n    UNION ALL\n    SELECT d + 1 FROM days WHERE d < DATE '1995-03-07')\nSELECT days.d, count(o.o_orderkey) AS orders_placed\nFROM days\nLEFT JOIN orders o ON o.o_orderdate = days.d\nGROUP BY days.d\nORDER BY days.d",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Sort",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 47047.64,
+    "Total Cost": 47047.71,
+    "Plan Rows": 31,
+    "Plan Width": 12,
+    "Disabled": false,
+    "Sort Key": [
+     "days.d"
+    ],
+    "Plans": [
+     {
+      "Node Type": "Recursive Union",
+      "Parent Relationship": "InitPlan",
+      "Subplan Name": "CTE days",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 0.0,
+      "Total Cost": 2.65,
+      "Plan Rows": 31,
+      "Plan Width": 4,
+      "Disabled": false,
+      "Plans": [
+       {
+        "Node Type": "Result",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.01,
+        "Plan Rows": 1,
+        "Plan Width": 4,
+        "Disabled": false
+       },
+       {
+        "Node Type": "WorkTable Scan",
+        "Parent Relationship": "Inner",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "CTE Name": "days",
+        "Alias": "days_1",
+        "Startup Cost": 0.0,
+        "Total Cost": 0.23,
+        "Plan Rows": 3,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Filter": "(d < '1995-03-07'::date)"
+       }
+      ]
+     },
+     {
+      "Node Type": "Aggregate",
+      "Strategy": "Hashed",
+      "Partial Mode": "Simple",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 47043.91,
+      "Total Cost": 47044.22,
+      "Plan Rows": 31,
+      "Plan Width": 12,
+      "Disabled": false,
+      "Group Key": [
+       "days.d"
+      ],
+      "Planned Partitions": 0,
+      "Plans": [
+       {
+        "Node Type": "Hash Join",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Join Type": "Right",
+        "Startup Cost": 1.01,
+        "Total Cost": 46947.28,
+        "Plan Rows": 19327,
+        "Plan Width": 8,
+        "Disabled": false,
+        "Inner Unique": false,
+        "Hash Cond": "(o.o_orderdate = days.d)",
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Relation Name": "orders",
+          "Alias": "o",
+          "Startup Cost": 0.0,
+          "Total Cost": 41128.0,
+          "Plan Rows": 1500000,
+          "Plan Width": 8,
+          "Disabled": false
+         },
+         {
+          "Node Type": "Hash",
+          "Parent Relationship": "Inner",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 0.62,
+          "Total Cost": 0.62,
+          "Plan Rows": 31,
+          "Plan Width": 4,
+          "Disabled": false,
+          "Plans": [
+           {
+            "Node Type": "CTE Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "CTE Name": "days",
+            "Alias": "days",
+            "Startup Cost": 0.0,
+            "Total Cost": 0.62,
+            "Plan Rows": 31,
+            "Plan Width": 4,
+            "Disabled": false
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Sort",
+  "raw_type": "Sort",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "days.d"
+  ],
+  "extra": {},
+  "cost": 47047.71,
+  "rows": 31,
+  "children": [
+   {
+    "node_type": "Recursive Union",
+    "raw_type": "Recursive Union",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "CTE days"
+    },
+    "cost": 2.65,
+    "rows": 31,
+    "children": [
+     {
+      "node_type": "Result",
+      "raw_type": "Result",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 0.01,
+      "rows": 1,
+      "children": [],
+      "source": "postgres"
+     },
+     {
+      "node_type": "WorkTable Scan",
+      "raw_type": "WorkTable Scan",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "(d < '1995-03-07'::date)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Inner",
+       "CTE Name": "days",
+       "Alias": "days_1"
+      },
+      "cost": 0.23,
+      "rows": 3,
+      "children": [],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "days.d"
+    ],
+    "extra": {
+     "Strategy": "Hashed",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "Outer"
+    },
+    "cost": 47044.22,
+    "rows": 31,
+    "children": [
+     {
+      "node_type": "Hash Join",
+      "raw_type": "Hash Join",
+      "relation": null,
+      "index_name": null,
+      "join_type": "Right",
+      "conditions": {
+       "Hash Cond": "(o.o_orderdate = days.d)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 46947.28,
+      "rows": 19327,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "orders",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "o"
+        },
+        "cost": 41128.0,
+        "rows": 1500000,
+        "children": [],
+        "source": "postgres"
+       },
+       {
+        "node_type": "Hash",
+        "raw_type": "Hash",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Inner"
+        },
+        "cost": 0.62,
+        "rows": 31,
+        "children": [
+         {
+          "node_type": "CTE Scan",
+          "raw_type": "CTE Scan",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer",
+           "CTE Name": "days",
+           "Alias": "days"
+          },
+          "cost": 0.62,
+          "rows": 31,
+          "children": [],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Sort\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {},\n  \"keys\": [\"days.d\"],\n  \"estimated_rows\": 7,\n  \"parent_relationship\": null,\n  \"reason\": \"The query requires grouping by the generated date and sorting the result.\",\n  \"children\": [\n    {\n      \"node_type\": \"Aggregate\",\n      \"relation\": null,\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": \"Hashed\",\n      \"conditions\": {},\n      \"keys\": [\"days.d\"],\n      \"estimated_rows\": 7,\n      \"parent_relationship\": null,\n      \"reason\": \"Aggregate the joined results by the generated date.\",\n      \"children\": [\n        {\n          \"node_type\": \"Hash Join\",\n          \"relation\": null,\n          \"index_name\": null,\n          \"join_type\": \"Left\",\n          \"strategy\": null,\n          \"conditions\": {\n            \"Hash Cond\": \"o.o_orderdate = days.d\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 7,\n          \"parent_relationship\": null,\n          \"reason\": \"Hash join is efficient for joining the recursive CTE result with the orders table.\",\n          \"children\": [\n            {\n              \"node_type\": \"CTE Scan\",\n              \"relation\": null,\n              \"index_name\": null,\n              \"join_type\": null,\n              \"strategy\": null,\n              \"conditions\": {},\n              \"keys\": [],\n              \"estimated_rows\": 7,\n              \"parent_relationship\": null,\n              \"reason\": \"Scan the recursive CTE result.\",\n              \"children\": []\n            },\n            {\n              \"node_type\": \"Hash\",\n              \"relation\": null,\n              \"index_name\": null,\n              \"join_type\": null,\n              \"strategy\": null,\n              \"conditions\": {},\n              \"keys\": [],\n              \"estimated_rows\": 1500000,\n              \"parent_relationship\": null,\n              \"reason\": \"Build hash table for the orders table.\",\n              \"children\": [\n                {\n                  \"node_type\": \"Seq Scan\",\n                  \"relation\": \"orders\",\n                  \"index_name\": null,\n                  \"join_type\": null,\n                  \"strategy\": null,\n                  \"conditions\": {},\n                  \"keys\": [],\n                  \"estimated_rows\": 1500000,\n                  \"parent_relationship\": null,\n                  \"reason\": \"Full scan of orders table to build hash.\",\n                  \"children\": []\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Sort",
+  "raw_type": "Sort",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "days.d"
+  ],
+  "extra": {
+   "AI Reason": "The query requires grouping by the generated date and sorting the result.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 7.0,
+  "children": [
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "days.d"
+    ],
+    "extra": {
+     "Strategy": "Hashed",
+     "AI Reason": "Aggregate the joined results by the generated date."
+    },
+    "cost": null,
+    "rows": 7.0,
+    "children": [
+     {
+      "node_type": "Hash Join",
+      "raw_type": "Hash Join",
+      "relation": null,
+      "index_name": null,
+      "join_type": "Left",
+      "conditions": {
+       "Hash Cond": "o.o_orderdate = days.d"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Hash join is efficient for joining the recursive CTE result with the orders table."
+      },
+      "cost": null,
+      "rows": 7.0,
+      "children": [
+       {
+        "node_type": "CTE Scan",
+        "raw_type": "CTE Scan",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Scan the recursive CTE result."
+        },
+        "cost": null,
+        "rows": 7.0,
+        "children": [],
+        "source": "ai"
+       },
+       {
+        "node_type": "Hash",
+        "raw_type": "Hash",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Build hash table for the orders table."
+        },
+        "cost": null,
+        "rows": 1500000.0,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "orders",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Full scan of orders table to build hash."
+          },
+          "cost": null,
+          "rows": 1500000.0,
+          "children": [],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.3333,
+   "ted_rate": 0.4667,
+   "pg_nodes": 9,
+   "ai_nodes": 6,
+   "matched_pairs": 6,
+   "identical_pairs": 4,
+   "changed_pairs": 2,
+   "postgres_only_nodes": 3,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 4.43,
+   "max_q_error": 48387.1
+  },
+  "join_order": {
+   "postgres": "HJ(orders, CTE Scan)[Recursive Union(Result, WorkTable Scan)]",
+   "ai": "HJ(CTE Scan, orders)"
+  },
+  "differences": [
+   {
+    "category": "Tables",
+    "text": "Only the PostgreSQL plan reads table result. The AI plan cannot produce the full result without it.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Tables",
+    "text": "Only the PostgreSQL plan reads table worktable scan. The AI plan cannot produce the full result without it.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Subquery",
+    "text": "PostgreSQL evaluates the subquery over (Result, WorkTable Scan) as a separate InitPlan (computed once) used by Sort over (orders, CTE Scan).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Conditions",
+    "text": "These conditions appear in the PostgreSQL plan but nowhere in the AI plan: d < '1995-03-07'.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Cardinality estimate",
+    "text": "The largest disagreement on row estimates is at Hash over (CTE Scan): PostgreSQL estimates 31 rows, the AI 1,500,000 (factor 48387.1). Row estimates drive operator choice.",
+    "pg_path": "0.1.0.1",
+    "ai_path": "0.0.0.1"
+   },
+   {
+    "category": "Join input order",
+    "text": "Hash Join of (orders, CTE Scan): PostgreSQL hashes (CTE Scan). The AI hashes (orders). PostgreSQL usually hashes the smaller input.",
+    "pg_path": "0.1.0",
+    "ai_path": "0.0.0"
+   },
+   {
+    "category": "Join inputs",
+    "text": "Hash: PostgreSQL applies it to (CTE Scan), the AI to (orders).",
+    "pg_path": "0.1.0.1",
+    "ai_path": "0.0.0.1"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Recursive Union over (Result, WorkTable Scan) (evaluates a recursive WITH query).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Result over (Result) (computes values without reading a table).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has WorkTable Scan over (WorkTable Scan) (reads the working table of a recursive query).",
+    "pg_path": "0.0.1",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Apart from the subquery, both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Seq Scan on orders.",
+   "Both plans use CTE Scan over (CTE Scan)."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Recursive Union over (Result, WorkTable Scan) (evaluates a recursive WITH query)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Result over (Result) (computes values without reading a table)."
+    ]
+   },
+   {
+    "pg_path": "0.0.1",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has WorkTable Scan over (WorkTable Scan) (reads the working table of a recursive query)."
+    ]
+   },
+   {
+    "pg_path": "0.1",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1.0",
+    "ai_path": "0.0.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Hash Join of (orders, CTE Scan): PostgreSQL hashes (CTE Scan). The AI hashes (orders). PostgreSQL usually hashes the smaller input."
+    ]
+   },
+   {
+    "pg_path": "0.1.0.0",
+    "ai_path": "0.0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1.0.1",
+    "ai_path": "0.0.0.1",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Hash: PostgreSQL applies it to (CTE Scan), the AI to (orders)."
+    ]
+   },
+   {
+    "pg_path": "0.1.0.1.0",
+    "ai_path": "0.0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.1": "postgres_only",
+    "0.1": "same",
+    "0.1.0": "changed",
+    "0.1.0.0": "same",
+    "0.1.0.1": "changed",
+    "0.1.0.1.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same",
+    "0.0.0": "changed",
+    "0.0.0.1.0": "same",
+    "0.0.0.1": "changed",
+    "0.0.0.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 33% (tree edit distance rate: 47%). 4 of 9 PostgreSQL nodes have an identical counterpart in the AI plan's 6 nodes.\n\nPostgreSQL join order: HJ(orders, CTE Scan)[Recursive Union(Result, WorkTable Scan)]\nAI join order:         HJ(CTE Scan, orders)\n\nDIFFERENCES\n1. [Tables] Only the PostgreSQL plan reads table result. The AI plan cannot produce the full result without it.\n2. [Tables] Only the PostgreSQL plan reads table worktable scan. The AI plan cannot produce the full result without it.\n3. [Subquery] PostgreSQL evaluates the subquery over (Result, WorkTable Scan) as a separate InitPlan (computed once) used by Sort over (orders, CTE Scan).\n4. [Conditions] These conditions appear in the PostgreSQL plan but nowhere in the AI plan: d < '1995-03-07'.\n5. [Cardinality estimate] The largest disagreement on row estimates is at Hash over (CTE Scan): PostgreSQL estimates 31 rows, the AI 1,500,000 (factor 48387.1). Row estimates drive operator choice.\n6. [Join input order] Hash Join of (orders, CTE Scan): PostgreSQL hashes (CTE Scan). The AI hashes (orders). PostgreSQL usually hashes the smaller input.\n7. [Join inputs] Hash: PostgreSQL applies it to (CTE Scan), the AI to (orders).\n8. [Missing operator] Only the PostgreSQL plan has Recursive Union over (Result, WorkTable Scan) (evaluates a recursive WITH query).\n9. [Missing operator] Only the PostgreSQL plan has Result over (Result) (computes values without reading a table).\n10. [Missing operator] Only the PostgreSQL plan has WorkTable Scan over (WorkTable Scan) (reads the working table of a recursive query).\n\nSIMILARITIES\n- Apart from the subquery, both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Seq Scan on orders.\n- Both plans use CTE Scan over (CTE Scan).",
+ "timings": {
+  "postgres": 0.051,
+  "ai": 3.711,
+  "comparison": 0.002
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.3333,
+  "ted_rate": 0.4667,
+  "pg_nodes": 9,
+  "ai_nodes": 6,
+  "identical_pairs": 4,
+  "changed_pairs": 2,
+  "postgres_only_nodes": 3,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 4.43,
+  "max_q_error": 48387.1
+ },
+ "difference_categories": [
+  "Tables",
+  "Tables",
+  "Subquery",
+  "Conditions",
+  "Cardinality estimate",
+  "Join input order",
+  "Join inputs",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.3333,
+   0.3333,
+   0.3333
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

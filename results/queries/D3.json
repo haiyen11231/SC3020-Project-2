@@ -1,0 +1,321 @@
+{
+ "id": "D3",
+ "category": "D. Aggregation",
+ "purpose": "COUNT(DISTINCT) (needs a sort inside the aggregate)",
+ "sql": "SELECT count(DISTINCT o_custkey) AS active_customers\nFROM orders\nWHERE o_orderdate >= DATE '1998-01-01'",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Simple",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 54929.22,
+    "Total Cost": 54929.23,
+    "Plan Rows": 1,
+    "Plan Width": 8,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Gather Merge",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 39260.5,
+      "Total Cost": 54599.95,
+      "Plan Rows": 131707,
+      "Plan Width": 4,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Plans": [
+       {
+        "Node Type": "Sort",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 38260.48,
+        "Total Cost": 38397.67,
+        "Plan Rows": 54878,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Sort Key": [
+         "o_custkey"
+        ],
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": true,
+          "Async Capable": false,
+          "Relation Name": "orders",
+          "Alias": "orders",
+          "Startup Cost": 0.0,
+          "Total Cost": 33940.5,
+          "Plan Rows": 54878,
+          "Plan Width": 4,
+          "Disabled": false,
+          "Filter": "(o_orderdate >= '1998-01-01'::date)"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "Partial Mode": "Simple"
+  },
+  "cost": 54929.23,
+  "rows": 1,
+  "children": [
+   {
+    "node_type": "Gather Merge",
+    "raw_type": "Gather Merge",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 54599.95,
+    "rows": 131707,
+    "children": [
+     {
+      "node_type": "Sort",
+      "raw_type": "Sort",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "o_custkey"
+      ],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 38397.67,
+      "rows": 54878,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "orders",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "(o_orderdate >= '1998-01-01'::date)"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "orders"
+        },
+        "cost": 33940.5,
+        "rows": 54878,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Hashed\",\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 1,\n  \"reason\": \"The query requires a count of distinct values, which is most efficiently handled by a Hashed Aggregate after filtering the orders table.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"orders\",\n      \"index_name\": null,\n      \"conditions\": {\n        \"Filter\": \"o_orderdate >= '1998-01-01'::date\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 178500,\n      \"reason\": \"A sequential scan is chosen as the filter on o_orderdate is not indexed, and the estimated selectivity is high enough to warrant a full table scan.\",\n      \"children\": []\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Hashed",
+   "AI Reason": "The query requires a count of distinct values, which is most efficiently handled by a Hashed Aggregate after filtering the orders table.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 1.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "orders",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "o_orderdate >= '1998-01-01'::date"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "A sequential scan is chosen as the filter on o_orderdate is not indexed, and the estimated selectivity is high enough to warrant a full table scan."
+    },
+    "cost": null,
+    "rows": 178500.0,
+    "children": [],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.5,
+   "ted_rate": 0.3333,
+   "pg_nodes": 4,
+   "ai_nodes": 2,
+   "matched_pairs": 2,
+   "identical_pairs": 1,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 2,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "orders",
+   "ai": "orders"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Plain) over (orders): PostgreSQL uses Plain aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query requires a count of distinct values, which is most efficiently handled by a Hashed Aggregate after filtering the orders table.\"",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (orders) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Sort over (orders) (sorts its input).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on orders."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Plain) over (orders): PostgreSQL uses Plain aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query requires a count of distinct values, which is most efficiently handled by a Hashed Aggregate after filtering the orders table.\""
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (orders) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Sort over (orders) (sorts its input)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "same"
+   },
+   "ai": {
+    "0": "changed",
+    "0.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 50% (tree edit distance rate: 33%). 1 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 2 nodes.\n\nPostgreSQL join order: orders\nAI join order:         orders\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge). The AI plan runs in a single process.\n2. [Aggregation strategy] Aggregate (Plain) over (orders): PostgreSQL uses Plain aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query requires a count of distinct values, which is most efficiently handled by a Hashed Aggregate after filtering the orders table.\"\n3. [Missing operator] Only the PostgreSQL plan has Gather Merge over (orders) (collects sorted rows from parallel workers, keeping the order).\n4. [Missing operator] Only the PostgreSQL plan has Sort over (orders) (sorts its input).\n\nSIMILARITIES\n- Both plans use Seq Scan on orders.",
+ "timings": {
+  "postgres": 0.062,
+  "ai": 1.785,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.5,
+  "ted_rate": 0.3333,
+  "pg_nodes": 4,
+  "ai_nodes": 2,
+  "identical_pairs": 1,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 2,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Aggregation strategy",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.5,
+   0.5,
+   0.5
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

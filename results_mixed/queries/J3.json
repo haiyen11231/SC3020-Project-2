@@ -1,0 +1,632 @@
+{
+ "id": "J3",
+ "category": "J. Outer join",
+ "purpose": "FULL OUTER JOIN of two aggregated inputs",
+ "sql": "SELECT coalesce(c.nationkey, s.nationkey) AS nationkey, c.customers, s.suppliers\nFROM (SELECT c_nationkey AS nationkey, count(*) AS customers FROM customer GROUP BY c_nationkey) c\nFULL OUTER JOIN\n     (SELECT s_nationkey AS nationkey, count(*) AS suppliers FROM supplier GROUP BY s_nationkey) s\nON c.nationkey = s.nationkey",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Hash Join",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Join Type": "Full",
+    "Startup Cost": 5911.92,
+    "Total Cost": 5919.53,
+    "Plan Rows": 25,
+    "Plan Width": 20,
+    "Disabled": false,
+    "Inner Unique": true,
+    "Hash Cond": "(customer.c_nationkey = supplier.s_nationkey)",
+    "Plans": [
+     {
+      "Node Type": "Aggregate",
+      "Strategy": "Sorted",
+      "Partial Mode": "Finalize",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 5538.35,
+      "Total Cost": 5545.89,
+      "Plan Rows": 25,
+      "Plan Width": 12,
+      "Disabled": false,
+      "Group Key": [
+       "customer.c_nationkey"
+      ],
+      "Plans": [
+       {
+        "Node Type": "Gather Merge",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 5538.35,
+        "Total Cost": 5545.34,
+        "Plan Rows": 60,
+        "Plan Width": 12,
+        "Disabled": false,
+        "Workers Planned": 2,
+        "Plans": [
+         {
+          "Node Type": "Sort",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 4538.33,
+          "Total Cost": 4538.39,
+          "Plan Rows": 25,
+          "Plan Width": 12,
+          "Disabled": false,
+          "Sort Key": [
+           "customer.c_nationkey"
+          ],
+          "Plans": [
+           {
+            "Node Type": "Aggregate",
+            "Strategy": "Hashed",
+            "Partial Mode": "Partial",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 4537.5,
+            "Total Cost": 4537.75,
+            "Plan Rows": 25,
+            "Plan Width": 12,
+            "Disabled": false,
+            "Group Key": [
+             "customer.c_nationkey"
+            ],
+            "Planned Partitions": 0,
+            "Plans": [
+             {
+              "Node Type": "Seq Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": true,
+              "Async Capable": false,
+              "Relation Name": "customer",
+              "Alias": "customer",
+              "Startup Cost": 0.0,
+              "Total Cost": 4225.0,
+              "Plan Rows": 62500,
+              "Plan Width": 4,
+              "Disabled": false
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "Node Type": "Hash",
+      "Parent Relationship": "Inner",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 373.25,
+      "Total Cost": 373.25,
+      "Plan Rows": 25,
+      "Plan Width": 12,
+      "Disabled": false,
+      "Plans": [
+       {
+        "Node Type": "Aggregate",
+        "Strategy": "Hashed",
+        "Partial Mode": "Simple",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 373.0,
+        "Total Cost": 373.25,
+        "Plan Rows": 25,
+        "Plan Width": 12,
+        "Disabled": false,
+        "Group Key": [
+         "supplier.s_nationkey"
+        ],
+        "Planned Partitions": 0,
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Relation Name": "supplier",
+          "Alias": "supplier",
+          "Startup Cost": 0.0,
+          "Total Cost": 323.0,
+          "Plan Rows": 10000,
+          "Plan Width": 4,
+          "Disabled": false
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Full",
+  "conditions": {
+   "Hash Cond": "(customer.c_nationkey = supplier.s_nationkey)"
+  },
+  "keys": [],
+  "extra": {},
+  "cost": 5919.53,
+  "rows": 25,
+  "children": [
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "customer.c_nationkey"
+    ],
+    "extra": {
+     "Strategy": "Sorted",
+     "Partial Mode": "Finalize",
+     "Parent Relationship": "Outer"
+    },
+    "cost": 5545.89,
+    "rows": 25,
+    "children": [
+     {
+      "node_type": "Gather Merge",
+      "raw_type": "Gather Merge",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 5545.34,
+      "rows": 60,
+      "children": [
+       {
+        "node_type": "Sort",
+        "raw_type": "Sort",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [
+         "customer.c_nationkey"
+        ],
+        "extra": {
+         "Parent Relationship": "Outer"
+        },
+        "cost": 4538.39,
+        "rows": 25,
+        "children": [
+         {
+          "node_type": "Aggregate",
+          "raw_type": "Aggregate",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [
+           "customer.c_nationkey"
+          ],
+          "extra": {
+           "Strategy": "Hashed",
+           "Partial Mode": "Partial",
+           "Parent Relationship": "Outer"
+          },
+          "cost": 4537.75,
+          "rows": 25,
+          "children": [
+           {
+            "node_type": "Seq Scan",
+            "raw_type": "Seq Scan",
+            "relation": "customer",
+            "index_name": null,
+            "join_type": null,
+            "conditions": {},
+            "keys": [],
+            "extra": {
+             "Parent Relationship": "Outer",
+             "Alias": "customer"
+            },
+            "cost": 4225.0,
+            "rows": 62500,
+            "children": [],
+            "source": "postgres"
+           }
+          ],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Inner"
+    },
+    "cost": 373.25,
+    "rows": 25,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "supplier.s_nationkey"
+      ],
+      "extra": {
+       "Strategy": "Hashed",
+       "Partial Mode": "Simple",
+       "Parent Relationship": "Outer"
+      },
+      "cost": 373.25,
+      "rows": 25,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "supplier",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "supplier"
+        },
+        "cost": 323.0,
+        "rows": 10000,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Hash Join\",\n  \"join_type\": \"Full\",\n  \"conditions\": {\n    \"Hash Cond\": \"c.nationkey = s.nationkey\"\n  },\n  \"estimated_rows\": 25,\n  \"reason\": \"Full outer join between two aggregated subqueries using a hash join.\",\n  \"children\": [\n    {\n      \"node_type\": \"Aggregate\",\n      \"strategy\": \"Hashed\",\n      \"keys\": [\n        \"c_nationkey\"\n      ],\n      \"estimated_rows\": 25,\n      \"reason\": \"Aggregate customer counts by nationkey.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"customer\",\n          \"estimated_rows\": 150000,\n          \"reason\": \"Full scan of customer table to perform aggregation.\",\n          \"children\": []\n        }\n      ]\n    },\n    {\n      \"node_type\": \"Hash\",\n      \"estimated_rows\": 25,\n      \"reason\": \"Hash table for supplier aggregation.\",\n      \"children\": [\n        {\n          \"node_type\": \"Aggregate\",\n          \"strategy\": \"Hashed\",\n          \"keys\": [\n            \"s_nationkey\"\n          ],\n          \"estimated_rows\": 25,\n          \"reason\": \"Aggregate supplier counts by nationkey.\",\n          \"children\": [\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"supplier\",\n              \"estimated_rows\": 10000,\n              \"reason\": \"Full scan of supplier table to perform aggregation.\",\n              \"children\": []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Full",
+  "conditions": {
+   "Hash Cond": "c.nationkey = s.nationkey"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "Full outer join between two aggregated subqueries using a hash join."
+  },
+  "cost": null,
+  "rows": 25.0,
+  "children": [
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "c_nationkey"
+    ],
+    "extra": {
+     "Strategy": "Hashed",
+     "AI Reason": "Aggregate customer counts by nationkey."
+    },
+    "cost": null,
+    "rows": 25.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "customer",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Full scan of customer table to perform aggregation."
+      },
+      "cost": null,
+      "rows": 150000.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "Hash table for supplier aggregation."
+    },
+    "cost": null,
+    "rows": 25.0,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "s_nationkey"
+      ],
+      "extra": {
+       "Strategy": "Hashed",
+       "AI Reason": "Aggregate supplier counts by nationkey."
+      },
+      "cost": null,
+      "rows": 25.0,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "supplier",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Full scan of supplier table to perform aggregation."
+        },
+        "cost": null,
+        "rows": 10000.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.3333,
+   "ted_rate": 0.2,
+   "pg_nodes": 9,
+   "ai_nodes": 6,
+   "matched_pairs": 6,
+   "identical_pairs": 4,
+   "changed_pairs": 2,
+   "postgres_only_nodes": 3,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "HJ(customer, supplier)",
+   "ai": "HJ(customer, supplier)"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Conditions",
+    "text": "Hash Join of (customer) with (supplier): PostgreSQL applies c_nationkey = s_nationkey here, the AI does not. The AI applies nationkey = nationkey here, PostgreSQL does not.",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Sorted, Finalize) over (customer): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate customer counts by nationkey.\"",
+    "pg_path": "0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (customer) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Sort over (customer) (sorts its input).",
+    "pg_path": "0.0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (customer) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0.0.0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Seq Scan on customer.",
+   "Both plans use Seq Scan on supplier."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Hash Join of (customer) with (supplier): PostgreSQL applies c_nationkey = s_nationkey here, the AI does not. The AI applies nationkey = nationkey here, PostgreSQL does not."
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Sorted, Finalize) over (customer): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate customer counts by nationkey.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (customer) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Sort over (customer) (sorts its input)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (customer) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0.0",
+    "ai_path": "0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1",
+    "ai_path": "0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1.0",
+    "ai_path": "0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1.0.0",
+    "ai_path": "0.1.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed",
+    "0.0": "changed",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "postgres_only",
+    "0.0.0.0.0": "postgres_only",
+    "0.0.0.0.0.0": "same",
+    "0.1": "same",
+    "0.1.0": "same",
+    "0.1.0.0": "same"
+   },
+   "ai": {
+    "0": "changed",
+    "0.0": "changed",
+    "0.0.0": "same",
+    "0.1": "same",
+    "0.1.0": "same",
+    "0.1.0.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 33% (tree edit distance rate: 20%). 4 of 9 PostgreSQL nodes have an identical counterpart in the AI plan's 6 nodes.\n\nPostgreSQL join order: HJ(customer, supplier)\nAI join order:         HJ(customer, supplier)\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.\n2. [Conditions] Hash Join of (customer) with (supplier): PostgreSQL applies c_nationkey = s_nationkey here, the AI does not. The AI applies nationkey = nationkey here, PostgreSQL does not.\n3. [Aggregation strategy] Aggregate (Sorted, Finalize) over (customer): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate customer counts by nationkey.\"\n4. [Missing operator] Only the PostgreSQL plan has Gather Merge over (customer) (collects sorted rows from parallel workers, keeping the order).\n5. [Missing operator] Only the PostgreSQL plan has Sort over (customer) (sorts its input).\n6. [Missing operator] Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (customer) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Seq Scan on customer.\n- Both plans use Seq Scan on supplier.",
+ "timings": {
+  "postgres": 0.002,
+  "ai": 2.846,
+  "comparison": 0.002
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.3333,
+  "ted_rate": 0.2,
+  "pg_nodes": 9,
+  "ai_nodes": 6,
+  "identical_pairs": 4,
+  "changed_pairs": 2,
+  "postgres_only_nodes": 3,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Conditions",
+  "Aggregation strategy",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.3333,
+   0.3333,
+   0.3333
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

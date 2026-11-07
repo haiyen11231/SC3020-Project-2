@@ -1,0 +1,986 @@
+{
+ "id": "G1",
+ "category": "G. CTE",
+ "purpose": "CTE referenced twice (materialized once, read by two CTE Scans)",
+ "sql": "WITH nation_revenue AS (\n    SELECT c.c_nationkey, sum(o.o_totalprice) AS revenue\n    FROM customer c JOIN orders o ON o.o_custkey = c.c_custkey\n    WHERE o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'\n    GROUP BY c.c_nationkey)\nSELECT n.n_name, nr.revenue\nFROM nation_revenue nr\nJOIN nation n ON n.n_nationkey = nr.c_nationkey\nWHERE nr.revenue > (SELECT avg(revenue) FROM nation_revenue)",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Hash Join",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Join Type": "Inner",
+    "Startup Cost": 42229.05,
+    "Total Cost": 42230.48,
+    "Plan Rows": 8,
+    "Plan Width": 58,
+    "Disabled": false,
+    "Inner Unique": false,
+    "Hash Cond": "(n.n_nationkey = nr.c_nationkey)",
+    "Plans": [
+     {
+      "Node Type": "Aggregate",
+      "Strategy": "Sorted",
+      "Partial Mode": "Finalize",
+      "Parent Relationship": "InitPlan",
+      "Subplan Name": "CTE nation_revenue",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 42220.07,
+      "Total Cost": 42227.82,
+      "Plan Rows": 25,
+      "Plan Width": 36,
+      "Disabled": false,
+      "Group Key": [
+       "c.c_nationkey"
+      ],
+      "Plans": [
+       {
+        "Node Type": "Gather Merge",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 42220.07,
+        "Total Cost": 42227.05,
+        "Plan Rows": 60,
+        "Plan Width": 36,
+        "Disabled": false,
+        "Workers Planned": 2,
+        "Plans": [
+         {
+          "Node Type": "Sort",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 41220.04,
+          "Total Cost": 41220.1,
+          "Plan Rows": 25,
+          "Plan Width": 36,
+          "Disabled": false,
+          "Sort Key": [
+           "c.c_nationkey"
+          ],
+          "Plans": [
+           {
+            "Node Type": "Aggregate",
+            "Strategy": "Hashed",
+            "Partial Mode": "Partial",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 41219.15,
+            "Total Cost": 41219.46,
+            "Plan Rows": 25,
+            "Plan Width": 36,
+            "Disabled": false,
+            "Group Key": [
+             "c.c_nationkey"
+            ],
+            "Planned Partitions": 0,
+            "Plans": [
+             {
+              "Node Type": "Hash Join",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": true,
+              "Async Capable": false,
+              "Join Type": "Inner",
+              "Startup Cost": 5006.25,
+              "Total Cost": 40753.65,
+              "Plan Rows": 93100,
+              "Plan Width": 12,
+              "Disabled": false,
+              "Inner Unique": true,
+              "Hash Cond": "(o.o_custkey = c.c_custkey)",
+              "Plans": [
+               {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": true,
+                "Async Capable": false,
+                "Relation Name": "orders",
+                "Alias": "o",
+                "Startup Cost": 0.0,
+                "Total Cost": 35503.0,
+                "Plan Rows": 93100,
+                "Plan Width": 12,
+                "Disabled": false,
+                "Filter": "((o_orderdate >= '1993-01-01'::date) AND (o_orderdate < '1994-01-01'::date))"
+               },
+               {
+                "Node Type": "Hash",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": true,
+                "Async Capable": false,
+                "Startup Cost": 4225.0,
+                "Total Cost": 4225.0,
+                "Plan Rows": 62500,
+                "Plan Width": 8,
+                "Disabled": false,
+                "Plans": [
+                 {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": true,
+                  "Async Capable": false,
+                  "Relation Name": "customer",
+                  "Alias": "c",
+                  "Startup Cost": 0.0,
+                  "Total Cost": 4225.0,
+                  "Plan Rows": 62500,
+                  "Plan Width": 8,
+                  "Disabled": false
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "Node Type": "Aggregate",
+      "Strategy": "Plain",
+      "Partial Mode": "Simple",
+      "Parent Relationship": "InitPlan",
+      "Subplan Name": "InitPlan 2",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 0.56,
+      "Total Cost": 0.57,
+      "Plan Rows": 1,
+      "Plan Width": 32,
+      "Disabled": false,
+      "Plans": [
+       {
+        "Node Type": "CTE Scan",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "CTE Name": "nation_revenue",
+        "Alias": "nation_revenue",
+        "Startup Cost": 0.0,
+        "Total Cost": 0.5,
+        "Plan Rows": 25,
+        "Plan Width": 32,
+        "Disabled": false
+       }
+      ]
+     },
+     {
+      "Node Type": "Seq Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Relation Name": "nation",
+      "Alias": "n",
+      "Startup Cost": 0.0,
+      "Total Cost": 1.25,
+      "Plan Rows": 25,
+      "Plan Width": 30,
+      "Disabled": false
+     },
+     {
+      "Node Type": "Hash",
+      "Parent Relationship": "Inner",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 0.56,
+      "Total Cost": 0.56,
+      "Plan Rows": 8,
+      "Plan Width": 36,
+      "Disabled": false,
+      "Plans": [
+       {
+        "Node Type": "CTE Scan",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "CTE Name": "nation_revenue",
+        "Alias": "nr",
+        "Startup Cost": 0.0,
+        "Total Cost": 0.56,
+        "Plan Rows": 8,
+        "Plan Width": 36,
+        "Disabled": false,
+        "Filter": "(revenue > (InitPlan 2).col1)"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Hash Cond": "(n.n_nationkey = nr.c_nationkey)"
+  },
+  "keys": [],
+  "extra": {},
+  "cost": 42230.48,
+  "rows": 8,
+  "children": [
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "c.c_nationkey"
+    ],
+    "extra": {
+     "Strategy": "Sorted",
+     "Partial Mode": "Finalize",
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "CTE nation_revenue"
+    },
+    "cost": 42227.82,
+    "rows": 25,
+    "children": [
+     {
+      "node_type": "Gather Merge",
+      "raw_type": "Gather Merge",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 42227.05,
+      "rows": 60,
+      "children": [
+       {
+        "node_type": "Sort",
+        "raw_type": "Sort",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [
+         "c.c_nationkey"
+        ],
+        "extra": {
+         "Parent Relationship": "Outer"
+        },
+        "cost": 41220.1,
+        "rows": 25,
+        "children": [
+         {
+          "node_type": "Aggregate",
+          "raw_type": "Aggregate",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [
+           "c.c_nationkey"
+          ],
+          "extra": {
+           "Strategy": "Hashed",
+           "Partial Mode": "Partial",
+           "Parent Relationship": "Outer"
+          },
+          "cost": 41219.46,
+          "rows": 25,
+          "children": [
+           {
+            "node_type": "Hash Join",
+            "raw_type": "Hash Join",
+            "relation": null,
+            "index_name": null,
+            "join_type": "Inner",
+            "conditions": {
+             "Hash Cond": "(o.o_custkey = c.c_custkey)"
+            },
+            "keys": [],
+            "extra": {
+             "Parent Relationship": "Outer"
+            },
+            "cost": 40753.65,
+            "rows": 93100,
+            "children": [
+             {
+              "node_type": "Seq Scan",
+              "raw_type": "Seq Scan",
+              "relation": "orders",
+              "index_name": null,
+              "join_type": null,
+              "conditions": {
+               "Filter": "((o_orderdate >= '1993-01-01'::date) AND (o_orderdate < '1994-01-01'::date))"
+              },
+              "keys": [],
+              "extra": {
+               "Parent Relationship": "Outer",
+               "Alias": "o"
+              },
+              "cost": 35503.0,
+              "rows": 93100,
+              "children": [],
+              "source": "postgres"
+             },
+             {
+              "node_type": "Hash",
+              "raw_type": "Hash",
+              "relation": null,
+              "index_name": null,
+              "join_type": null,
+              "conditions": {},
+              "keys": [],
+              "extra": {
+               "Parent Relationship": "Inner"
+              },
+              "cost": 4225.0,
+              "rows": 62500,
+              "children": [
+               {
+                "node_type": "Seq Scan",
+                "raw_type": "Seq Scan",
+                "relation": "customer",
+                "index_name": null,
+                "join_type": null,
+                "conditions": {},
+                "keys": [],
+                "extra": {
+                 "Parent Relationship": "Outer",
+                 "Alias": "c"
+                },
+                "cost": 4225.0,
+                "rows": 62500,
+                "children": [],
+                "source": "postgres"
+               }
+              ],
+              "source": "postgres"
+             }
+            ],
+            "source": "postgres"
+           }
+          ],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Strategy": "Plain",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "InitPlan 2"
+    },
+    "cost": 0.57,
+    "rows": 1,
+    "children": [
+     {
+      "node_type": "CTE Scan",
+      "raw_type": "CTE Scan",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer",
+       "CTE Name": "nation_revenue",
+       "Alias": "nation_revenue"
+      },
+      "cost": 0.5,
+      "rows": 25,
+      "children": [],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "nation",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Alias": "n"
+    },
+    "cost": 1.25,
+    "rows": 25,
+    "children": [],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Inner"
+    },
+    "cost": 0.56,
+    "rows": 8,
+    "children": [
+     {
+      "node_type": "CTE Scan",
+      "raw_type": "CTE Scan",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "(revenue > (InitPlan 2).col1)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer",
+       "CTE Name": "nation_revenue",
+       "Alias": "nr"
+      },
+      "cost": 0.56,
+      "rows": 8,
+      "children": [],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Hash Join\",\n  \"join_type\": \"Inner\",\n  \"conditions\": {\n    \"Hash Cond\": \"n.n_nationkey = nr.c_nationkey\"\n  },\n  \"estimated_rows\": 8,\n  \"reason\": \"Joining the aggregated nation revenue with the nation table, filtering by the subquery average.\",\n  \"children\": [\n    {\n      \"node_type\": \"Subquery Scan\",\n      \"relation\": null,\n      \"conditions\": {\n        \"Filter\": \"nr.revenue > (InitPlan 1)\"\n      },\n      \"estimated_rows\": 8,\n      \"reason\": \"Scanning the CTE result and applying the filter based on the scalar subquery.\",\n      \"children\": [\n        {\n          \"node_type\": \"Aggregate\",\n          \"strategy\": \"Hashed\",\n          \"keys\": [\n            \"c.c_nationkey\"\n          ],\n          \"estimated_rows\": 25,\n          \"reason\": \"Aggregating revenue by nation key for the CTE.\",\n          \"children\": [\n            {\n              \"node_type\": \"Hash Join\",\n              \"join_type\": \"Inner\",\n              \"conditions\": {\n                \"Hash Cond\": \"o.o_custkey = c.c_custkey\"\n              },\n              \"estimated_rows\": 214285,\n              \"reason\": \"Joining customer and orders to calculate revenue.\",\n              \"children\": [\n                {\n                  \"node_type\": \"Seq Scan\",\n                  \"relation\": \"customer\",\n                  \"estimated_rows\": 150000,\n                  \"reason\": \"Scanning customer table.\",\n                  \"children\": []\n                },\n                {\n                  \"node_type\": \"Hash\",\n                  \"estimated_rows\": 214285,\n                  \"reason\": \"Hashing orders for join.\",\n                  \"children\": [\n                    {\n                      \"node_type\": \"Seq Scan\",\n                      \"relation\": \"orders\",\n                      \"conditions\": {\n                        \"Filter\": \"o_orderdate >= '1993-01-01'::date AND o_orderdate < '1994-01-01'::date\"\n                      },\n                      \"estimated_rows\": 214285,\n                      \"reason\": \"Scanning orders with date filter.\",\n                      \"children\": []\n                    }\n                  ]\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"node_type\": \"Hash\",\n      \"estimated_rows\": 25,\n      \"reason\": \"Hashing nation table for join.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"nation\",\n          \"estimated_rows\": 25,\n          \"reason\": \"Scanning nation table.\",\n          \"children\": []\n        }\n      ]\n    }\n  ],\n  \"children_plans\": [\n    {\n      \"node_type\": \"Aggregate\",\n      \"strategy\": \"Plain\",\n      \"parent_relationship\": \"InitPlan\",\n      \"estimated_rows\": 1,\n      \"reason\": \"Calculating the average revenue across all nations for the filter.\",\n      \"children\": [\n        {\n          \"node_type\": \"CTE Scan\",\n          \"relation\": \"nation_revenue\",\n          \"estimated_rows\": 25,\n          \"reason\": \"Reading CTE result to compute average.\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Hash Cond": "n.n_nationkey = nr.c_nationkey"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "Joining the aggregated nation revenue with the nation table, filtering by the subquery average.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 8.0,
+  "children": [
+   {
+    "node_type": "Subquery Scan",
+    "raw_type": "Subquery Scan",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "nr.revenue > (InitPlan 1)"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Scanning the CTE result and applying the filter based on the scalar subquery."
+    },
+    "cost": null,
+    "rows": 8.0,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "c.c_nationkey"
+      ],
+      "extra": {
+       "Strategy": "Hashed",
+       "AI Reason": "Aggregating revenue by nation key for the CTE."
+      },
+      "cost": null,
+      "rows": 25.0,
+      "children": [
+       {
+        "node_type": "Hash Join",
+        "raw_type": "Hash Join",
+        "relation": null,
+        "index_name": null,
+        "join_type": "Inner",
+        "conditions": {
+         "Hash Cond": "o.o_custkey = c.c_custkey"
+        },
+        "keys": [],
+        "extra": {
+         "AI Reason": "Joining customer and orders to calculate revenue."
+        },
+        "cost": null,
+        "rows": 214285.0,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "customer",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Scanning customer table."
+          },
+          "cost": null,
+          "rows": 150000.0,
+          "children": [],
+          "source": "ai"
+         },
+         {
+          "node_type": "Hash",
+          "raw_type": "Hash",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Hashing orders for join."
+          },
+          "cost": null,
+          "rows": 214285.0,
+          "children": [
+           {
+            "node_type": "Seq Scan",
+            "raw_type": "Seq Scan",
+            "relation": "orders",
+            "index_name": null,
+            "join_type": null,
+            "conditions": {
+             "Filter": "o_orderdate >= '1993-01-01'::date AND o_orderdate < '1994-01-01'::date"
+            },
+            "keys": [],
+            "extra": {
+             "AI Reason": "Scanning orders with date filter."
+            },
+            "cost": null,
+            "rows": 214285.0,
+            "children": [],
+            "source": "ai"
+           }
+          ],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "Hashing nation table for join."
+    },
+    "cost": null,
+    "rows": 25.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "nation",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Scanning nation table."
+      },
+      "cost": null,
+      "rows": 25.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.4783,
+   "ted_rate": 0.4783,
+   "pg_nodes": 14,
+   "ai_nodes": 9,
+   "matched_pairs": 8,
+   "identical_pairs": 4,
+   "changed_pairs": 4,
+   "postgres_only_nodes": 6,
+   "ai_only_nodes": 1,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 0.3333,
+   "median_q_error": 1.0,
+   "max_q_error": 3.12
+  },
+  "join_order": {
+   "postgres": "HJ(nation, CTE Scan)[HJ(orders, customer), CTE Scan]",
+   "ai": "HJ(HJ(customer, orders), nation)"
+  },
+  "differences": [
+   {
+    "category": "Tables",
+    "text": "Only the PostgreSQL plan reads table cte scan. The AI plan cannot produce the full result without it.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Subquery",
+    "text": "PostgreSQL evaluates the subquery over (orders, customer) as a separate InitPlan (computed once) used by Hash Join of (nation) with (CTE Scan), while the AI turns it into a Hash Join (Hash Join of (customer) with (orders)).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Subquery",
+    "text": "PostgreSQL evaluates the subquery over (CTE Scan) as a separate InitPlan (computed once) used by Hash Join of (nation) with (CTE Scan).",
+    "pg_path": "0.1",
+    "ai_path": null
+   },
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Conditions",
+    "text": "These conditions appear in the PostgreSQL plan but nowhere in the AI plan: o_custkey = c_custkey; revenue > initplan 2 .col1.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Conditions",
+    "text": "These conditions appear in the AI plan but nowhere in the PostgreSQL plan: revenue > initplan 1.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Join inputs",
+    "text": "Hash Join: PostgreSQL joins (nation) with (CTE Scan). The AI joins (customer, orders) with (nation).",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Join input order",
+    "text": "Hash Join of (orders, customer): PostgreSQL hashes (customer). The AI hashes (orders). PostgreSQL usually hashes the smaller input.",
+    "pg_path": "0.0.0.0.0.0",
+    "ai_path": "0.0.0.0"
+   },
+   {
+    "category": "Join inputs",
+    "text": "Hash: PostgreSQL applies it to (customer), the AI to (orders).",
+    "pg_path": "0.0.0.0.0.0.1",
+    "ai_path": "0.0.0.0.1"
+   },
+   {
+    "category": "Join inputs",
+    "text": "Hash: PostgreSQL applies it to (CTE Scan), the AI to (nation).",
+    "pg_path": "0.3",
+    "ai_path": "0.1"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Sorted, Finalize) over (orders, customer) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (orders, customer) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Sort over (orders, customer) (sorts its input).",
+    "pg_path": "0.0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Plain) over (CTE Scan) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.1",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has CTE Scan over (CTE Scan) (reads the result of a WITH query).",
+    "pg_path": "0.1.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has CTE Scan over (CTE Scan) (reads the result of a WITH query).",
+    "pg_path": "0.3.0",
+    "ai_path": null
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Subquery Scan over (customer, orders) (reads the result of a subquery). The AI's reason: \"Scanning the CTE result and applying the filter based on the scalar subquery.\"",
+    "pg_path": null,
+    "ai_path": "0.0"
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on orders.",
+   "Both plans use Seq Scan on customer.",
+   "Both plans use Seq Scan on nation."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Hash Join: PostgreSQL joins (nation) with (CTE Scan). The AI joins (customer, orders) with (nation)."
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Sorted, Finalize) over (orders, customer) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (orders, customer) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Sort over (orders, customer) (sorts its input)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0",
+    "ai_path": "0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0",
+    "ai_path": "0.0.0.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Hash Join of (orders, customer): PostgreSQL hashes (customer). The AI hashes (orders). PostgreSQL usually hashes the smaller input."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0",
+    "ai_path": "0.0.0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.1",
+    "ai_path": "0.0.0.0.1",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Hash: PostgreSQL applies it to (customer), the AI to (orders)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.1.0",
+    "ai_path": "0.0.0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Plain) over (CTE Scan) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.1.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has CTE Scan over (CTE Scan) (reads the result of a WITH query)."
+    ]
+   },
+   {
+    "pg_path": "0.2",
+    "ai_path": "0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.3",
+    "ai_path": "0.1",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Hash: PostgreSQL applies it to (CTE Scan), the AI to (nation)."
+    ]
+   },
+   {
+    "pg_path": "0.3.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has CTE Scan over (CTE Scan) (reads the result of a WITH query)."
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Subquery Scan over (customer, orders) (reads the result of a subquery). The AI's reason: \"Scanning the CTE result and applying the filter based on the scalar subquery.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "postgres_only",
+    "0.0.0.0.0": "same",
+    "0.0.0.0.0.0": "changed",
+    "0.0.0.0.0.0.0": "same",
+    "0.0.0.0.0.0.1": "changed",
+    "0.0.0.0.0.0.1.0": "same",
+    "0.1": "postgres_only",
+    "0.1.0": "postgres_only",
+    "0.2": "same",
+    "0.3": "changed",
+    "0.3.0": "postgres_only"
+   },
+   "ai": {
+    "0": "changed",
+    "0.0.0": "same",
+    "0.0.0.0": "changed",
+    "0.0.0.0.1.0": "same",
+    "0.0.0.0.1": "changed",
+    "0.0.0.0.0": "same",
+    "0.1.0": "same",
+    "0.1": "changed",
+    "0.0": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 48% (tree edit distance rate: 48%). 4 of 14 PostgreSQL nodes have an identical counterpart in the AI plan's 9 nodes.\n\nPostgreSQL join order: HJ(nation, CTE Scan)[HJ(orders, customer), CTE Scan]\nAI join order:         HJ(HJ(customer, orders), nation)\n\nDIFFERENCES\n1. [Tables] Only the PostgreSQL plan reads table cte scan. The AI plan cannot produce the full result without it.\n2. [Subquery] PostgreSQL evaluates the subquery over (orders, customer) as a separate InitPlan (computed once) used by Hash Join of (nation) with (CTE Scan), while the AI turns it into a Hash Join (Hash Join of (customer) with (orders)).\n3. [Subquery] PostgreSQL evaluates the subquery over (CTE Scan) as a separate InitPlan (computed once) used by Hash Join of (nation) with (CTE Scan).\n4. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.\n5. [Conditions] These conditions appear in the PostgreSQL plan but nowhere in the AI plan: o_custkey = c_custkey; revenue > initplan 2 .col1.\n6. [Conditions] These conditions appear in the AI plan but nowhere in the PostgreSQL plan: revenue > initplan 1.\n7. [Join inputs] Hash Join: PostgreSQL joins (nation) with (CTE Scan). The AI joins (customer, orders) with (nation).\n8. [Join input order] Hash Join of (orders, customer): PostgreSQL hashes (customer). The AI hashes (orders). PostgreSQL usually hashes the smaller input.\n9. [Join inputs] Hash: PostgreSQL applies it to (customer), the AI to (orders).\n10. [Join inputs] Hash: PostgreSQL applies it to (CTE Scan), the AI to (nation).\n11. [Missing operator] Only the PostgreSQL plan has Aggregate (Sorted, Finalize) over (orders, customer) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n12. [Missing operator] Only the PostgreSQL plan has Gather Merge over (orders, customer) (collects sorted rows from parallel workers, keeping the order).\n13. [Missing operator] Only the PostgreSQL plan has Sort over (orders, customer) (sorts its input).\n14. [Missing operator] Only the PostgreSQL plan has Aggregate (Plain) over (CTE Scan) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n15. [Missing operator] Only the PostgreSQL plan has CTE Scan over (CTE Scan) (reads the result of a WITH query).\n16. [Missing operator] Only the PostgreSQL plan has CTE Scan over (CTE Scan) (reads the result of a WITH query).\n17. [Extra operator] Only the AI plan has Subquery Scan over (customer, orders) (reads the result of a subquery). The AI's reason: \"Scanning the CTE result and applying the filter based on the scalar subquery.\"\n\nSIMILARITIES\n- Both plans use Seq Scan on orders.\n- Both plans use Seq Scan on customer.\n- Both plans use Seq Scan on nation.",
+ "timings": {
+  "postgres": 0.008,
+  "ai": 2.834,
+  "comparison": 0.004
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.4783,
+  "ted_rate": 0.4783,
+  "pg_nodes": 14,
+  "ai_nodes": 9,
+  "identical_pairs": 4,
+  "changed_pairs": 4,
+  "postgres_only_nodes": 6,
+  "ai_only_nodes": 1,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 0.3333,
+  "median_q_error": 1.0,
+  "max_q_error": 3.12
+ },
+ "difference_categories": [
+  "Tables",
+  "Subquery",
+  "Subquery",
+  "Parallelism",
+  "Conditions",
+  "Conditions",
+  "Join inputs",
+  "Join input order",
+  "Join inputs",
+  "Join inputs",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.4783,
+   0.4783,
+   0.4783
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

@@ -1,0 +1,200 @@
+{
+ "id": "E2",
+ "category": "E. Sorting / Top-N",
+ "purpose": "ORDER BY the primary key descending plus LIMIT (backward Index Scan, no Sort)",
+ "sql": "SELECT o_orderkey, o_orderdate\nFROM orders\nORDER BY o_orderkey DESC\nLIMIT 5",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Limit",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 0.43,
+    "Total Cost": 0.64,
+    "Plan Rows": 5,
+    "Plan Width": 8,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Index Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Scan Direction": "Backward",
+      "Index Name": "orders_pkey",
+      "Relation Name": "orders",
+      "Alias": "orders",
+      "Startup Cost": 0.43,
+      "Total Cost": 65098.04,
+      "Plan Rows": 1500000,
+      "Plan Width": 8,
+      "Disabled": false
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 0.64,
+  "rows": 5,
+  "children": [
+   {
+    "node_type": "Index Scan",
+    "raw_type": "Index Scan",
+    "relation": "orders",
+    "index_name": "orders_pkey",
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Scan Direction": "Backward",
+     "Alias": "orders"
+    },
+    "cost": 65098.04,
+    "rows": 1500000,
+    "children": [],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Limit\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 5,\n  \"parent_relationship\": null,\n  \"reason\": \"The query requests a limited number of rows ordered by the primary key in descending order.\",\n  \"children\": [\n    {\n      \"node_type\": \"Index Scan\",\n      \"relation\": \"orders\",\n      \"index_name\": \"orders_pkey\",\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {\n        \"Filter\": {}\n      },\n      \"keys\": [\n        \"o_orderkey DESC\"\n      ],\n      \"estimated_rows\": 5,\n      \"parent_relationship\": null,\n      \"reason\": \"The primary key index is already sorted, allowing an efficient reverse scan to satisfy the ORDER BY clause.\",\n      \"children\": []\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query requests a limited number of rows ordered by the primary key in descending order.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 5.0,
+  "children": [
+   {
+    "node_type": "Index Scan",
+    "raw_type": "Index Scan",
+    "relation": "orders",
+    "index_name": "orders_pkey",
+    "join_type": null,
+    "conditions": {
+     "Filter": "{}"
+    },
+    "keys": [
+     "o_orderkey DESC"
+    ],
+    "extra": {
+     "AI Reason": "The primary key index is already sorted, allowing an efficient reverse scan to satisfy the ORDER BY clause."
+    },
+    "cost": null,
+    "rows": 5.0,
+    "children": [],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.0,
+   "ted_rate": 0.0,
+   "pg_nodes": 2,
+   "ai_nodes": 2,
+   "matched_pairs": 2,
+   "identical_pairs": 2,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "orders",
+   "ai": "orders"
+  },
+  "differences": [],
+  "similarities": [
+   "The plans are identical.",
+   "Both plans use Index Scan on orders using orders_pkey."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same"
+   }
+  }
+ },
+ "explanation": "The two plans are identical in structure, operators and details.\n\nPostgreSQL join order: orders\nAI join order:         orders\n\nSIMILARITIES\n- The plans are identical.\n- Both plans use Index Scan on orders using orders_pkey.",
+ "timings": {
+  "postgres": 0.001,
+  "ai": 1.362,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.0,
+  "ted_rate": 0.0,
+  "pg_nodes": 2,
+  "ai_nodes": 2,
+  "identical_pairs": 2,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

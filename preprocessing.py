@@ -143,7 +143,8 @@ def get_schema_text(conn, schemas=("public",)) -> str:
 # ---------------------------------------------------------------------------
 _COND_KEYS = ["Index Cond", "Recheck Cond", "Filter", "Hash Cond",
               "Merge Cond", "Join Filter"]
-_EXTRA_KEYS = ["Strategy", "Partial Mode", "Parent Relationship", "Scan Direction"]
+_EXTRA_KEYS = ["Strategy", "Partial Mode", "Parent Relationship", "Scan Direction",
+               "Subplan Name", "CTE Name", "Alias", "Function Name"]   # last four: display only
 
 
 def _pg_node(p: dict) -> PlanNode:
@@ -313,12 +314,22 @@ def get_catalog_names(conn, schemas=("public",)) -> Tuple[Set[str], Set[str]]:
 # --- a. Prompt --------------------------------------------------------------
 PG_OPERATORS = [
     "Seq Scan", "Index Scan", "Index Only Scan", "Bitmap Heap Scan", "Bitmap Index Scan",
-    "Subquery Scan", "CTE Scan", "Function Scan", "Values Scan",
+    "BitmapAnd", "BitmapOr",
+    "Subquery Scan", "CTE Scan", "Function Scan", "Values Scan", "WorkTable Scan",
     "Nested Loop", "Hash Join", "Merge Join", "Hash",
     "Sort", "Incremental Sort", "Aggregate", "WindowAgg", "Unique", "SetOp",
     "Gather", "Gather Merge", "Limit", "Materialize", "Memoize",
-    "Append", "Merge Append", "Result",
+    "Append", "Merge Append", "Recursive Union", "ProjectSet", "Result",
 ]
+
+# Every node type PostgreSQL's EXPLAIN can print for a query. An AI answer that
+# already uses one of these names is taken as it is, before any fuzzy matching
+# (otherwise e.g. "WorkTable Scan" would be read as a table scan, i.e. Seq Scan).
+PG_NODE_TYPES = set(PG_OPERATORS) | {
+    "Tid Scan", "Tid Range Scan", "Sample Scan", "Foreign Scan", "Custom Scan",
+    "Table Function Scan", "Named Tuplestore Scan", "Group", "LockRows", "ModifyTable",
+}
+_PG_NODE_TYPES_LOWER = {t.lower(): t for t in PG_NODE_TYPES}
 
 AI_SYSTEM_PROMPT = """You are the cost-based query optimizer of PostgreSQL 18. Given \
 a database schema, the optimizer statistics and an SQL query, output the query \
@@ -339,6 +350,8 @@ before or after it.
 "Recheck Cond", "Hash Cond", "Merge Cond" and "Join Filter"; {} if none
   "keys":       list of group by or sort keys, [] if none
   "estimated_rows": estimated number of rows this node outputs (its cardinality)
+  "parent_relationship": "InitPlan" or "SubPlan" for the root of a subquery plan (see \
+below), otherwise null
   "reason":     one short sentence explaining why the optimizer chooses this operator
   "children":   list of input nodes, [] for leaf nodes
 
@@ -363,6 +376,11 @@ first child is the probe relation.
 - A Bitmap Heap Scan reads the rows found by its Bitmap Index Scan child.
 - A parallel plan puts Gather or Gather Merge above the part that runs in parallel workers.
 - A Merge Join needs both inputs sorted on the join key.
+- A subquery that is not turned into a join (for example a scalar subquery, a NOT IN \
+subquery, or a WITH query read by a "CTE Scan") is a separate subquery plan. Put its \
+tree in the "children" of the node that uses its result, after that node's normal \
+inputs, and set "parent_relationship" on the subquery's root: "InitPlan" if it is \
+computed once, "SubPlan" if it is re-run for each outer row.
 
 Use only the tables, columns and indexes in the schema (an index scan is impossible \
 without a matching index). Choose the join order, access methods and join algorithms \
@@ -479,7 +497,7 @@ _TYPE_RULES = [
     (r"bitmap|multi.?index", "Bitmap Heap Scan"),
     (r"index only", "Index Only Scan"),
     (r"index", "Index Scan"),
-    (r"\bseq|sequential|full table|table scan|full scan|\bfts\b", "Seq Scan"),
+    (r"\bseq|sequential|full table|table scan|full scan|\bfts\b|table access", "Seq Scan"),
     (r"subquery", "Subquery Scan"),
     (r"\bcte\b", "CTE Scan"),
     (r"function scan", "Function Scan"),
@@ -501,8 +519,21 @@ _TYPE_RULES = [
     (r"result", "Result"),
 ]
 _JOIN_TYPES = {"Nested Loop", "Hash Join", "Merge Join"}
+# Number of real inputs of operators with a fixed number of inputs. Any further
+# child of such a node must be a subquery plan (InitPlan / SubPlan).
+_INPUT_COUNT = {
+    **{t: 0 for t in ("Seq Scan", "Index Scan", "Index Only Scan", "CTE Scan", "Function Scan",
+                      "Values Scan", "WorkTable Scan", "Tid Scan", "Bitmap Index Scan")},
+    **{t: 1 for t in ("Hash", "Sort", "Incremental Sort", "Aggregate", "Group", "WindowAgg",
+                      "Unique", "Limit", "Gather", "Gather Merge", "Materialize", "Memoize",
+                      "Subquery Scan", "LockRows", "ProjectSet", "Bitmap Heap Scan")},
+    **{t: 2 for t in ("Nested Loop", "Hash Join", "Merge Join")},
+}
 _SCAN_TYPES = {"Seq Scan", "Index Scan", "Index Only Scan", "Bitmap Heap Scan",
                "Bitmap Index Scan"}
+# Operators that read a stored table, i.e. the only ones with a "relation".
+_TABLE_SCANS = (_SCAN_TYPES - {"Bitmap Index Scan"}) | {"Tid Scan", "Tid Range Scan",
+                                                       "Sample Scan", "Foreign Scan"}
 # Operators PostgreSQL never shows as separate nodes; with one input they are
 # folded into that input instead of becoming an extra node.
 _FOLD_RE = re.compile(r"project|compute scalar|^filter$|^selection$|^select$")
@@ -520,6 +551,8 @@ _ALIASES = {  # normalized field name -> PlanNode field
     "estimated rows": "rows", "rows": "rows", "plan rows": "rows",
     "cardinality": "rows", "estimated cardinality": "rows",
     "reason": "reason", "explanation": "reason", "description": "reason",
+    "parent relationship": "parent", "relationship": "parent", "subplan": "parent",
+    "subplan type": "parent", "subquery type": "parent",
     "children": "children", "plans": "children", "inputs": "children",
     "id": "id", "step": "id", "node id": "id",
 }
@@ -578,6 +611,9 @@ def canonical_node_type(name: str) -> Optional[str]:
     # A hash join written as two steps, e.g. "Hash Join (Build Phase)" and
     # "Hash Join (Probe Phase)": the build phase is PostgreSQL's Hash node.
     full = _norm_key(name)
+    exact = _PG_NODE_TYPES_LOWER.get(re.sub(r"\s+", " ", str(name)).strip().lower())
+    if exact:
+        return exact
     if re.search(r"\bbuild", full):
         return "Hash"
     if re.search(r"\bprobe", full):
@@ -687,7 +723,9 @@ class _AIPlanBuilder:
         children = [self._node(c, depth + 1) for c in _as_list(f.get("children"))]
 
         # Projection / filter steps are part of other nodes in PostgreSQL.
-        if len(children) == 1 and _FOLD_RE.search(_norm_key(raw_type)):
+        # (A real PostgreSQL operator such as ProjectSet is never folded.)
+        if len(children) == 1 and _FOLD_RE.search(_norm_key(raw_type)) \
+                and raw_type.lower() not in _PG_NODE_TYPES_LOWER:
             child = children[0]
             for label, expr in f["conditions"].items():
                 child.conditions.setdefault(label, expr)
@@ -703,16 +741,42 @@ class _AIPlanBuilder:
         if pg_type is None:
             warnings.append(f"'{raw_type}' is not a PostgreSQL operator")
 
+        self._mark_unlabelled_subplans(node)
         self._set_relation(node, f, warnings)
         self._set_join_and_strategy(node, f, raw_type, warnings)
         if f.get("reason"):
             node.extra["AI Reason"] = str(f["reason"])
+        parent = re.sub(r"[\s_-]+", "", str(f.get("parent") or "")).lower()
+        if parent in ("initplan", "subplan"):
+            node.extra["Parent Relationship"] = "InitPlan" if parent == "initplan" else "SubPlan"
         if warnings:
             node.extra["Warning"] = "; ".join(warnings)
         return node
 
+    @staticmethod
+    def _mark_unlabelled_subplans(node: PlanNode) -> None:
+        """An operator with more children than it has inputs (a Sort with two
+        children, a Seq Scan with one) can only have subquery plans as the extra
+        children. When the AI forgot "parent_relationship", label them, keeping
+        the first children as the inputs (the order the prompt asks for)."""
+        inputs = _INPUT_COUNT.get(node.node_type)
+        if inputs is None:
+            return
+        free = [c for c in node.children
+                if c.extra.get("Parent Relationship") not in ("InitPlan", "SubPlan")]
+        for extra in free[inputs:]:
+            extra.extra["Parent Relationship"] = "SubPlan"
+            extra.extra.setdefault("Note", "extra child of a one-input operator, "
+                                           "treated as a subquery plan")
+
     def _set_relation(self, node: PlanNode, f: Dict[str, Any], warnings: List[str]):
         relation = _clean_relation(f.get("relation"))
+        if relation and node.node_type in PG_NODE_TYPES and node.node_type not in _TABLE_SCANS:
+            # e.g. the name of the WITH query a CTE Scan reads, or the table under a
+            # Hash. PostgreSQL gives these operators no relation, so keep the name
+            # only as a label; it is not a table and must not be checked as one.
+            node.extra["Name"] = str(f.get("relation"))
+            relation = None
         if relation and self.tables:
             known = _match_name(relation, self.tables)
             if known is None:
@@ -744,15 +808,19 @@ class _AIPlanBuilder:
                 found = re.search(r"\b(left|right|full|semi|anti)\b", name)
                 join_type = found.group(1) if found else "Inner"
             node.join_type = str(join_type).strip().title()
-            if len(node.children) != 2:
-                warnings.append(f"a join needs 2 inputs, the AI gave {len(node.children)}")
-            elif node.node_type == "Hash Join" and node.children[1].node_type != "Hash":
+            # Subquery plans hanging off the join are not join inputs.
+            inputs = [i for i, c in enumerate(node.children)
+                      if c.extra.get("Parent Relationship") not in ("InitPlan", "SubPlan")]
+            if len(inputs) != 2:
+                warnings.append(f"a join needs 2 inputs, the AI gave {len(inputs)}")
+            elif node.node_type == "Hash Join" and node.children[inputs[1]].node_type != "Hash":
                 # PostgreSQL always builds the hash table in a Hash node; add it so
                 # the two plans differ only in real decisions, not in notation.
-                node.children[1] = PlanNode(
+                inner = node.children[inputs[1]]
+                node.children[inputs[1]] = PlanNode(
                     node_type="Hash", raw_type="(added)", source="ai",
                     extra={"Note": "Hash node added during normalisation"},
-                    children=[node.children[1]])
+                    children=[inner])
 
         if node.node_type in ("Aggregate", "SetOp"):
             strategy = f.get("strategy")
@@ -765,6 +833,10 @@ class _AIPlanBuilder:
                     strategy = "Plain"
             if strategy:
                 node.extra["Strategy"] = str(strategy).strip().title()
+            # "Partial HashAggregate" / "Finalize Aggregate": two-phase parallel aggregation
+            phase = re.search(r"\b(partial|finalize)\b", name)
+            if phase and node.node_type == "Aggregate":
+                node.extra["Partial Mode"] = phase.group(1).title()
 
 
 def _extract_json(text: str) -> Any:

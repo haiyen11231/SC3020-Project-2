@@ -38,8 +38,14 @@ AI plans can have these extra keys in `extra`:
 | `Warning` | Something wrong with the AI's node: a table or index that does not exist, an unknown operator, a join without 2 inputs |
 | `Note` | Set on a `Hash` node that normalization added, because the AI wrote a Hash Join without one (`raw_type` is `(added)`) |
 | `Folded` | The AI wrote a separate Projection or Filter step; it was merged into this node, as PostgreSQL does |
+| `Parent Relationship` | `InitPlan` or `SubPlan` on the root of a subquery plan, as in PostgreSQL's EXPLAIN. The AI is asked to set it; if it forgets, an extra child of a one-input operator (a Sort with two children, say) is labelled `SubPlan` automatically |
+| `Partial Mode` | `Partial` / `Finalize` when the AI writes a two-phase parallel aggregate such as `Partial HashAggregate` |
+| `Name` | A name the AI gave to an operator that reads no stored table, e.g. the WITH query of a `CTE Scan`. It is kept as a label only, so it is never reported as an invented table |
 
 ## How to use it
+
+The main program wires everything together in `project.Session`; see `integration.md` for how the GUI uses it.
+
 
 ```python
 from preprocessing import DBConfig, connect, get_postgres_plan, get_schema_text, print_tree

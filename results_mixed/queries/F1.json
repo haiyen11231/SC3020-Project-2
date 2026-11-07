@@ -1,0 +1,452 @@
+{
+ "id": "F1",
+ "category": "F. Subquery",
+ "purpose": "Uncorrelated IN subquery (expected: unnested into a semi join)",
+ "sql": "SELECT c_custkey, c_name\nFROM customer\nWHERE c_custkey IN (SELECT o_custkey FROM orders WHERE o_totalprice > 500000)",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Nested Loop",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Join Type": "Inner",
+    "Startup Cost": 34956.29,
+    "Total Cost": 36119.01,
+    "Plan Rows": 150,
+    "Plan Width": 23,
+    "Disabled": false,
+    "Inner Unique": true,
+    "Plans": [
+     {
+      "Node Type": "Aggregate",
+      "Strategy": "Hashed",
+      "Partial Mode": "Simple",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 34955.88,
+      "Total Cost": 34957.38,
+      "Plan Rows": 150,
+      "Plan Width": 4,
+      "Disabled": false,
+      "Group Key": [
+       "orders.o_custkey"
+      ],
+      "Planned Partitions": 0,
+      "Plans": [
+       {
+        "Node Type": "Gather",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 1000.0,
+        "Total Cost": 34955.5,
+        "Plan Rows": 150,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Workers Planned": 2,
+        "Single Copy": false,
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": true,
+          "Async Capable": false,
+          "Relation Name": "orders",
+          "Alias": "orders",
+          "Startup Cost": 0.0,
+          "Total Cost": 33940.5,
+          "Plan Rows": 62,
+          "Plan Width": 4,
+          "Disabled": false,
+          "Filter": "(o_totalprice > '500000'::numeric)"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "Node Type": "Index Scan",
+      "Parent Relationship": "Inner",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Scan Direction": "Forward",
+      "Index Name": "customer_pkey",
+      "Relation Name": "customer",
+      "Alias": "customer",
+      "Startup Cost": 0.42,
+      "Total Cost": 7.74,
+      "Plan Rows": 1,
+      "Plan Width": 23,
+      "Disabled": false,
+      "Index Cond": "(c_custkey = orders.o_custkey)"
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Nested Loop",
+  "raw_type": "Nested Loop",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 36119.01,
+  "rows": 150,
+  "children": [
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "orders.o_custkey"
+    ],
+    "extra": {
+     "Strategy": "Hashed",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "Outer"
+    },
+    "cost": 34957.38,
+    "rows": 150,
+    "children": [
+     {
+      "node_type": "Gather",
+      "raw_type": "Gather",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 34955.5,
+      "rows": 150,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "orders",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "(o_totalprice > '500000'::numeric)"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "orders"
+        },
+        "cost": 33940.5,
+        "rows": 62,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Index Scan",
+    "raw_type": "Index Scan",
+    "relation": "customer",
+    "index_name": "customer_pkey",
+    "join_type": null,
+    "conditions": {
+     "Index Cond": "(c_custkey = orders.o_custkey)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Inner",
+     "Scan Direction": "Forward",
+     "Alias": "customer"
+    },
+    "cost": 7.74,
+    "rows": 1,
+    "children": [],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Hash Join\",\n  \"join_type\": \"Semi\",\n  \"conditions\": {\n    \"Hash Cond\": \"customer.c_custkey = orders.o_custkey\"\n  },\n  \"estimated_rows\": 150000,\n  \"reason\": \"The optimizer uses a Hash Semi Join to efficiently filter customers based on the existence of orders meeting the price criteria.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"customer\",\n      \"conditions\": {\n        \"Filter\": null\n      },\n      \"estimated_rows\": 150000,\n      \"reason\": \"Full scan of the customer table is efficient for retrieving all rows.\",\n      \"children\": []\n    },\n    {\n      \"node_type\": \"Hash\",\n      \"estimated_rows\": 1500000,\n      \"reason\": \"Build a hash table on the filtered orders to perform the semi-join.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"orders\",\n          \"conditions\": {\n            \"Filter\": \"o_totalprice > 500000\"\n          },\n          \"estimated_rows\": 1500000,\n          \"reason\": \"Scan orders to find those matching the price condition.\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Semi",
+  "conditions": {
+   "Hash Cond": "customer.c_custkey = orders.o_custkey"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "The optimizer uses a Hash Semi Join to efficiently filter customers based on the existence of orders meeting the price criteria."
+  },
+  "cost": null,
+  "rows": 150000.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "customer",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "Full scan of the customer table is efficient for retrieving all rows."
+    },
+    "cost": null,
+    "rows": 150000.0,
+    "children": [],
+    "source": "ai"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "Build a hash table on the filtered orders to perform the semi-join."
+    },
+    "cost": null,
+    "rows": 1500000.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "orders",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "o_totalprice > 500000"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Scan orders to find those matching the price condition."
+      },
+      "cost": null,
+      "rows": 1500000.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.7778,
+   "ted_rate": 0.6667,
+   "pg_nodes": 5,
+   "ai_nodes": 4,
+   "matched_pairs": 3,
+   "identical_pairs": 1,
+   "changed_pairs": 2,
+   "postgres_only_nodes": 2,
+   "ai_only_nodes": 1,
+   "access_method_agreement": 0.5,
+   "join_algorithm_agreement": 0.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1000.0,
+   "max_q_error": 1000.0
+  },
+  "join_order": {
+   "postgres": "NL(orders, customer)",
+   "ai": "HJ(customer, orders)"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Cardinality estimate",
+    "text": "The largest disagreement on row estimates is at Nested Loop of (orders) with (customer): PostgreSQL estimates 150 rows, the AI 150,000 (factor 1000.0). Row estimates drive operator choice.",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Join algorithm",
+    "text": "The join of (orders, customer): PostgreSQL uses Nested Loop of (orders) with (customer). The AI uses Hash Join of (customer) with (orders). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"The optimizer uses a Hash Semi Join to efficiently filter customers based on the existence of orders meeting the price criteria.\"",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Join input order",
+    "text": "Join of (orders, customer): outer and inner inputs are swapped. PostgreSQL's outer input is (orders).",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Join type",
+    "text": "Join of (orders, customer): PostgreSQL performs an Inner join, the AI a Semi join.",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Access method",
+    "text": "Table customer: PostgreSQL uses Index Scan on customer using customer_pkey. The AI uses Seq Scan on customer. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of the customer table is efficient for retrieving all rows.\"",
+    "pg_path": "0.1",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Hashed) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash over (orders) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Build a hash table on the filtered orders to perform the semi-join.\"",
+    "pg_path": null,
+    "ai_path": "0.1"
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Seq Scan on orders."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "The join of (orders, customer): PostgreSQL uses Nested Loop of (orders) with (customer). The AI uses Hash Join of (customer) with (orders). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"The optimizer uses a Hash Semi Join to efficiently filter customers based on the existence of orders meeting the price criteria.\"",
+     "Join of (orders, customer): outer and inner inputs are swapped. PostgreSQL's outer input is (orders).",
+     "Join of (orders, customer): PostgreSQL performs an Inner join, the AI a Semi join."
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Hashed) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table customer: PostgreSQL uses Index Scan on customer using customer_pkey. The AI uses Seq Scan on customer. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of the customer table is efficient for retrieving all rows.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash over (orders) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Build a hash table on the filtered orders to perform the semi-join.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "same",
+    "0.1": "changed"
+   },
+   "ai": {
+    "0": "changed",
+    "0.1.0": "same",
+    "0.0": "changed",
+    "0.1": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 78% (tree edit distance rate: 67%). 1 of 5 PostgreSQL nodes have an identical counterpart in the AI plan's 4 nodes.\n\nPostgreSQL join order: NL(orders, customer)\nAI join order:         HJ(customer, orders)\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.\n2. [Cardinality estimate] The largest disagreement on row estimates is at Nested Loop of (orders) with (customer): PostgreSQL estimates 150 rows, the AI 150,000 (factor 1000.0). Row estimates drive operator choice.\n3. [Join algorithm] The join of (orders, customer): PostgreSQL uses Nested Loop of (orders) with (customer). The AI uses Hash Join of (customer) with (orders). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"The optimizer uses a Hash Semi Join to efficiently filter customers based on the existence of orders meeting the price criteria.\"\n4. [Join input order] Join of (orders, customer): outer and inner inputs are swapped. PostgreSQL's outer input is (orders).\n5. [Join type] Join of (orders, customer): PostgreSQL performs an Inner join, the AI a Semi join.\n6. [Access method] Table customer: PostgreSQL uses Index Scan on customer using customer_pkey. The AI uses Seq Scan on customer. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of the customer table is efficient for retrieving all rows.\"\n7. [Missing operator] Only the PostgreSQL plan has Aggregate (Hashed) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n8. [Missing operator] Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes).\n9. [Extra operator] Only the AI plan has Hash over (orders) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Build a hash table on the filtered orders to perform the semi-join.\"\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Seq Scan on orders.",
+ "timings": {
+  "postgres": 0.004,
+  "ai": 3.45,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.7778,
+  "ted_rate": 0.6667,
+  "pg_nodes": 5,
+  "ai_nodes": 4,
+  "identical_pairs": 1,
+  "changed_pairs": 2,
+  "postgres_only_nodes": 2,
+  "ai_only_nodes": 1,
+  "access_method_agreement": 0.5,
+  "join_algorithm_agreement": 0.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1000.0,
+  "max_q_error": 1000.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Cardinality estimate",
+  "Join algorithm",
+  "Join input order",
+  "Join type",
+  "Access method",
+  "Missing operator",
+  "Missing operator",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.7778,
+   0.7778,
+   0.7778
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

@@ -1,0 +1,520 @@
+{
+ "id": "F4",
+ "category": "F. Subquery",
+ "purpose": "NOT EXISTS (expected: anti join)",
+ "sql": "SELECT count(*) AS customers_without_orders\nFROM customer c\nWHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.o_custkey = c.c_custkey)",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Finalize",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 42882.55,
+    "Total Cost": 42882.56,
+    "Plan Rows": 1,
+    "Plan Width": 8,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Gather",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 42882.34,
+      "Total Cost": 42882.55,
+      "Plan Rows": 2,
+      "Plan Width": 8,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Single Copy": false,
+      "Plans": [
+       {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Partial Mode": "Partial",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 41882.34,
+        "Total Cost": 41882.35,
+        "Plan Rows": 1,
+        "Plan Width": 8,
+        "Disabled": false,
+        "Plans": [
+         {
+          "Node Type": "Hash Join",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": true,
+          "Async Capable": false,
+          "Join Type": "Right Anti",
+          "Startup Cost": 3822.69,
+          "Total Cost": 41815.39,
+          "Plan Rows": 26778,
+          "Plan Width": 0,
+          "Disabled": false,
+          "Inner Unique": true,
+          "Hash Cond": "(o.o_custkey = c.c_custkey)",
+          "Plans": [
+           {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": true,
+            "Async Capable": false,
+            "Relation Name": "orders",
+            "Alias": "o",
+            "Startup Cost": 0.0,
+            "Total Cost": 32378.0,
+            "Plan Rows": 625000,
+            "Plan Width": 4,
+            "Disabled": false
+           },
+           {
+            "Node Type": "Hash",
+            "Parent Relationship": "Inner",
+            "Parallel Aware": true,
+            "Async Capable": false,
+            "Startup Cost": 3041.44,
+            "Total Cost": 3041.44,
+            "Plan Rows": 62500,
+            "Plan Width": 4,
+            "Disabled": false,
+            "Plans": [
+             {
+              "Node Type": "Index Only Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": true,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "customer_pkey",
+              "Relation Name": "customer",
+              "Alias": "c",
+              "Startup Cost": 0.42,
+              "Total Cost": 3041.44,
+              "Plan Rows": 62500,
+              "Plan Width": 4,
+              "Disabled": false
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "Partial Mode": "Finalize"
+  },
+  "cost": 42882.56,
+  "rows": 1,
+  "children": [
+   {
+    "node_type": "Gather",
+    "raw_type": "Gather",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 42882.55,
+    "rows": 2,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Strategy": "Plain",
+       "Partial Mode": "Partial",
+       "Parent Relationship": "Outer"
+      },
+      "cost": 41882.35,
+      "rows": 1,
+      "children": [
+       {
+        "node_type": "Hash Join",
+        "raw_type": "Hash Join",
+        "relation": null,
+        "index_name": null,
+        "join_type": "Right Anti",
+        "conditions": {
+         "Hash Cond": "(o.o_custkey = c.c_custkey)"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer"
+        },
+        "cost": 41815.39,
+        "rows": 26778,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "orders",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer",
+           "Alias": "o"
+          },
+          "cost": 32378.0,
+          "rows": 625000,
+          "children": [],
+          "source": "postgres"
+         },
+         {
+          "node_type": "Hash",
+          "raw_type": "Hash",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Inner"
+          },
+          "cost": 3041.44,
+          "rows": 62500,
+          "children": [
+           {
+            "node_type": "Index Only Scan",
+            "raw_type": "Index Only Scan",
+            "relation": "customer",
+            "index_name": "customer_pkey",
+            "join_type": null,
+            "conditions": {},
+            "keys": [],
+            "extra": {
+             "Parent Relationship": "Outer",
+             "Scan Direction": "Forward",
+             "Alias": "c"
+            },
+            "cost": 3041.44,
+            "rows": 62500,
+            "children": [],
+            "source": "postgres"
+           }
+          ],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Plain\",\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 1,\n  \"reason\": \"The query counts rows from the customer table that do not have a corresponding entry in the orders table using an Anti Join.\",\n  \"children\": [\n    {\n      \"node_type\": \"Hash Join\",\n      \"join_type\": \"Anti\",\n      \"conditions\": {\n        \"Hash Cond\": \"c.c_custkey = o.o_custkey\"\n      },\n      \"estimated_rows\": 64267,\n      \"reason\": \"A Hash Anti Join is the most efficient way to filter out customers that have orders.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"customer\",\n          \"conditions\": {},\n          \"estimated_rows\": 150000,\n          \"reason\": \"Full scan of the customer table is required to check all customers.\",\n          \"children\": []\n        },\n        {\n          \"node_type\": \"Hash\",\n          \"conditions\": {},\n          \"estimated_rows\": 1500000,\n          \"reason\": \"Build a hash table on the orders table to perform the anti-join.\",\n          \"children\": [\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"orders\",\n              \"conditions\": {},\n              \"estimated_rows\": 1500000,\n              \"reason\": \"Full scan of the orders table to build the hash table.\",\n              \"children\": []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "AI Reason": "The query counts rows from the customer table that do not have a corresponding entry in the orders table using an Anti Join.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 1.0,
+  "children": [
+   {
+    "node_type": "Hash Join",
+    "raw_type": "Hash Join",
+    "relation": null,
+    "index_name": null,
+    "join_type": "Anti",
+    "conditions": {
+     "Hash Cond": "c.c_custkey = o.o_custkey"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "A Hash Anti Join is the most efficient way to filter out customers that have orders."
+    },
+    "cost": null,
+    "rows": 64267.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "customer",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Full scan of the customer table is required to check all customers."
+      },
+      "cost": null,
+      "rows": 150000.0,
+      "children": [],
+      "source": "ai"
+     },
+     {
+      "node_type": "Hash",
+      "raw_type": "Hash",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Build a hash table on the orders table to perform the anti-join."
+      },
+      "cost": null,
+      "rows": 1500000.0,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "orders",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Full scan of the orders table to build the hash table."
+        },
+        "cost": null,
+        "rows": 1500000.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.5,
+   "ted_rate": 0.3333,
+   "pg_nodes": 7,
+   "ai_nodes": 5,
+   "matched_pairs": 5,
+   "identical_pairs": 2,
+   "changed_pairs": 3,
+   "postgres_only_nodes": 2,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 0.5,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "HJ(orders, customer)",
+   "ai": "HJ(customer, orders)"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Join input order",
+    "text": "Hash Join of (orders, customer): PostgreSQL hashes (customer). The AI hashes (orders). PostgreSQL usually hashes the smaller input.",
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Join type",
+    "text": "Join of (orders, customer): PostgreSQL performs a Right Anti join, the AI an Anti join.",
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Join inputs",
+    "text": "Hash: PostgreSQL applies it to (customer), the AI to (orders).",
+    "pg_path": "0.0.0.0.1",
+    "ai_path": "0.0.1"
+   },
+   {
+    "category": "Access method",
+    "text": "Table customer: PostgreSQL uses Index Only Scan on customer using customer_pkey. The AI uses Seq Scan on customer. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of the customer table is required to check all customers.\"",
+    "pg_path": "0.0.0.0.1.0",
+    "ai_path": "0.0.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (orders, customer) (collects rows from parallel worker processes).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders, customer) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Seq Scan on orders."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (orders, customer) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders, customer) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Hash Join of (orders, customer): PostgreSQL hashes (customer). The AI hashes (orders). PostgreSQL usually hashes the smaller input.",
+     "Join of (orders, customer): PostgreSQL performs a Right Anti join, the AI an Anti join."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0",
+    "ai_path": "0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.1",
+    "ai_path": "0.0.1",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Hash: PostgreSQL applies it to (customer), the AI to (orders)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.1.0",
+    "ai_path": "0.0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table customer: PostgreSQL uses Index Only Scan on customer using customer_pkey. The AI uses Seq Scan on customer. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of the customer table is required to check all customers.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "changed",
+    "0.0.0.0.0": "same",
+    "0.0.0.0.1": "changed",
+    "0.0.0.0.1.0": "changed"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "changed",
+    "0.0.1.0": "same",
+    "0.0.1": "changed",
+    "0.0.0": "changed"
+   }
+  }
+ },
+ "explanation": "Difference rate: 50% (tree edit distance rate: 33%). 2 of 7 PostgreSQL nodes have an identical counterpart in the AI plan's 5 nodes.\n\nPostgreSQL join order: HJ(orders, customer)\nAI join order:         HJ(customer, orders)\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather), with partial aggregation in each worker. The AI plan runs in a single process.\n2. [Join input order] Hash Join of (orders, customer): PostgreSQL hashes (customer). The AI hashes (orders). PostgreSQL usually hashes the smaller input.\n3. [Join type] Join of (orders, customer): PostgreSQL performs a Right Anti join, the AI an Anti join.\n4. [Join inputs] Hash: PostgreSQL applies it to (customer), the AI to (orders).\n5. [Access method] Table customer: PostgreSQL uses Index Only Scan on customer using customer_pkey. The AI uses Seq Scan on customer. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of the customer table is required to check all customers.\"\n6. [Missing operator] Only the PostgreSQL plan has Gather over (orders, customer) (collects rows from parallel worker processes).\n7. [Missing operator] Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders, customer) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Seq Scan on orders.",
+ "timings": {
+  "postgres": 0.001,
+  "ai": 2.119,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.5,
+  "ted_rate": 0.3333,
+  "pg_nodes": 7,
+  "ai_nodes": 5,
+  "identical_pairs": 2,
+  "changed_pairs": 3,
+  "postgres_only_nodes": 2,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 0.5,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Join input order",
+  "Join type",
+  "Join inputs",
+  "Access method",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.5,
+   0.5,
+   0.5
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

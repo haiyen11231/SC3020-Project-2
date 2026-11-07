@@ -1,0 +1,365 @@
+{
+ "id": "D4",
+ "category": "D. Aggregation",
+ "purpose": "SELECT DISTINCT on two low-cardinality columns (HashAggregate or Sort + Unique)",
+ "sql": "SELECT DISTINCT c_nationkey, c_mktsegment\nFROM customer",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Unique",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 5543.13,
+    "Total Cost": 5579.57,
+    "Plan Rows": 125,
+    "Plan Width": 15,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Gather Merge",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 5543.13,
+      "Total Cost": 5578.07,
+      "Plan Rows": 300,
+      "Plan Width": 15,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Plans": [
+       {
+        "Node Type": "Sort",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 4543.1,
+        "Total Cost": 4543.42,
+        "Plan Rows": 125,
+        "Plan Width": 15,
+        "Disabled": false,
+        "Sort Key": [
+         "c_nationkey",
+         "c_mktsegment"
+        ],
+        "Plans": [
+         {
+          "Node Type": "Aggregate",
+          "Strategy": "Hashed",
+          "Partial Mode": "Simple",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 4537.5,
+          "Total Cost": 4538.75,
+          "Plan Rows": 125,
+          "Plan Width": 15,
+          "Disabled": false,
+          "Group Key": [
+           "c_nationkey",
+           "c_mktsegment"
+          ],
+          "Planned Partitions": 0,
+          "Plans": [
+           {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": true,
+            "Async Capable": false,
+            "Relation Name": "customer",
+            "Alias": "customer",
+            "Startup Cost": 0.0,
+            "Total Cost": 4225.0,
+            "Plan Rows": 62500,
+            "Plan Width": 15,
+            "Disabled": false
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Unique",
+  "raw_type": "Unique",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 5579.57,
+  "rows": 125,
+  "children": [
+   {
+    "node_type": "Gather Merge",
+    "raw_type": "Gather Merge",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 5578.07,
+    "rows": 300,
+    "children": [
+     {
+      "node_type": "Sort",
+      "raw_type": "Sort",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "c_nationkey",
+       "c_mktsegment"
+      ],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 4543.42,
+      "rows": 125,
+      "children": [
+       {
+        "node_type": "Aggregate",
+        "raw_type": "Aggregate",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [
+         "c_nationkey",
+         "c_mktsegment"
+        ],
+        "extra": {
+         "Strategy": "Hashed",
+         "Partial Mode": "Simple",
+         "Parent Relationship": "Outer"
+        },
+        "cost": 4538.75,
+        "rows": 125,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "customer",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer",
+           "Alias": "customer"
+          },
+          "cost": 4225.0,
+          "rows": 62500,
+          "children": [],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Hashed\",\n  \"keys\": [\n    \"c_nationkey\",\n    \"c_mktsegment\"\n  ],\n  \"estimated_rows\": 125,\n  \"reason\": \"The query requires distinct pairs of c_nationkey and c_mktsegment, which is efficiently handled by a hashed aggregate.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"customer\",\n      \"conditions\": {},\n      \"estimated_rows\": 150000,\n      \"reason\": \"A sequential scan is the most efficient way to read all rows from the customer table.\",\n      \"children\": []\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "c_nationkey",
+   "c_mktsegment"
+  ],
+  "extra": {
+   "Strategy": "Hashed",
+   "AI Reason": "The query requires distinct pairs of c_nationkey and c_mktsegment, which is efficiently handled by a hashed aggregate."
+  },
+  "cost": null,
+  "rows": 125.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "customer",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "A sequential scan is the most efficient way to read all rows from the customer table."
+    },
+    "cost": null,
+    "rows": 150000.0,
+    "children": [],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.4286,
+   "ted_rate": 0.4286,
+   "pg_nodes": 5,
+   "ai_nodes": 2,
+   "matched_pairs": 2,
+   "identical_pairs": 2,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 3,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": null,
+   "max_q_error": null
+  },
+  "join_order": {
+   "postgres": "customer",
+   "ai": "customer"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Unique over (customer) (removes duplicate rows from sorted input).",
+    "pg_path": "0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (customer) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Sort over (customer) (sorts its input).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on customer."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Unique over (customer) (removes duplicate rows from sorted input)."
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (customer) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Sort over (customer) (sorts its input)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "postgres_only",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "same",
+    "0.0.0.0.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 43% (tree edit distance rate: 43%). 2 of 5 PostgreSQL nodes have an identical counterpart in the AI plan's 2 nodes.\n\nPostgreSQL join order: customer\nAI join order:         customer\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge). The AI plan runs in a single process.\n2. [Missing operator] Only the PostgreSQL plan has Unique over (customer) (removes duplicate rows from sorted input).\n3. [Missing operator] Only the PostgreSQL plan has Gather Merge over (customer) (collects sorted rows from parallel workers, keeping the order).\n4. [Missing operator] Only the PostgreSQL plan has Sort over (customer) (sorts its input).\n\nSIMILARITIES\n- Both plans use Seq Scan on customer.",
+ "timings": {
+  "postgres": 0.002,
+  "ai": 5.214,
+  "comparison": 0.0
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.4286,
+  "ted_rate": 0.4286,
+  "pg_nodes": 5,
+  "ai_nodes": 2,
+  "identical_pairs": 2,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 3,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": null,
+  "max_q_error": null
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.4286,
+   0.4286,
+   0.4286
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

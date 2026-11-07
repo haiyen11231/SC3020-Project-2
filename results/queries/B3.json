@@ -1,0 +1,381 @@
+{
+ "id": "B3",
+ "category": "B. Two-table join",
+ "purpose": "Filters on both inputs, large tables (expected: Hash Join, smaller side hashed)",
+ "sql": "SELECT c.c_name, o.o_orderdate, o.o_totalprice\nFROM customer c\nJOIN orders o ON o.o_custkey = c.c_custkey\nWHERE c.c_mktsegment = 'MACHINERY'\n  AND o.o_orderdate >= DATE '1997-06-01'\n  AND o.o_orderdate <  DATE '1997-06-08'",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Gather",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 5539.23,
+    "Total Cost": 41143.42,
+    "Plan Rows": 960,
+    "Plan Width": 31,
+    "Disabled": false,
+    "Workers Planned": 2,
+    "Single Copy": false,
+    "Plans": [
+     {
+      "Node Type": "Hash Join",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": true,
+      "Async Capable": false,
+      "Join Type": "Inner",
+      "Startup Cost": 4539.23,
+      "Total Cost": 40047.42,
+      "Plan Rows": 400,
+      "Plan Width": 31,
+      "Disabled": false,
+      "Inner Unique": true,
+      "Hash Cond": "(o.o_custkey = c.c_custkey)",
+      "Plans": [
+       {
+        "Node Type": "Seq Scan",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": true,
+        "Async Capable": false,
+        "Relation Name": "orders",
+        "Alias": "o",
+        "Startup Cost": 0.0,
+        "Total Cost": 35503.0,
+        "Plan Rows": 1978,
+        "Plan Width": 16,
+        "Disabled": false,
+        "Filter": "((o_orderdate >= '1997-06-01'::date) AND (o_orderdate < '1997-06-08'::date))"
+       },
+       {
+        "Node Type": "Hash",
+        "Parent Relationship": "Inner",
+        "Parallel Aware": true,
+        "Async Capable": false,
+        "Startup Cost": 4381.25,
+        "Total Cost": 4381.25,
+        "Plan Rows": 12638,
+        "Plan Width": 23,
+        "Disabled": false,
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": true,
+          "Async Capable": false,
+          "Relation Name": "customer",
+          "Alias": "c",
+          "Startup Cost": 0.0,
+          "Total Cost": 4381.25,
+          "Plan Rows": 12638,
+          "Plan Width": 23,
+          "Disabled": false,
+          "Filter": "(c_mktsegment = 'MACHINERY'::bpchar)"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Gather",
+  "raw_type": "Gather",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 41143.42,
+  "rows": 960,
+  "children": [
+   {
+    "node_type": "Hash Join",
+    "raw_type": "Hash Join",
+    "relation": null,
+    "index_name": null,
+    "join_type": "Inner",
+    "conditions": {
+     "Hash Cond": "(o.o_custkey = c.c_custkey)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 40047.42,
+    "rows": 400,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "orders",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "((o_orderdate >= '1997-06-01'::date) AND (o_orderdate < '1997-06-08'::date))"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer",
+       "Alias": "o"
+      },
+      "cost": 35503.0,
+      "rows": 1978,
+      "children": [],
+      "source": "postgres"
+     },
+     {
+      "node_type": "Hash",
+      "raw_type": "Hash",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Inner"
+      },
+      "cost": 4381.25,
+      "rows": 12638,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "customer",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "(c_mktsegment = 'MACHINERY'::bpchar)"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "c"
+        },
+        "cost": 4381.25,
+        "rows": 12638,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Hash Join\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": \"Inner\",\n  \"strategy\": null,\n  \"conditions\": {\n    \"Hash Cond\": \"o.o_custkey = c.c_custkey\"\n  },\n  \"keys\": [],\n  \"estimated_rows\": 1440,\n  \"parent_relationship\": null,\n  \"reason\": \"Hash join is efficient for joining filtered customer and orders tables.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"orders\",\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {\n        \"Filter\": \"o_orderdate >= '1997-06-01'::date AND o_orderdate < '1997-06-08'::date\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 4000,\n      \"parent_relationship\": null,\n      \"reason\": \"Sequential scan is chosen for filtering orders by date range.\",\n      \"children\": []\n    },\n    {\n      \"node_type\": \"Hash\",\n      \"relation\": null,\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {},\n      \"keys\": [],\n      \"estimated_rows\": 30000,\n      \"parent_relationship\": null,\n      \"reason\": \"Building a hash table for the filtered customer table.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"customer\",\n          \"index_name\": null,\n          \"join_type\": null,\n          \"strategy\": null,\n          \"conditions\": {\n            \"Filter\": \"c_mktsegment = 'MACHINERY'::text\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 30000,\n          \"parent_relationship\": null,\n          \"reason\": \"Sequential scan is efficient for filtering the customer table by market segment.\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Hash Cond": "o.o_custkey = c.c_custkey"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "Hash join is efficient for joining filtered customer and orders tables.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 1440.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "orders",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "o_orderdate >= '1997-06-01'::date AND o_orderdate < '1997-06-08'::date"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Sequential scan is chosen for filtering orders by date range."
+    },
+    "cost": null,
+    "rows": 4000.0,
+    "children": [],
+    "source": "ai"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "Building a hash table for the filtered customer table."
+    },
+    "cost": null,
+    "rows": 30000.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "customer",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "c_mktsegment = 'MACHINERY'::text"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Sequential scan is efficient for filtering the customer table by market segment."
+      },
+      "cost": null,
+      "rows": 30000.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.1111,
+   "ted_rate": 0.1111,
+   "pg_nodes": 5,
+   "ai_nodes": 4,
+   "matched_pairs": 4,
+   "identical_pairs": 4,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 1,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": null,
+   "max_q_error": null
+  },
+  "join_order": {
+   "postgres": "HJ(orders, customer)",
+   "ai": "HJ(orders, customer)"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (orders, customer) (collects rows from parallel worker processes).",
+    "pg_path": "0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Hash Join of (orders) with (customer).",
+   "Both plans use Seq Scan on orders.",
+   "Both plans use Seq Scan on customer."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (orders, customer) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.1",
+    "ai_path": "0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.1.0",
+    "ai_path": "0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "postgres_only",
+    "0.0": "same",
+    "0.0.0": "same",
+    "0.0.1": "same",
+    "0.0.1.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same",
+    "0.1": "same",
+    "0.1.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 11% (tree edit distance rate: 11%). 4 of 5 PostgreSQL nodes have an identical counterpart in the AI plan's 4 nodes.\n\nPostgreSQL join order: HJ(orders, customer)\nAI join order:         HJ(orders, customer)\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.\n2. [Missing operator] Only the PostgreSQL plan has Gather over (orders, customer) (collects rows from parallel worker processes).\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Hash Join of (orders) with (customer).\n- Both plans use Seq Scan on orders.\n- Both plans use Seq Scan on customer.",
+ "timings": {
+  "postgres": 0.007,
+  "ai": 17.59,
+  "comparison": 0.003
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.1111,
+  "ted_rate": 0.1111,
+  "pg_nodes": 5,
+  "ai_nodes": 4,
+  "identical_pairs": 4,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 1,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": null,
+  "max_q_error": null
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.1111,
+   0.1111,
+   0.1111
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

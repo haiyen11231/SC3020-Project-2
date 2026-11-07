@@ -1,0 +1,449 @@
+{
+ "id": "F2",
+ "category": "F. Subquery",
+ "purpose": "NOT IN subquery (not unnested because of NULL semantics: hashed SubPlan)",
+ "sql": "SELECT count(*)\nFROM part\nWHERE p_partkey NOT IN (SELECT l_partkey FROM lineitem WHERE l_quantity = 50\n                        AND l_shipdate >= DATE '1998-01-01')",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Simple",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 158466.23,
+    "Total Cost": 158466.24,
+    "Plan Rows": 1,
+    "Plan Width": 8,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Index Only Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Scan Direction": "Forward",
+      "Index Name": "part_pkey",
+      "Relation Name": "part",
+      "Alias": "part",
+      "Startup Cost": 152485.21,
+      "Total Cost": 158216.23,
+      "Plan Rows": 100000,
+      "Plan Width": 0,
+      "Disabled": false,
+      "Filter": "(NOT (ANY (p_partkey = (hashed SubPlan 1).col1)))",
+      "Plans": [
+       {
+        "Node Type": "Gather",
+        "Parent Relationship": "SubPlan",
+        "Subplan Name": "SubPlan 1",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 1000.0,
+        "Total Cost": 152450.76,
+        "Plan Rows": 13613,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Workers Planned": 2,
+        "Single Copy": false,
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": true,
+          "Async Capable": false,
+          "Relation Name": "lineitem",
+          "Alias": "lineitem",
+          "Startup Cost": 0.0,
+          "Total Cost": 150089.46,
+          "Plan Rows": 5672,
+          "Plan Width": 4,
+          "Disabled": false,
+          "Filter": "((l_shipdate >= '1998-01-01'::date) AND (l_quantity = '50'::numeric))"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "Partial Mode": "Simple"
+  },
+  "cost": 158466.24,
+  "rows": 1,
+  "children": [
+   {
+    "node_type": "Index Only Scan",
+    "raw_type": "Index Only Scan",
+    "relation": "part",
+    "index_name": "part_pkey",
+    "join_type": null,
+    "conditions": {
+     "Filter": "(NOT (ANY (p_partkey = (hashed SubPlan 1).col1)))"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Scan Direction": "Forward",
+     "Alias": "part"
+    },
+    "cost": 158216.23,
+    "rows": 100000,
+    "children": [
+     {
+      "node_type": "Gather",
+      "raw_type": "Gather",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "SubPlan",
+       "Subplan Name": "SubPlan 1"
+      },
+      "cost": 152450.76,
+      "rows": 13613,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "lineitem",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "((l_shipdate >= '1998-01-01'::date) AND (l_quantity = '50'::numeric))"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "lineitem"
+        },
+        "cost": 150089.46,
+        "rows": 5672,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Plain\",\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 1,\n  \"reason\": \"Aggregate the results of the anti-join to count the remaining parts.\",\n  \"children\": [\n    {\n      \"node_type\": \"Hash Join\",\n      \"join_type\": \"Anti\",\n      \"conditions\": {\n        \"Hash Cond\": \"part.p_partkey = lineitem.l_partkey\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 199999,\n      \"reason\": \"Use a Hash Anti Join to filter out parts that exist in the lineitem subquery.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"part\",\n          \"conditions\": {},\n          \"keys\": [],\n          \"estimated_rows\": 200000,\n          \"reason\": \"Full scan of the part table is efficient for the outer relation.\",\n          \"children\": []\n        },\n        {\n          \"node_type\": \"Hash\",\n          \"conditions\": {},\n          \"keys\": [],\n          \"estimated_rows\": 1,\n          \"reason\": \"Build a hash table on the filtered lineitem results.\",\n          \"children\": [\n            {\n              \"node_type\": \"Aggregate\",\n              \"strategy\": \"Hashed\",\n              \"conditions\": {},\n              \"keys\": [\n                \"lineitem.l_partkey\"\n              ],\n              \"estimated_rows\": 1,\n              \"reason\": \"Aggregate to get unique part keys for the anti-join hash table.\",\n              \"children\": [\n                {\n                  \"node_type\": \"Seq Scan\",\n                  \"relation\": \"lineitem\",\n                  \"conditions\": {\n                    \"Filter\": \"l_quantity = 50 AND l_shipdate >= '1998-01-01'::date\"\n                  },\n                  \"keys\": [],\n                  \"estimated_rows\": 1,\n                  \"reason\": \"Filter lineitem rows based on quantity and shipdate.\",\n                  \"children\": []\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "AI Reason": "Aggregate the results of the anti-join to count the remaining parts."
+  },
+  "cost": null,
+  "rows": 1.0,
+  "children": [
+   {
+    "node_type": "Hash Join",
+    "raw_type": "Hash Join",
+    "relation": null,
+    "index_name": null,
+    "join_type": "Anti",
+    "conditions": {
+     "Hash Cond": "part.p_partkey = lineitem.l_partkey"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Use a Hash Anti Join to filter out parts that exist in the lineitem subquery."
+    },
+    "cost": null,
+    "rows": 199999.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "part",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Full scan of the part table is efficient for the outer relation."
+      },
+      "cost": null,
+      "rows": 200000.0,
+      "children": [],
+      "source": "ai"
+     },
+     {
+      "node_type": "Hash",
+      "raw_type": "Hash",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Build a hash table on the filtered lineitem results."
+      },
+      "cost": null,
+      "rows": 1.0,
+      "children": [
+       {
+        "node_type": "Aggregate",
+        "raw_type": "Aggregate",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [
+         "lineitem.l_partkey"
+        ],
+        "extra": {
+         "Strategy": "Hashed",
+         "AI Reason": "Aggregate to get unique part keys for the anti-join hash table."
+        },
+        "cost": null,
+        "rows": 1.0,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "lineitem",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {
+           "Filter": "l_quantity = 50 AND l_shipdate >= '1998-01-01'::date"
+          },
+          "keys": [],
+          "extra": {
+           "AI Reason": "Filter lineitem rows based on quantity and shipdate."
+          },
+          "cost": null,
+          "rows": 1.0,
+          "children": [],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.6,
+   "ted_rate": 0.6,
+   "pg_nodes": 4,
+   "ai_nodes": 6,
+   "matched_pairs": 3,
+   "identical_pairs": 2,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 1,
+   "ai_only_nodes": 3,
+   "access_method_agreement": 0.5,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": 0.0,
+   "median_q_error": 1.5,
+   "max_q_error": 2.0
+  },
+  "join_order": {
+   "postgres": "part[lineitem]",
+   "ai": "HJ(part, lineitem)"
+  },
+  "differences": [
+   {
+    "category": "Subquery",
+    "text": "PostgreSQL evaluates the subquery over (lineitem) as a separate SubPlan (checked for each row) used by Index Only Scan on part using part_pkey, while the AI turns it into an Anti Hash Join (Hash Join of (part) with (lineitem)).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Access method",
+    "text": "Table part: PostgreSQL uses Index Only Scan on part using part_pkey. The AI uses Seq Scan on part. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of the part table is efficient for the outer relation.\"",
+    "pg_path": "0.0",
+    "ai_path": "0.0.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (lineitem) (collects rows from parallel worker processes).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash Join of (part) with (lineitem) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"Use a Hash Anti Join to filter out parts that exist in the lineitem subquery.\"",
+    "pg_path": null,
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash over (lineitem) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Build a hash table on the filtered lineitem results.\"",
+    "pg_path": null,
+    "ai_path": "0.0.1"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Aggregate (Hashed) over (lineitem) (computes aggregates (GROUP BY, SUM, COUNT, ...)). The AI's reason: \"Aggregate to get unique part keys for the anti-join hash table.\"",
+    "pg_path": null,
+    "ai_path": "0.0.1.0"
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on lineitem."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table part: PostgreSQL uses Index Only Scan on part using part_pkey. The AI uses Seq Scan on part. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of the part table is efficient for the outer relation.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (lineitem) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0.1.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash Join of (part) with (lineitem) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"Use a Hash Anti Join to filter out parts that exist in the lineitem subquery.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash over (lineitem) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Build a hash table on the filtered lineitem results.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.1.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Aggregate (Hashed) over (lineitem) (computes aggregates (GROUP BY, SUM, COUNT, ...)). The AI's reason: \"Aggregate to get unique part keys for the anti-join hash table.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "changed",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0.0": "changed",
+    "0.0.1.0.0": "same",
+    "0.0": "ai_only",
+    "0.0.1": "ai_only",
+    "0.0.1.0": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 60% (tree edit distance rate: 60%). 2 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 6 nodes.\n\nPostgreSQL join order: part[lineitem]\nAI join order:         HJ(part, lineitem)\n\nDIFFERENCES\n1. [Subquery] PostgreSQL evaluates the subquery over (lineitem) as a separate SubPlan (checked for each row) used by Index Only Scan on part using part_pkey, while the AI turns it into an Anti Hash Join (Hash Join of (part) with (lineitem)).\n2. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.\n3. [Access method] Table part: PostgreSQL uses Index Only Scan on part using part_pkey. The AI uses Seq Scan on part. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of the part table is efficient for the outer relation.\"\n4. [Missing operator] Only the PostgreSQL plan has Gather over (lineitem) (collects rows from parallel worker processes).\n5. [Extra operator] Only the AI plan has Hash Join of (part) with (lineitem) (builds a hash table on the inner input, then probes it with every outer row). The AI's reason: \"Use a Hash Anti Join to filter out parts that exist in the lineitem subquery.\"\n6. [Extra operator] Only the AI plan has Hash over (lineitem) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Build a hash table on the filtered lineitem results.\"\n7. [Extra operator] Only the AI plan has Aggregate (Hashed) over (lineitem) (computes aggregates (GROUP BY, SUM, COUNT, ...)). The AI's reason: \"Aggregate to get unique part keys for the anti-join hash table.\"\n\nSIMILARITIES\n- Both plans use Seq Scan on lineitem.",
+ "timings": {
+  "postgres": 0.002,
+  "ai": 2.982,
+  "comparison": 0.002
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.6,
+  "ted_rate": 0.6,
+  "pg_nodes": 4,
+  "ai_nodes": 6,
+  "identical_pairs": 2,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 1,
+  "ai_only_nodes": 3,
+  "access_method_agreement": 0.5,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": 0.0,
+  "median_q_error": 1.5,
+  "max_q_error": 2.0
+ },
+ "difference_categories": [
+  "Subquery",
+  "Parallelism",
+  "Access method",
+  "Missing operator",
+  "Extra operator",
+  "Extra operator",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.6,
+   0.6,
+   0.6
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

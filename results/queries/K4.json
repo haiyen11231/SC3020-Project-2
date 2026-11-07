@@ -1,0 +1,198 @@
+{
+ "id": "K4",
+ "category": "K. Miscellaneous",
+ "purpose": "String functions and arithmetic in the projection, LIMIT without ORDER BY",
+ "sql": "SELECT upper(c_name) AS name, length(c_address) AS address_len, c_acctbal * 1.1 AS adjusted\nFROM customer\nWHERE c_mktsegment = 'BUILDING'\nLIMIT 15",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Limit",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 0.0,
+    "Total Cost": 2.8,
+    "Plan Rows": 15,
+    "Plan Width": 68,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Seq Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Relation Name": "customer",
+      "Alias": "customer",
+      "Startup Cost": 0.0,
+      "Total Cost": 5704.24,
+      "Plan Rows": 30565,
+      "Plan Width": 68,
+      "Disabled": false,
+      "Filter": "(c_mktsegment = 'BUILDING'::bpchar)"
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 2.8,
+  "rows": 15,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "customer",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "(c_mktsegment = 'BUILDING'::bpchar)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Alias": "customer"
+    },
+    "cost": 5704.24,
+    "rows": 30565,
+    "children": [],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Limit\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 15,\n  \"parent_relationship\": null,\n  \"reason\": \"The query requests a limited number of rows from the customer table filtered by market segment.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"customer\",\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {\n        \"Filter\": \"c_mktsegment = 'BUILDING'\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 30000,\n      \"parent_relationship\": null,\n      \"reason\": \"Sequential scan is chosen as there is no index on c_mktsegment and the filter is not highly selective.\",\n      \"children\": []\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query requests a limited number of rows from the customer table filtered by market segment.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 15.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "customer",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "c_mktsegment = 'BUILDING'"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Sequential scan is chosen as there is no index on c_mktsegment and the filter is not highly selective."
+    },
+    "cost": null,
+    "rows": 30000.0,
+    "children": [],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.0,
+   "ted_rate": 0.0,
+   "pg_nodes": 2,
+   "ai_nodes": 2,
+   "matched_pairs": 2,
+   "identical_pairs": 2,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "customer",
+   "ai": "customer"
+  },
+  "differences": [],
+  "similarities": [
+   "The plans are identical.",
+   "Both plans use Seq Scan on customer."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same"
+   }
+  }
+ },
+ "explanation": "The two plans are identical in structure, operators and details.\n\nPostgreSQL join order: customer\nAI join order:         customer\n\nSIMILARITIES\n- The plans are identical.\n- Both plans use Seq Scan on customer.",
+ "timings": {
+  "postgres": 0.007,
+  "ai": 1.503,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.0,
+  "ted_rate": 0.0,
+  "pg_nodes": 2,
+  "ai_nodes": 2,
+  "identical_pairs": 2,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

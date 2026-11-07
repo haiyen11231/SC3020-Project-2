@@ -1,0 +1,442 @@
+{
+ "id": "K3",
+ "category": "K. Miscellaneous",
+ "purpose": "OR across two different columns (BitmapOr if both were indexed; here one is not)",
+ "sql": "SELECT count(*)\nFROM orders\nWHERE o_orderkey < 1000 OR o_clerk = 'Clerk#000000001'",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Finalize",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 36505.03,
+    "Total Cost": 36505.04,
+    "Plan Rows": 1,
+    "Plan Width": 8,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Gather",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 36504.81,
+      "Total Cost": 36505.02,
+      "Plan Rows": 2,
+      "Plan Width": 8,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Single Copy": false,
+      "Plans": [
+       {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Partial Mode": "Partial",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 35504.81,
+        "Total Cost": 35504.82,
+        "Plan Rows": 1,
+        "Plan Width": 8,
+        "Disabled": false,
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": true,
+          "Async Capable": false,
+          "Relation Name": "orders",
+          "Alias": "orders",
+          "Startup Cost": 0.0,
+          "Total Cost": 35503.0,
+          "Plan Rows": 725,
+          "Plan Width": 0,
+          "Disabled": false,
+          "Filter": "((o_orderkey < 1000) OR (o_clerk = 'Clerk#000000001'::bpchar))"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "Partial Mode": "Finalize"
+  },
+  "cost": 36505.04,
+  "rows": 1,
+  "children": [
+   {
+    "node_type": "Gather",
+    "raw_type": "Gather",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 36505.02,
+    "rows": 2,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Strategy": "Plain",
+       "Partial Mode": "Partial",
+       "Parent Relationship": "Outer"
+      },
+      "cost": 35504.82,
+      "rows": 1,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "orders",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "((o_orderkey < 1000) OR (o_clerk = 'Clerk#000000001'::bpchar))"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "orders"
+        },
+        "cost": 35503.0,
+        "rows": 725,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Plain\",\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 1,\n  \"parent_relationship\": null,\n  \"reason\": \"Aggregate the filtered rows to count them.\",\n  \"children\": [\n    {\n      \"node_type\": \"Bitmap Heap Scan\",\n      \"relation\": \"orders\",\n      \"index_name\": null,\n      \"conditions\": {\n        \"Filter\": \"(o_orderkey < 1000 OR (o_clerk)::text = 'Clerk#000000001'::text)\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 1000,\n      \"parent_relationship\": null,\n      \"reason\": \"Use bitmap scan to combine conditions on orderkey and clerk.\",\n      \"children\": [\n        {\n          \"node_type\": \"BitmapOr\",\n          \"relation\": null,\n          \"index_name\": null,\n          \"conditions\": {},\n          \"keys\": [],\n          \"estimated_rows\": 1000,\n          \"parent_relationship\": null,\n          \"reason\": \"Combine index scans for the OR condition.\",\n          \"children\": [\n            {\n              \"node_type\": \"Bitmap Index Scan\",\n              \"relation\": \"orders\",\n              \"index_name\": \"orders_pkey\",\n              \"conditions\": {\n                \"Index Cond\": \"o_orderkey < 1000\"\n              },\n              \"keys\": [],\n              \"estimated_rows\": 586,\n              \"parent_relationship\": null,\n              \"reason\": \"Index scan on primary key for range condition.\",\n              \"children\": []\n            },\n            {\n              \"node_type\": \"Bitmap Index Scan\",\n              \"relation\": \"orders\",\n              \"index_name\": null,\n              \"conditions\": {\n                \"Filter\": \"(o_clerk)::text = 'Clerk#000000001'::text\"\n              },\n              \"keys\": [],\n              \"estimated_rows\": 1500,\n              \"parent_relationship\": null,\n              \"reason\": \"Sequential scan on index-less column for OR condition.\",\n              \"children\": []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "AI Reason": "Aggregate the filtered rows to count them."
+  },
+  "cost": null,
+  "rows": 1.0,
+  "children": [
+   {
+    "node_type": "Bitmap Heap Scan",
+    "raw_type": "Bitmap Heap Scan",
+    "relation": "orders",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "(o_orderkey < 1000 OR (o_clerk)::text = 'Clerk#000000001'::text)"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Use bitmap scan to combine conditions on orderkey and clerk."
+    },
+    "cost": null,
+    "rows": 1000.0,
+    "children": [
+     {
+      "node_type": "BitmapOr",
+      "raw_type": "BitmapOr",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Combine index scans for the OR condition."
+      },
+      "cost": null,
+      "rows": 1000.0,
+      "children": [
+       {
+        "node_type": "Bitmap Index Scan",
+        "raw_type": "Bitmap Index Scan",
+        "relation": null,
+        "index_name": "orders_pkey",
+        "join_type": null,
+        "conditions": {
+         "Index Cond": "o_orderkey < 1000"
+        },
+        "keys": [],
+        "extra": {
+         "Name": "orders",
+         "AI Reason": "Index scan on primary key for range condition."
+        },
+        "cost": null,
+        "rows": 586.0,
+        "children": [],
+        "source": "ai"
+       },
+       {
+        "node_type": "Bitmap Index Scan",
+        "raw_type": "Bitmap Index Scan",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "(o_clerk)::text = 'Clerk#000000001'::text"
+        },
+        "keys": [],
+        "extra": {
+         "Name": "orders",
+         "AI Reason": "Sequential scan on index-less column for OR condition.",
+         "Warning": "index scan without an index name"
+        },
+        "cost": null,
+        "rows": 1500.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.7778,
+   "ted_rate": 0.6667,
+   "pg_nodes": 4,
+   "ai_nodes": 5,
+   "matched_pairs": 2,
+   "identical_pairs": 1,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 2,
+   "ai_only_nodes": 3,
+   "access_method_agreement": 0.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "orders",
+   "ai": "orders"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Conditions",
+    "text": "These conditions appear in the AI plan but nowhere in the PostgreSQL plan: o_clerk = 'clerk#000000001'; o_orderkey < 1000.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Invalid AI node",
+    "text": "Bitmap Index Scan: index scan without an index name.",
+    "pg_path": null,
+    "ai_path": "0.0.0.1"
+   },
+   {
+    "category": "Access method",
+    "text": "Table orders: PostgreSQL uses Seq Scan on orders. The AI uses Bitmap Heap Scan on orders. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Use bitmap scan to combine conditions on orderkey and clerk.\"",
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has BitmapOr (unites the row locations found by several bitmap index scans). The AI's reason: \"Combine index scans for the OR condition.\"",
+    "pg_path": null,
+    "ai_path": "0.0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Bitmap Index Scan on orders_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Index scan on primary key for range condition.\"",
+    "pg_path": null,
+    "ai_path": "0.0.0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Bitmap Index Scan (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Sequential scan on index-less column for OR condition.\"",
+    "pg_path": null,
+    "ai_path": "0.0.0.1"
+   }
+  ],
+  "similarities": [],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table orders: PostgreSQL uses Seq Scan on orders. The AI uses Bitmap Heap Scan on orders. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Use bitmap scan to combine conditions on orderkey and clerk.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has BitmapOr (unites the row locations found by several bitmap index scans). The AI's reason: \"Combine index scans for the OR condition.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.0.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Bitmap Index Scan on orders_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Index scan on primary key for range condition.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Bitmap Index Scan (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Sequential scan on index-less column for OR condition.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "changed"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "changed",
+    "0.0.0": "ai_only",
+    "0.0.0.0": "ai_only",
+    "0.0.0.1": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 78% (tree edit distance rate: 67%). 1 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 5 nodes.\n\nPostgreSQL join order: orders\nAI join order:         orders\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather), with partial aggregation in each worker. The AI plan runs in a single process.\n2. [Conditions] These conditions appear in the AI plan but nowhere in the PostgreSQL plan: o_clerk = 'clerk#000000001'; o_orderkey < 1000.\n3. [Invalid AI node] Bitmap Index Scan: index scan without an index name.\n4. [Access method] Table orders: PostgreSQL uses Seq Scan on orders. The AI uses Bitmap Heap Scan on orders. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Use bitmap scan to combine conditions on orderkey and clerk.\"\n5. [Missing operator] Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes).\n6. [Missing operator] Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n7. [Extra operator] Only the AI plan has BitmapOr (unites the row locations found by several bitmap index scans). The AI's reason: \"Combine index scans for the OR condition.\"\n8. [Extra operator] Only the AI plan has Bitmap Index Scan on orders_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Index scan on primary key for range condition.\"\n9. [Extra operator] Only the AI plan has Bitmap Index Scan (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Sequential scan on index-less column for OR condition.\"",
+ "timings": {
+  "postgres": 0.002,
+  "ai": 3.978,
+  "comparison": 0.002
+ },
+ "ai_warnings": [
+  "index scan without an index name"
+ ],
+ "metrics": {
+  "difference_rate": 0.7778,
+  "ted_rate": 0.6667,
+  "pg_nodes": 4,
+  "ai_nodes": 5,
+  "identical_pairs": 1,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 2,
+  "ai_only_nodes": 3,
+  "access_method_agreement": 0.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Conditions",
+  "Invalid AI node",
+  "Access method",
+  "Missing operator",
+  "Missing operator",
+  "Extra operator",
+  "Extra operator",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.7778,
+   0.7778,
+   0.7778
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

@@ -1,0 +1,515 @@
+{
+ "id": "B4",
+ "category": "B. Two-table join",
+ "purpose": "Full join of a large table with a small one, then grouping",
+ "sql": "SELECT s.s_name, count(*) AS parts_supplied, sum(ps.ps_availqty) AS total_qty\nFROM supplier s\nJOIN partsupp ps ON ps.ps_suppkey = s.s_suppkey\nGROUP BY s.s_name",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Hashed",
+    "Partial Mode": "Finalize",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 28388.7,
+    "Total Cost": 28488.7,
+    "Plan Rows": 10000,
+    "Plan Width": 42,
+    "Disabled": false,
+    "Group Key": [
+     "s.s_name"
+    ],
+    "Planned Partitions": 0,
+    "Plans": [
+     {
+      "Node Type": "Gather",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 25708.7,
+      "Total Cost": 28208.7,
+      "Plan Rows": 24000,
+      "Plan Width": 42,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Single Copy": false,
+      "Plans": [
+       {
+        "Node Type": "Aggregate",
+        "Strategy": "Hashed",
+        "Partial Mode": "Partial",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 24708.7,
+        "Total Cost": 24808.7,
+        "Plan Rows": 10000,
+        "Plan Width": 42,
+        "Disabled": false,
+        "Group Key": [
+         "s.s_name"
+        ],
+        "Planned Partitions": 0,
+        "Plans": [
+         {
+          "Node Type": "Hash Join",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Join Type": "Inner",
+          "Startup Cost": 448.0,
+          "Total Cost": 22208.7,
+          "Plan Rows": 333333,
+          "Plan Width": 30,
+          "Disabled": false,
+          "Inner Unique": true,
+          "Hash Cond": "(ps.ps_suppkey = s.s_suppkey)",
+          "Plans": [
+           {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": true,
+            "Async Capable": false,
+            "Relation Name": "partsupp",
+            "Alias": "ps",
+            "Startup Cost": 0.0,
+            "Total Cost": 20885.33,
+            "Plan Rows": 333333,
+            "Plan Width": 8,
+            "Disabled": false
+           },
+           {
+            "Node Type": "Hash",
+            "Parent Relationship": "Inner",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 323.0,
+            "Total Cost": 323.0,
+            "Plan Rows": 10000,
+            "Plan Width": 30,
+            "Disabled": false,
+            "Plans": [
+             {
+              "Node Type": "Seq Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Relation Name": "supplier",
+              "Alias": "s",
+              "Startup Cost": 0.0,
+              "Total Cost": 323.0,
+              "Plan Rows": 10000,
+              "Plan Width": 30,
+              "Disabled": false
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "s.s_name"
+  ],
+  "extra": {
+   "Strategy": "Hashed",
+   "Partial Mode": "Finalize"
+  },
+  "cost": 28488.7,
+  "rows": 10000,
+  "children": [
+   {
+    "node_type": "Gather",
+    "raw_type": "Gather",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 28208.7,
+    "rows": 24000,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "s.s_name"
+      ],
+      "extra": {
+       "Strategy": "Hashed",
+       "Partial Mode": "Partial",
+       "Parent Relationship": "Outer"
+      },
+      "cost": 24808.7,
+      "rows": 10000,
+      "children": [
+       {
+        "node_type": "Hash Join",
+        "raw_type": "Hash Join",
+        "relation": null,
+        "index_name": null,
+        "join_type": "Inner",
+        "conditions": {
+         "Hash Cond": "(ps.ps_suppkey = s.s_suppkey)"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer"
+        },
+        "cost": 22208.7,
+        "rows": 333333,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "partsupp",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer",
+           "Alias": "ps"
+          },
+          "cost": 20885.33,
+          "rows": 333333,
+          "children": [],
+          "source": "postgres"
+         },
+         {
+          "node_type": "Hash",
+          "raw_type": "Hash",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Inner"
+          },
+          "cost": 323.0,
+          "rows": 10000,
+          "children": [
+           {
+            "node_type": "Seq Scan",
+            "raw_type": "Seq Scan",
+            "relation": "supplier",
+            "index_name": null,
+            "join_type": null,
+            "conditions": {},
+            "keys": [],
+            "extra": {
+             "Parent Relationship": "Outer",
+             "Alias": "s"
+            },
+            "cost": 323.0,
+            "rows": 10000,
+            "children": [],
+            "source": "postgres"
+           }
+          ],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Hashed\",\n  \"keys\": [\"s.s_name\"],\n  \"estimated_rows\": 10000,\n  \"reason\": \"Aggregating supplier data by name using a hash aggregate after joining supplier and partsupp.\",\n  \"conditions\": {},\n  \"children\": [\n    {\n      \"node_type\": \"Hash Join\",\n      \"join_type\": \"Inner\",\n      \"conditions\": {\n        \"Hash Cond\": \"ps.ps_suppkey = s.s_suppkey\"\n      },\n      \"estimated_rows\": 800000,\n      \"reason\": \"Joining supplier and partsupp tables using a hash join for efficient lookup.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"supplier\",\n          \"estimated_rows\": 10000,\n          \"reason\": \"Scanning the supplier table to build the hash table.\",\n          \"conditions\": {},\n          \"children\": []\n        },\n        {\n          \"node_type\": \"Hash\",\n          \"estimated_rows\": 800000,\n          \"reason\": \"Building a hash table on the supplier join key.\",\n          \"conditions\": {},\n          \"children\": [\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"partsupp\",\n              \"estimated_rows\": 800000,\n              \"reason\": \"Scanning the partsupp table to probe the hash table.\",\n              \"conditions\": {},\n              \"children\": []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "s.s_name"
+  ],
+  "extra": {
+   "Strategy": "Hashed",
+   "AI Reason": "Aggregating supplier data by name using a hash aggregate after joining supplier and partsupp.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 10000.0,
+  "children": [
+   {
+    "node_type": "Hash Join",
+    "raw_type": "Hash Join",
+    "relation": null,
+    "index_name": null,
+    "join_type": "Inner",
+    "conditions": {
+     "Hash Cond": "ps.ps_suppkey = s.s_suppkey"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Joining supplier and partsupp tables using a hash join for efficient lookup."
+    },
+    "cost": null,
+    "rows": 800000.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "supplier",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Scanning the supplier table to build the hash table."
+      },
+      "cost": null,
+      "rows": 10000.0,
+      "children": [],
+      "source": "ai"
+     },
+     {
+      "node_type": "Hash",
+      "raw_type": "Hash",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Building a hash table on the supplier join key."
+      },
+      "cost": null,
+      "rows": 800000.0,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "partsupp",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Scanning the partsupp table to probe the hash table."
+        },
+        "cost": null,
+        "rows": 800000.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.3333,
+   "ted_rate": 0.3333,
+   "pg_nodes": 7,
+   "ai_nodes": 5,
+   "matched_pairs": 5,
+   "identical_pairs": 3,
+   "changed_pairs": 2,
+   "postgres_only_nodes": 2,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "HJ(partsupp, supplier)",
+   "ai": "HJ(supplier, partsupp)"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Join input order",
+    "text": "Hash Join of (partsupp, supplier): PostgreSQL hashes (supplier). The AI hashes (partsupp). PostgreSQL usually hashes the smaller input.",
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Join inputs",
+    "text": "Hash: PostgreSQL applies it to (supplier), the AI to (partsupp).",
+    "pg_path": "0.0.0.0.1",
+    "ai_path": "0.0.1"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (partsupp, supplier) (collects rows from parallel worker processes).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (partsupp, supplier) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Seq Scan on partsupp.",
+   "Both plans use Seq Scan on supplier."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (partsupp, supplier) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (partsupp, supplier) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Hash Join of (partsupp, supplier): PostgreSQL hashes (supplier). The AI hashes (partsupp). PostgreSQL usually hashes the smaller input."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0",
+    "ai_path": "0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.1",
+    "ai_path": "0.0.1",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Hash: PostgreSQL applies it to (supplier), the AI to (partsupp)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.1.0",
+    "ai_path": "0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "changed",
+    "0.0.0.0.0": "same",
+    "0.0.0.0.1": "changed",
+    "0.0.0.0.1.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "changed",
+    "0.0.1.0": "same",
+    "0.0.1": "changed",
+    "0.0.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 33% (tree edit distance rate: 33%). 3 of 7 PostgreSQL nodes have an identical counterpart in the AI plan's 5 nodes.\n\nPostgreSQL join order: HJ(partsupp, supplier)\nAI join order:         HJ(supplier, partsupp)\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather), with partial aggregation in each worker. The AI plan runs in a single process.\n2. [Join input order] Hash Join of (partsupp, supplier): PostgreSQL hashes (supplier). The AI hashes (partsupp). PostgreSQL usually hashes the smaller input.\n3. [Join inputs] Hash: PostgreSQL applies it to (supplier), the AI to (partsupp).\n4. [Missing operator] Only the PostgreSQL plan has Gather over (partsupp, supplier) (collects rows from parallel worker processes).\n5. [Missing operator] Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (partsupp, supplier) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Seq Scan on partsupp.\n- Both plans use Seq Scan on supplier.",
+ "timings": {
+  "postgres": 0.007,
+  "ai": 1.913,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.3333,
+  "ted_rate": 0.3333,
+  "pg_nodes": 7,
+  "ai_nodes": 5,
+  "identical_pairs": 3,
+  "changed_pairs": 2,
+  "postgres_only_nodes": 2,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Join input order",
+  "Join inputs",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.3333,
+   0.3333,
+   0.3333
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

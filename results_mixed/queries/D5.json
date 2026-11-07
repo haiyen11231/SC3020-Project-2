@@ -1,0 +1,624 @@
+{
+ "id": "D5",
+ "category": "D. Aggregation",
+ "purpose": "ROLLUP, i.e. several grouping levels in one aggregate",
+ "sql": "SELECT r.r_name, n.n_name, count(*) AS suppliers\nFROM supplier s\nJOIN nation n ON n.n_nationkey = s.s_nationkey\nJOIN region r ON r.r_regionkey = n.n_regionkey\nGROUP BY ROLLUP (r.r_name, n.n_name)",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Mixed",
+    "Partial Mode": "Simple",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 2.67,
+    "Total Cost": 556.18,
+    "Plan Rows": 131,
+    "Plan Width": 60,
+    "Disabled": false,
+    "Grouping Sets": [
+     {
+      "Hash Keys": [
+       [
+        "r.r_name",
+        "n.n_name"
+       ]
+      ]
+     },
+     {
+      "Hash Keys": [
+       [
+        "r.r_name"
+       ]
+      ]
+     },
+     {
+      "Group Keys": [
+       []
+      ]
+     }
+    ],
+    "Planned Partitions": 0,
+    "Plans": [
+     {
+      "Node Type": "Hash Join",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Join Type": "Inner",
+      "Startup Cost": 2.67,
+      "Total Cost": 404.88,
+      "Plan Rows": 10000,
+      "Plan Width": 52,
+      "Disabled": false,
+      "Inner Unique": true,
+      "Hash Cond": "(n.n_regionkey = r.r_regionkey)",
+      "Plans": [
+       {
+        "Node Type": "Hash Join",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Join Type": "Inner",
+        "Startup Cost": 1.56,
+        "Total Cost": 355.26,
+        "Plan Rows": 10000,
+        "Plan Width": 30,
+        "Disabled": false,
+        "Inner Unique": true,
+        "Hash Cond": "(s.s_nationkey = n.n_nationkey)",
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Relation Name": "supplier",
+          "Alias": "s",
+          "Startup Cost": 0.0,
+          "Total Cost": 323.0,
+          "Plan Rows": 10000,
+          "Plan Width": 4,
+          "Disabled": false
+         },
+         {
+          "Node Type": "Hash",
+          "Parent Relationship": "Inner",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 1.25,
+          "Total Cost": 1.25,
+          "Plan Rows": 25,
+          "Plan Width": 34,
+          "Disabled": false,
+          "Plans": [
+           {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "nation",
+            "Alias": "n",
+            "Startup Cost": 0.0,
+            "Total Cost": 1.25,
+            "Plan Rows": 25,
+            "Plan Width": 34,
+            "Disabled": false
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "Node Type": "Hash",
+        "Parent Relationship": "Inner",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 1.05,
+        "Total Cost": 1.05,
+        "Plan Rows": 5,
+        "Plan Width": 30,
+        "Disabled": false,
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Relation Name": "region",
+          "Alias": "r",
+          "Startup Cost": 0.0,
+          "Total Cost": 1.05,
+          "Plan Rows": 5,
+          "Plan Width": 30,
+          "Disabled": false
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Mixed",
+   "Partial Mode": "Simple"
+  },
+  "cost": 556.18,
+  "rows": 131,
+  "children": [
+   {
+    "node_type": "Hash Join",
+    "raw_type": "Hash Join",
+    "relation": null,
+    "index_name": null,
+    "join_type": "Inner",
+    "conditions": {
+     "Hash Cond": "(n.n_regionkey = r.r_regionkey)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 404.88,
+    "rows": 10000,
+    "children": [
+     {
+      "node_type": "Hash Join",
+      "raw_type": "Hash Join",
+      "relation": null,
+      "index_name": null,
+      "join_type": "Inner",
+      "conditions": {
+       "Hash Cond": "(s.s_nationkey = n.n_nationkey)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 355.26,
+      "rows": 10000,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "supplier",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "s"
+        },
+        "cost": 323.0,
+        "rows": 10000,
+        "children": [],
+        "source": "postgres"
+       },
+       {
+        "node_type": "Hash",
+        "raw_type": "Hash",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Inner"
+        },
+        "cost": 1.25,
+        "rows": 25,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "nation",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer",
+           "Alias": "n"
+          },
+          "cost": 1.25,
+          "rows": 25,
+          "children": [],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     },
+     {
+      "node_type": "Hash",
+      "raw_type": "Hash",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Inner"
+      },
+      "cost": 1.05,
+      "rows": 5,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "region",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "r"
+        },
+        "cost": 1.05,
+        "rows": 5,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Sorted\",\n  \"keys\": [\n    \"r.r_name\",\n    \"n.n_name\"\n  ],\n  \"estimated_rows\": 36,\n  \"reason\": \"The query uses ROLLUP, which is efficiently handled by a Sorted Aggregate after joining the small dimension tables.\",\n  \"conditions\": {},\n  \"children\": [\n    {\n      \"node_type\": \"Sort\",\n      \"keys\": [\n        \"r.r_name\",\n        \"n.n_name\"\n      ],\n      \"estimated_rows\": 10000,\n      \"reason\": \"Sorting is required for the ROLLUP aggregation.\",\n      \"conditions\": {},\n      \"children\": [\n        {\n          \"node_type\": \"Hash Join\",\n          \"join_type\": \"Inner\",\n          \"conditions\": {\n            \"Hash Cond\": \"n.n_regionkey = r.r_regionkey\"\n          },\n          \"estimated_rows\": 10000,\n          \"reason\": \"Joining supplier, nation, and region tables using hash joins.\",\n          \"children\": [\n            {\n              \"node_type\": \"Hash Join\",\n              \"join_type\": \"Inner\",\n              \"conditions\": {\n                \"Hash Cond\": \"s.s_nationkey = n.n_nationkey\"\n              },\n              \"estimated_rows\": 10000,\n              \"reason\": \"Joining supplier and nation tables.\",\n              \"children\": [\n                {\n                  \"node_type\": \"Seq Scan\",\n                  \"relation\": \"supplier\",\n                  \"estimated_rows\": 10000,\n                  \"reason\": \"Full scan of the supplier table.\",\n                  \"conditions\": {},\n                  \"children\": []\n                },\n                {\n                  \"node_type\": \"Hash\",\n                  \"estimated_rows\": 25,\n                  \"reason\": \"Building hash table for nation table.\",\n                  \"conditions\": {},\n                  \"children\": [\n                    {\n                      \"node_type\": \"Seq Scan\",\n                      \"relation\": \"nation\",\n                      \"estimated_rows\": 25,\n                      \"reason\": \"Full scan of the nation table.\",\n                      \"conditions\": {},\n                      \"children\": []\n                    }\n                  ]\n                }\n              ]\n            },\n            {\n              \"node_type\": \"Hash\",\n              \"estimated_rows\": 5,\n              \"reason\": \"Building hash table for region table.\",\n              \"conditions\": {},\n              \"children\": [\n                {\n                  \"node_type\": \"Seq Scan\",\n                  \"relation\": \"region\",\n                  \"estimated_rows\": 5,\n                  \"reason\": \"Full scan of the region table.\",\n                  \"conditions\": {},\n                  \"children\": []\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "r.r_name",
+   "n.n_name"
+  ],
+  "extra": {
+   "Strategy": "Sorted",
+   "AI Reason": "The query uses ROLLUP, which is efficiently handled by a Sorted Aggregate after joining the small dimension tables."
+  },
+  "cost": null,
+  "rows": 36.0,
+  "children": [
+   {
+    "node_type": "Sort",
+    "raw_type": "Sort",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "r.r_name",
+     "n.n_name"
+    ],
+    "extra": {
+     "AI Reason": "Sorting is required for the ROLLUP aggregation."
+    },
+    "cost": null,
+    "rows": 10000.0,
+    "children": [
+     {
+      "node_type": "Hash Join",
+      "raw_type": "Hash Join",
+      "relation": null,
+      "index_name": null,
+      "join_type": "Inner",
+      "conditions": {
+       "Hash Cond": "n.n_regionkey = r.r_regionkey"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Joining supplier, nation, and region tables using hash joins."
+      },
+      "cost": null,
+      "rows": 10000.0,
+      "children": [
+       {
+        "node_type": "Hash Join",
+        "raw_type": "Hash Join",
+        "relation": null,
+        "index_name": null,
+        "join_type": "Inner",
+        "conditions": {
+         "Hash Cond": "s.s_nationkey = n.n_nationkey"
+        },
+        "keys": [],
+        "extra": {
+         "AI Reason": "Joining supplier and nation tables."
+        },
+        "cost": null,
+        "rows": 10000.0,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "supplier",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Full scan of the supplier table."
+          },
+          "cost": null,
+          "rows": 10000.0,
+          "children": [],
+          "source": "ai"
+         },
+         {
+          "node_type": "Hash",
+          "raw_type": "Hash",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Building hash table for nation table."
+          },
+          "cost": null,
+          "rows": 25.0,
+          "children": [
+           {
+            "node_type": "Seq Scan",
+            "raw_type": "Seq Scan",
+            "relation": "nation",
+            "index_name": null,
+            "join_type": null,
+            "conditions": {},
+            "keys": [],
+            "extra": {
+             "AI Reason": "Full scan of the nation table."
+            },
+            "cost": null,
+            "rows": 25.0,
+            "children": [],
+            "source": "ai"
+           }
+          ],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       },
+       {
+        "node_type": "Hash",
+        "raw_type": "Hash",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Building hash table for region table."
+        },
+        "cost": null,
+        "rows": 5.0,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "region",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Full scan of the region table."
+          },
+          "cost": null,
+          "rows": 5.0,
+          "children": [],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.1176,
+   "ted_rate": 0.0588,
+   "pg_nodes": 8,
+   "ai_nodes": 9,
+   "matched_pairs": 8,
+   "identical_pairs": 7,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 1,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.0,
+   "max_q_error": 3.64
+  },
+  "join_order": {
+   "postgres": "HJ(HJ(supplier, nation), region)",
+   "ai": "HJ(HJ(supplier, nation), region)"
+  },
+  "differences": [
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Mixed) over (supplier, nation, region): PostgreSQL uses Mixed aggregation, the AI uses Sorted. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query uses ROLLUP, which is efficiently handled by a Sorted Aggregate after joining the small dimension tables.\"",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Sort over (supplier, nation, region) (sorts its input). The AI's reason: \"Sorting is required for the ROLLUP aggregation.\"",
+    "pg_path": null,
+    "ai_path": "0.0"
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Hash Join of (supplier, nation) with (region).",
+   "Both plans use Hash Join of (supplier) with (nation).",
+   "Both plans use Seq Scan on supplier.",
+   "Both plans use Seq Scan on nation.",
+   "Both plans use Seq Scan on region."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Mixed) over (supplier, nation, region): PostgreSQL uses Mixed aggregation, the AI uses Sorted. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query uses ROLLUP, which is efficiently handled by a Sorted Aggregate after joining the small dimension tables.\""
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": "0.0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0.0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.1",
+    "ai_path": "0.0.0.0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.1.0",
+    "ai_path": "0.0.0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.1",
+    "ai_path": "0.0.0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.1.0",
+    "ai_path": "0.0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Sort over (supplier, nation, region) (sorts its input). The AI's reason: \"Sorting is required for the ROLLUP aggregation.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed",
+    "0.0": "same",
+    "0.0.0": "same",
+    "0.0.0.0": "same",
+    "0.0.0.1": "same",
+    "0.0.0.1.0": "same",
+    "0.0.1": "same",
+    "0.0.1.0": "same"
+   },
+   "ai": {
+    "0": "changed",
+    "0.0.0": "same",
+    "0.0.0.0": "same",
+    "0.0.0.0.0": "same",
+    "0.0.0.0.1": "same",
+    "0.0.0.0.1.0": "same",
+    "0.0.0.1": "same",
+    "0.0.0.1.0": "same",
+    "0.0": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 12% (tree edit distance rate: 6%). 7 of 8 PostgreSQL nodes have an identical counterpart in the AI plan's 9 nodes.\n\nPostgreSQL join order: HJ(HJ(supplier, nation), region)\nAI join order:         HJ(HJ(supplier, nation), region)\n\nDIFFERENCES\n1. [Aggregation strategy] Aggregate (Mixed) over (supplier, nation, region): PostgreSQL uses Mixed aggregation, the AI uses Sorted. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query uses ROLLUP, which is efficiently handled by a Sorted Aggregate after joining the small dimension tables.\"\n2. [Extra operator] Only the AI plan has Sort over (supplier, nation, region) (sorts its input). The AI's reason: \"Sorting is required for the ROLLUP aggregation.\"\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Hash Join of (supplier, nation) with (region).\n- Both plans use Hash Join of (supplier) with (nation).\n- Both plans use Seq Scan on supplier.\n- Both plans use Seq Scan on nation.\n- Both plans use Seq Scan on region.",
+ "timings": {
+  "postgres": 0.003,
+  "ai": 3.32,
+  "comparison": 0.002
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.1176,
+  "ted_rate": 0.0588,
+  "pg_nodes": 8,
+  "ai_nodes": 9,
+  "identical_pairs": 7,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 1,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.0,
+  "max_q_error": 3.64
+ },
+ "difference_categories": [
+  "Aggregation strategy",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.1176,
+   0.1176,
+   0.1176
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

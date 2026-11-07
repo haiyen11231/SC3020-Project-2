@@ -1,0 +1,390 @@
+{
+ "id": "D1",
+ "category": "D. Aggregation",
+ "purpose": "Few groups over a large table with HAVING (Hashed or parallel partial aggregation)",
+ "sql": "SELECT l_shipmode, avg(l_quantity) AS avg_qty, count(*) AS n\nFROM lineitem\nWHERE l_receiptdate > l_commitdate\nGROUP BY l_shipmode\nHAVING count(*) > 100000",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Sorted",
+    "Partial Mode": "Finalize",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 151089.67,
+    "Total Cost": 151091.93,
+    "Plan Rows": 2,
+    "Plan Width": 51,
+    "Disabled": false,
+    "Group Key": [
+     "l_shipmode"
+    ],
+    "Filter": "(count(*) > 100000)",
+    "Plans": [
+     {
+      "Node Type": "Gather Merge",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 151089.67,
+      "Total Cost": 151091.65,
+      "Plan Rows": 17,
+      "Plan Width": 51,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Plans": [
+       {
+        "Node Type": "Sort",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 150089.65,
+        "Total Cost": 150089.67,
+        "Plan Rows": 7,
+        "Plan Width": 51,
+        "Disabled": false,
+        "Sort Key": [
+         "l_shipmode"
+        ],
+        "Plans": [
+         {
+          "Node Type": "Aggregate",
+          "Strategy": "Hashed",
+          "Partial Mode": "Partial",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 150089.46,
+          "Total Cost": 150089.55,
+          "Plan Rows": 7,
+          "Plan Width": 51,
+          "Disabled": false,
+          "Group Key": [
+           "l_shipmode"
+          ],
+          "Planned Partitions": 0,
+          "Plans": [
+           {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": true,
+            "Async Capable": false,
+            "Relation Name": "lineitem",
+            "Alias": "lineitem",
+            "Startup Cost": 0.0,
+            "Total Cost": 143838.55,
+            "Plan Rows": 833455,
+            "Plan Width": 16,
+            "Disabled": false,
+            "Filter": "(l_receiptdate > l_commitdate)"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {
+   "Filter": "(count(*) > 100000)"
+  },
+  "keys": [
+   "l_shipmode"
+  ],
+  "extra": {
+   "Strategy": "Sorted",
+   "Partial Mode": "Finalize"
+  },
+  "cost": 151091.93,
+  "rows": 2,
+  "children": [
+   {
+    "node_type": "Gather Merge",
+    "raw_type": "Gather Merge",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 151091.65,
+    "rows": 17,
+    "children": [
+     {
+      "node_type": "Sort",
+      "raw_type": "Sort",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "l_shipmode"
+      ],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 150089.67,
+      "rows": 7,
+      "children": [
+       {
+        "node_type": "Aggregate",
+        "raw_type": "Aggregate",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [
+         "l_shipmode"
+        ],
+        "extra": {
+         "Strategy": "Hashed",
+         "Partial Mode": "Partial",
+         "Parent Relationship": "Outer"
+        },
+        "cost": 150089.55,
+        "rows": 7,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "lineitem",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {
+           "Filter": "(l_receiptdate > l_commitdate)"
+          },
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer",
+           "Alias": "lineitem"
+          },
+          "cost": 143838.55,
+          "rows": 833455,
+          "children": [],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Hashed\",\n  \"keys\": [\"l_shipmode\"],\n  \"conditions\": {\n    \"Filter\": \"count(*) > 100000\"\n  },\n  \"estimated_rows\": 7,\n  \"reason\": \"Aggregate by shipmode with a having clause filter on the count.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"lineitem\",\n      \"conditions\": {\n        \"Filter\": \"l_receiptdate > l_commitdate\"\n      },\n      \"estimated_rows\": 2000291,\n      \"reason\": \"Full scan of lineitem is required to evaluate the receiptdate vs commitdate condition.\",\n      \"children\": []\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {
+   "Filter": "count(*) > 100000"
+  },
+  "keys": [
+   "l_shipmode"
+  ],
+  "extra": {
+   "Strategy": "Hashed",
+   "AI Reason": "Aggregate by shipmode with a having clause filter on the count.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 7.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "lineitem",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "l_receiptdate > l_commitdate"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Full scan of lineitem is required to evaluate the receiptdate vs commitdate condition."
+    },
+    "cost": null,
+    "rows": 2000291.0,
+    "children": [],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.5714,
+   "ted_rate": 0.4286,
+   "pg_nodes": 5,
+   "ai_nodes": 2,
+   "matched_pairs": 2,
+   "identical_pairs": 1,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 3,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 3.5,
+   "max_q_error": 3.5
+  },
+  "join_order": {
+   "postgres": "lineitem",
+   "ai": "lineitem"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Sorted, Finalize) over (lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate by shipmode with a having clause filter on the count.\"",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (lineitem) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Sort over (lineitem) (sorts its input).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (lineitem) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0.0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on lineitem."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Sorted, Finalize) over (lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate by shipmode with a having clause filter on the count.\""
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (lineitem) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Sort over (lineitem) (sorts its input)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (lineitem) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "postgres_only",
+    "0.0.0.0.0": "same"
+   },
+   "ai": {
+    "0": "changed",
+    "0.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 57% (tree edit distance rate: 43%). 1 of 5 PostgreSQL nodes have an identical counterpart in the AI plan's 2 nodes.\n\nPostgreSQL join order: lineitem\nAI join order:         lineitem\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.\n2. [Aggregation strategy] Aggregate (Sorted, Finalize) over (lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate by shipmode with a having clause filter on the count.\"\n3. [Missing operator] Only the PostgreSQL plan has Gather Merge over (lineitem) (collects sorted rows from parallel workers, keeping the order).\n4. [Missing operator] Only the PostgreSQL plan has Sort over (lineitem) (sorts its input).\n5. [Missing operator] Only the PostgreSQL plan has Aggregate (Hashed, Partial) over (lineitem) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n\nSIMILARITIES\n- Both plans use Seq Scan on lineitem.",
+ "timings": {
+  "postgres": 0.001,
+  "ai": 1.352,
+  "comparison": 0.002
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.5714,
+  "ted_rate": 0.4286,
+  "pg_nodes": 5,
+  "ai_nodes": 2,
+  "identical_pairs": 1,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 3,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 3.5,
+  "max_q_error": 3.5
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Aggregation strategy",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.5714,
+   0.5714,
+   0.5714
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

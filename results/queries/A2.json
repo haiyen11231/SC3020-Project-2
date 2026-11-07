@@ -1,0 +1,146 @@
+{
+ "id": "A2",
+ "category": "A. Selection / access path",
+ "purpose": "Narrow range on the primary key (expected: Index Scan)",
+ "sql": "SELECT o_orderkey, o_totalprice\nFROM orders\nWHERE o_orderkey BETWEEN 100000 AND 100500",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Index Scan",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Scan Direction": "Forward",
+    "Index Name": "orders_pkey",
+    "Relation Name": "orders",
+    "Alias": "orders",
+    "Startup Cost": 0.43,
+    "Total Cost": 12.94,
+    "Plan Rows": 125,
+    "Plan Width": 12,
+    "Disabled": false,
+    "Index Cond": "((o_orderkey >= 100000) AND (o_orderkey <= 100500))"
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Index Scan",
+  "raw_type": "Index Scan",
+  "relation": "orders",
+  "index_name": "orders_pkey",
+  "join_type": null,
+  "conditions": {
+   "Index Cond": "((o_orderkey >= 100000) AND (o_orderkey <= 100500))"
+  },
+  "keys": [],
+  "extra": {
+   "Scan Direction": "Forward",
+   "Alias": "orders"
+  },
+  "cost": 12.94,
+  "rows": 125,
+  "children": [],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Index Scan\",\n  \"relation\": \"orders\",\n  \"index_name\": \"orders_pkey\",\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {\n    \"Index Cond\": \"o_orderkey >= 100000 AND o_orderkey <= 100500\"\n  },\n  \"keys\": [],\n  \"estimated_rows\": 501,\n  \"parent_relationship\": null,\n  \"reason\": \"The query filters on the primary key, making an index scan on the primary key index the most efficient access method.\",\n  \"children\": []\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Index Scan",
+  "raw_type": "Index Scan",
+  "relation": "orders",
+  "index_name": "orders_pkey",
+  "join_type": null,
+  "conditions": {
+   "Index Cond": "o_orderkey >= 100000 AND o_orderkey <= 100500"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query filters on the primary key, making an index scan on the primary key index the most efficient access method.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 501.0,
+  "children": [],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.0,
+   "ted_rate": 0.0,
+   "pg_nodes": 1,
+   "ai_nodes": 1,
+   "matched_pairs": 1,
+   "identical_pairs": 1,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 4.01,
+   "max_q_error": 4.01
+  },
+  "join_order": {
+   "postgres": "orders",
+   "ai": "orders"
+  },
+  "differences": [],
+  "similarities": [
+   "The plans are identical.",
+   "Both plans use Index Scan on orders using orders_pkey."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same"
+   },
+   "ai": {
+    "0": "same"
+   }
+  }
+ },
+ "explanation": "The two plans are identical in structure, operators and details.\n\nPostgreSQL join order: orders\nAI join order:         orders\n\nSIMILARITIES\n- The plans are identical.\n- Both plans use Index Scan on orders using orders_pkey.",
+ "timings": {
+  "postgres": 0.002,
+  "ai": 30.124,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.0,
+  "ted_rate": 0.0,
+  "pg_nodes": 1,
+  "ai_nodes": 1,
+  "identical_pairs": 1,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 4.01,
+  "max_q_error": 4.01
+ },
+ "difference_categories": [],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

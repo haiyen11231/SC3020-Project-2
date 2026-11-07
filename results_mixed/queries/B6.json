@@ -1,0 +1,413 @@
+{
+ "id": "B6",
+ "category": "B. Two-table join",
+ "purpose": "Join of two large tables on their shared key, both sorted by it (Merge Join candidate)",
+ "sql": "SELECT o.o_orderkey, count(*) AS lines\nFROM orders o\nJOIN lineitem l ON l.l_orderkey = o.o_orderkey\nWHERE o.o_orderkey < 20000\nGROUP BY o.o_orderkey",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Sorted",
+    "Partial Mode": "Simple",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 0.86,
+    "Total Cost": 22349.0,
+    "Plan Rows": 4939,
+    "Plan Width": 12,
+    "Disabled": false,
+    "Group Key": [
+     "o.o_orderkey"
+    ],
+    "Plans": [
+     {
+      "Node Type": "Nested Loop",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Join Type": "Inner",
+      "Startup Cost": 0.86,
+      "Total Cost": 22200.82,
+      "Plan Rows": 19759,
+      "Plan Width": 4,
+      "Disabled": false,
+      "Inner Unique": false,
+      "Plans": [
+       {
+        "Node Type": "Index Only Scan",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Scan Direction": "Forward",
+        "Index Name": "orders_pkey",
+        "Relation Name": "orders",
+        "Alias": "o",
+        "Startup Cost": 0.43,
+        "Total Cost": 146.86,
+        "Plan Rows": 4939,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Index Cond": "(o_orderkey < 20000)"
+       },
+       {
+        "Node Type": "Index Only Scan",
+        "Parent Relationship": "Inner",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Scan Direction": "Forward",
+        "Index Name": "lineitem_pkey",
+        "Relation Name": "lineitem",
+        "Alias": "l",
+        "Startup Cost": 0.43,
+        "Total Cost": 4.32,
+        "Plan Rows": 15,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Index Cond": "(l_orderkey = o.o_orderkey)"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "o.o_orderkey"
+  ],
+  "extra": {
+   "Strategy": "Sorted",
+   "Partial Mode": "Simple"
+  },
+  "cost": 22349.0,
+  "rows": 4939,
+  "children": [
+   {
+    "node_type": "Nested Loop",
+    "raw_type": "Nested Loop",
+    "relation": null,
+    "index_name": null,
+    "join_type": "Inner",
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 22200.82,
+    "rows": 19759,
+    "children": [
+     {
+      "node_type": "Index Only Scan",
+      "raw_type": "Index Only Scan",
+      "relation": "orders",
+      "index_name": "orders_pkey",
+      "join_type": null,
+      "conditions": {
+       "Index Cond": "(o_orderkey < 20000)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer",
+       "Scan Direction": "Forward",
+       "Alias": "o"
+      },
+      "cost": 146.86,
+      "rows": 4939,
+      "children": [],
+      "source": "postgres"
+     },
+     {
+      "node_type": "Index Only Scan",
+      "raw_type": "Index Only Scan",
+      "relation": "lineitem",
+      "index_name": "lineitem_pkey",
+      "join_type": null,
+      "conditions": {
+       "Index Cond": "(l_orderkey = o.o_orderkey)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Inner",
+       "Scan Direction": "Forward",
+       "Alias": "l"
+      },
+      "cost": 4.32,
+      "rows": 15,
+      "children": [],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Hashed\",\n  \"keys\": [\"o.o_orderkey\"],\n  \"estimated_rows\": 5000,\n  \"reason\": \"The query requires grouping by order key after joining orders and lineitems, and a hash aggregate is efficient for this cardinality.\",\n  \"conditions\": {},\n  \"children\": [\n    {\n      \"node_type\": \"Hash Join\",\n      \"join_type\": \"Inner\",\n      \"conditions\": {\n        \"Hash Cond\": \"l.l_orderkey = o.o_orderkey\"\n      },\n      \"estimated_rows\": 5000,\n      \"reason\": \"Hash join is chosen to combine the filtered orders with the lineitem table.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"lineitem\",\n          \"conditions\": {\n            \"Filter\": null\n          },\n          \"estimated_rows\": 6000874,\n          \"reason\": \"Full scan of lineitem is necessary as there is no filter on it.\",\n          \"children\": []\n        },\n        {\n          \"node_type\": \"Hash\",\n          \"estimated_rows\": 5000,\n          \"reason\": \"Build hash table for the filtered orders.\",\n          \"children\": [\n            {\n              \"node_type\": \"Index Scan\",\n              \"relation\": \"orders\",\n              \"index_name\": \"orders_pkey\",\n              \"conditions\": {\n                \"Index Cond\": \"o_orderkey < 20000\"\n              },\n              \"estimated_rows\": 5000,\n              \"reason\": \"Index scan on orders_pkey is efficient for the range filter on o_orderkey.\",\n              \"children\": []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "o.o_orderkey"
+  ],
+  "extra": {
+   "Strategy": "Hashed",
+   "AI Reason": "The query requires grouping by order key after joining orders and lineitems, and a hash aggregate is efficient for this cardinality."
+  },
+  "cost": null,
+  "rows": 5000.0,
+  "children": [
+   {
+    "node_type": "Hash Join",
+    "raw_type": "Hash Join",
+    "relation": null,
+    "index_name": null,
+    "join_type": "Inner",
+    "conditions": {
+     "Hash Cond": "l.l_orderkey = o.o_orderkey"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Hash join is chosen to combine the filtered orders with the lineitem table."
+    },
+    "cost": null,
+    "rows": 5000.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "lineitem",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Full scan of lineitem is necessary as there is no filter on it."
+      },
+      "cost": null,
+      "rows": 6000874.0,
+      "children": [],
+      "source": "ai"
+     },
+     {
+      "node_type": "Hash",
+      "raw_type": "Hash",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Build hash table for the filtered orders."
+      },
+      "cost": null,
+      "rows": 5000.0,
+      "children": [
+       {
+        "node_type": "Index Scan",
+        "raw_type": "Index Scan",
+        "relation": "orders",
+        "index_name": "orders_pkey",
+        "join_type": null,
+        "conditions": {
+         "Index Cond": "o_orderkey < 20000"
+        },
+        "keys": [],
+        "extra": {
+         "AI Reason": "Index scan on orders_pkey is efficient for the range filter on o_orderkey."
+        },
+        "cost": null,
+        "rows": 5000.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.8889,
+   "ted_rate": 0.4444,
+   "pg_nodes": 4,
+   "ai_nodes": 5,
+   "matched_pairs": 4,
+   "identical_pairs": 0,
+   "changed_pairs": 4,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 1,
+   "access_method_agreement": 0.0,
+   "join_algorithm_agreement": 0.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.01,
+   "max_q_error": 3.95
+  },
+  "join_order": {
+   "postgres": "NL(orders, lineitem)",
+   "ai": "HJ(lineitem, orders)"
+  },
+  "differences": [
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Sorted) over (orders, lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query requires grouping by order key after joining orders and lineitems, and a hash aggregate is efficient for this cardinality.\"",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Join algorithm",
+    "text": "The join of (orders, lineitem): PostgreSQL uses Nested Loop of (orders) with (lineitem). The AI uses Hash Join of (lineitem) with (orders). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Hash join is chosen to combine the filtered orders with the lineitem table.\"",
+    "pg_path": "0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Join input order",
+    "text": "Join of (orders, lineitem): outer and inner inputs are swapped. PostgreSQL's outer input is (orders).",
+    "pg_path": "0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Access method",
+    "text": "Table orders: PostgreSQL uses Index Only Scan on orders using orders_pkey. The AI uses Index Scan on orders using orders_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Index scan on orders_pkey is efficient for the range filter on o_orderkey.\"",
+    "pg_path": "0.0.0",
+    "ai_path": "0.0.1.0"
+   },
+   {
+    "category": "Access method",
+    "text": "Table lineitem: PostgreSQL uses Index Only Scan on lineitem using lineitem_pkey. The AI uses Seq Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of lineitem is necessary as there is no filter on it.\"",
+    "pg_path": "0.0.1",
+    "ai_path": "0.0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash over (orders) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Build hash table for the filtered orders.\"",
+    "pg_path": null,
+    "ai_path": "0.0.1"
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same)."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Sorted) over (orders, lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query requires grouping by order key after joining orders and lineitems, and a hash aggregate is efficient for this cardinality.\""
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "The join of (orders, lineitem): PostgreSQL uses Nested Loop of (orders) with (lineitem). The AI uses Hash Join of (lineitem) with (orders). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Hash join is chosen to combine the filtered orders with the lineitem table.\"",
+     "Join of (orders, lineitem): outer and inner inputs are swapped. PostgreSQL's outer input is (orders)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": "0.0.1.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table orders: PostgreSQL uses Index Only Scan on orders using orders_pkey. The AI uses Index Scan on orders using orders_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Index scan on orders_pkey is efficient for the range filter on o_orderkey.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.1",
+    "ai_path": "0.0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table lineitem: PostgreSQL uses Index Only Scan on lineitem using lineitem_pkey. The AI uses Seq Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of lineitem is necessary as there is no filter on it.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash over (orders) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Build hash table for the filtered orders.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed",
+    "0.0": "changed",
+    "0.0.0": "changed",
+    "0.0.1": "changed"
+   },
+   "ai": {
+    "0": "changed",
+    "0.0": "changed",
+    "0.0.1.0": "changed",
+    "0.0.0": "changed",
+    "0.0.1": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 89% (tree edit distance rate: 44%). 0 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 5 nodes.\n\nPostgreSQL join order: NL(orders, lineitem)\nAI join order:         HJ(lineitem, orders)\n\nDIFFERENCES\n1. [Aggregation strategy] Aggregate (Sorted) over (orders, lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query requires grouping by order key after joining orders and lineitems, and a hash aggregate is efficient for this cardinality.\"\n2. [Join algorithm] The join of (orders, lineitem): PostgreSQL uses Nested Loop of (orders) with (lineitem). The AI uses Hash Join of (lineitem) with (orders). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Hash join is chosen to combine the filtered orders with the lineitem table.\"\n3. [Join input order] Join of (orders, lineitem): outer and inner inputs are swapped. PostgreSQL's outer input is (orders).\n4. [Access method] Table orders: PostgreSQL uses Index Only Scan on orders using orders_pkey. The AI uses Index Scan on orders using orders_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Index scan on orders_pkey is efficient for the range filter on o_orderkey.\"\n5. [Access method] Table lineitem: PostgreSQL uses Index Only Scan on lineitem using lineitem_pkey. The AI uses Seq Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of lineitem is necessary as there is no filter on it.\"\n6. [Extra operator] Only the AI plan has Hash over (orders) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Build hash table for the filtered orders.\"\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).",
+ "timings": {
+  "postgres": 0.029,
+  "ai": 103.088,
+  "comparison": 0.002
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.8889,
+  "ted_rate": 0.4444,
+  "pg_nodes": 4,
+  "ai_nodes": 5,
+  "identical_pairs": 0,
+  "changed_pairs": 4,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 1,
+  "access_method_agreement": 0.0,
+  "join_algorithm_agreement": 0.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.01,
+  "max_q_error": 3.95
+ },
+ "difference_categories": [
+  "Aggregation strategy",
+  "Join algorithm",
+  "Join input order",
+  "Access method",
+  "Access method",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.8889,
+   0.8889,
+   0.8889
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

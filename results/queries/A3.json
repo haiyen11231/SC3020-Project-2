@@ -1,0 +1,319 @@
+{
+ "id": "A3",
+ "category": "A. Selection / access path",
+ "purpose": "Wide range on the primary key, most rows qualify (expected: Seq Scan despite the index)",
+ "sql": "SELECT count(*), avg(o_totalprice)\nFROM orders\nWHERE o_orderkey < 5000000",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Finalize",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 37541.36,
+    "Total Cost": 37541.37,
+    "Plan Rows": 1,
+    "Plan Width": 40,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Gather",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 37541.13,
+      "Total Cost": 37541.34,
+      "Plan Rows": 2,
+      "Plan Width": 40,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Single Copy": false,
+      "Plans": [
+       {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Partial Mode": "Partial",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 36541.13,
+        "Total Cost": 36541.14,
+        "Plan Rows": 1,
+        "Plan Width": 40,
+        "Disabled": false,
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": true,
+          "Async Capable": false,
+          "Relation Name": "orders",
+          "Alias": "orders",
+          "Startup Cost": 0.0,
+          "Total Cost": 33940.5,
+          "Plan Rows": 520126,
+          "Plan Width": 8,
+          "Disabled": false,
+          "Filter": "(o_orderkey < 5000000)"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "Partial Mode": "Finalize"
+  },
+  "cost": 37541.37,
+  "rows": 1,
+  "children": [
+   {
+    "node_type": "Gather",
+    "raw_type": "Gather",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 37541.34,
+    "rows": 2,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Strategy": "Plain",
+       "Partial Mode": "Partial",
+       "Parent Relationship": "Outer"
+      },
+      "cost": 36541.14,
+      "rows": 1,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "orders",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "(o_orderkey < 5000000)"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "orders"
+        },
+        "cost": 33940.5,
+        "rows": 520126,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Plain\",\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 1,\n  \"parent_relationship\": null,\n  \"reason\": \"Aggregate the filtered orders to compute count and average.\",\n  \"children\": [\n    {\n      \"node_type\": \"Index Scan\",\n      \"relation\": \"orders\",\n      \"index_name\": \"orders_pkey\",\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {\n        \"Filter\": \"o_orderkey < 5000000\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 1250000,\n      \"parent_relationship\": null,\n      \"reason\": \"Use the primary key index to filter orders by orderkey range.\",\n      \"children\": []\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "AI Reason": "Aggregate the filtered orders to compute count and average.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 1.0,
+  "children": [
+   {
+    "node_type": "Index Scan",
+    "raw_type": "Index Scan",
+    "relation": "orders",
+    "index_name": "orders_pkey",
+    "join_type": null,
+    "conditions": {
+     "Filter": "o_orderkey < 5000000"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Use the primary key index to filter orders by orderkey range."
+    },
+    "cost": null,
+    "rows": 1250000.0,
+    "children": [],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.6667,
+   "ted_rate": 0.5,
+   "pg_nodes": 4,
+   "ai_nodes": 2,
+   "matched_pairs": 2,
+   "identical_pairs": 1,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 2,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 0.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "orders",
+   "ai": "orders"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Access method",
+    "text": "Table orders: PostgreSQL uses Seq Scan on orders. The AI uses Index Scan on orders using orders_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Use the primary key index to filter orders by orderkey range.\"",
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table orders: PostgreSQL uses Seq Scan on orders. The AI uses Index Scan on orders using orders_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Use the primary key index to filter orders by orderkey range.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "changed"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "changed"
+   }
+  }
+ },
+ "explanation": "Difference rate: 67% (tree edit distance rate: 50%). 1 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 2 nodes.\n\nPostgreSQL join order: orders\nAI join order:         orders\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather), with partial aggregation in each worker. The AI plan runs in a single process.\n2. [Access method] Table orders: PostgreSQL uses Seq Scan on orders. The AI uses Index Scan on orders using orders_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Use the primary key index to filter orders by orderkey range.\"\n3. [Missing operator] Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes).\n4. [Missing operator] Only the PostgreSQL plan has Aggregate (Plain, Partial) over (orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+ "timings": {
+  "postgres": 0.075,
+  "ai": 2.863,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.6667,
+  "ted_rate": 0.5,
+  "pg_nodes": 4,
+  "ai_nodes": 2,
+  "identical_pairs": 1,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 2,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 0.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Access method",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.6667,
+   0.6667,
+   0.6667
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

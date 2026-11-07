@@ -1,0 +1,345 @@
+{
+ "id": "D2",
+ "category": "D. Aggregation",
+ "purpose": "Very many groups (one per order) followed by Top-N",
+ "sql": "SELECT l_orderkey, sum(l_extendedprice) AS order_value\nFROM lineitem\nGROUP BY l_orderkey\nORDER BY order_value DESC\nLIMIT 10",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Limit",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 485935.24,
+    "Total Cost": 485935.27,
+    "Plan Rows": 10,
+    "Plan Width": 36,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Sort",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 485935.24,
+      "Total Cost": 486906.9,
+      "Plan Rows": 388662,
+      "Plan Width": 36,
+      "Disabled": false,
+      "Sort Key": [
+       "(sum(l_extendedprice)) DESC"
+      ],
+      "Plans": [
+       {
+        "Node Type": "Aggregate",
+        "Strategy": "Sorted",
+        "Partial Mode": "Simple",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.43,
+        "Total Cost": 477536.4,
+        "Plan Rows": 388662,
+        "Plan Width": 36,
+        "Disabled": false,
+        "Group Key": [
+         "l_orderkey"
+        ],
+        "Plans": [
+         {
+          "Node Type": "Index Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Scan Direction": "Forward",
+          "Index Name": "lineitem_pkey",
+          "Relation Name": "lineitem",
+          "Alias": "lineitem",
+          "Startup Cost": 0.43,
+          "Total Cost": 442673.75,
+          "Plan Rows": 6000874,
+          "Plan Width": 12,
+          "Disabled": false
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 485935.27,
+  "rows": 10,
+  "children": [
+   {
+    "node_type": "Sort",
+    "raw_type": "Sort",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "(sum(l_extendedprice)) DESC"
+    ],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 486906.9,
+    "rows": 388662,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "l_orderkey"
+      ],
+      "extra": {
+       "Strategy": "Sorted",
+       "Partial Mode": "Simple",
+       "Parent Relationship": "Outer"
+      },
+      "cost": 477536.4,
+      "rows": 388662,
+      "children": [
+       {
+        "node_type": "Index Scan",
+        "raw_type": "Index Scan",
+        "relation": "lineitem",
+        "index_name": "lineitem_pkey",
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Scan Direction": "Forward",
+         "Alias": "lineitem"
+        },
+        "cost": 442673.75,
+        "rows": 6000874,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Limit\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 10,\n  \"parent_relationship\": null,\n  \"reason\": \"The query requires the top 10 order values, so a Limit node is applied after sorting.\",\n  \"children\": [\n    {\n      \"node_type\": \"Sort\",\n      \"relation\": null,\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {},\n      \"keys\": [\n        \"sum(l_extendedprice) DESC\"\n      ],\n      \"estimated_rows\": 388662,\n      \"parent_relationship\": null,\n      \"reason\": \"The results must be ordered by the aggregated sum in descending order.\",\n      \"children\": [\n        {\n          \"node_type\": \"Aggregate\",\n          \"relation\": null,\n          \"index_name\": null,\n          \"join_type\": null,\n          \"strategy\": \"Hashed\",\n          \"conditions\": {},\n          \"keys\": [\n            \"l_orderkey\"\n          ],\n          \"estimated_rows\": 388662,\n          \"parent_relationship\": null,\n          \"reason\": \"Grouping by l_orderkey to calculate the sum of extended prices per order.\",\n          \"children\": [\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"lineitem\",\n              \"index_name\": null,\n              \"join_type\": null,\n              \"strategy\": null,\n              \"conditions\": {\n                \"Filter\": {}\n              },\n              \"keys\": [],\n              \"estimated_rows\": 6000874,\n              \"parent_relationship\": null,\n              \"reason\": \"A sequential scan is the most efficient way to read all rows from the lineitem table for aggregation.\",\n              \"children\": []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query requires the top 10 order values, so a Limit node is applied after sorting."
+  },
+  "cost": null,
+  "rows": 10.0,
+  "children": [
+   {
+    "node_type": "Sort",
+    "raw_type": "Sort",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "sum(l_extendedprice) DESC"
+    ],
+    "extra": {
+     "AI Reason": "The results must be ordered by the aggregated sum in descending order."
+    },
+    "cost": null,
+    "rows": 388662.0,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "l_orderkey"
+      ],
+      "extra": {
+       "Strategy": "Hashed",
+       "AI Reason": "Grouping by l_orderkey to calculate the sum of extended prices per order."
+      },
+      "cost": null,
+      "rows": 388662.0,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "lineitem",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "{}"
+        },
+        "keys": [],
+        "extra": {
+         "AI Reason": "A sequential scan is the most efficient way to read all rows from the lineitem table for aggregation."
+        },
+        "cost": null,
+        "rows": 6000874.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.375,
+   "ted_rate": 0.125,
+   "pg_nodes": 4,
+   "ai_nodes": 4,
+   "matched_pairs": 4,
+   "identical_pairs": 2,
+   "changed_pairs": 2,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 0.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "lineitem",
+   "ai": "lineitem"
+  },
+  "differences": [
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Sorted) over (lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Grouping by l_orderkey to calculate the sum of extended prices per order.\"",
+    "pg_path": "0.0.0",
+    "ai_path": "0.0.0"
+   },
+   {
+    "category": "Access method",
+    "text": "Table lineitem: PostgreSQL uses Index Scan on lineitem using lineitem_pkey. The AI uses Seq Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"A sequential scan is the most efficient way to read all rows from the lineitem table for aggregation.\"",
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0.0.0"
+   }
+  ],
+  "similarities": [],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": "0.0.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Sorted) over (lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Grouping by l_orderkey to calculate the sum of extended prices per order.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0.0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table lineitem: PostgreSQL uses Index Scan on lineitem using lineitem_pkey. The AI uses Seq Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"A sequential scan is the most efficient way to read all rows from the lineitem table for aggregation.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "same",
+    "0.0.0": "changed",
+    "0.0.0.0": "changed"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same",
+    "0.0.0": "changed",
+    "0.0.0.0": "changed"
+   }
+  }
+ },
+ "explanation": "Difference rate: 38% (tree edit distance rate: 12%). 2 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 4 nodes.\n\nPostgreSQL join order: lineitem\nAI join order:         lineitem\n\nDIFFERENCES\n1. [Aggregation strategy] Aggregate (Sorted) over (lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Grouping by l_orderkey to calculate the sum of extended prices per order.\"\n2. [Access method] Table lineitem: PostgreSQL uses Index Scan on lineitem using lineitem_pkey. The AI uses Seq Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"A sequential scan is the most efficient way to read all rows from the lineitem table for aggregation.\"",
+ "timings": {
+  "postgres": 0.001,
+  "ai": 3.06,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.375,
+  "ted_rate": 0.125,
+  "pg_nodes": 4,
+  "ai_nodes": 4,
+  "identical_pairs": 2,
+  "changed_pairs": 2,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 0.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Aggregation strategy",
+  "Access method"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.375,
+   0.375,
+   0.375
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

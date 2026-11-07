@@ -464,12 +464,17 @@ UNIT, ANCHOR, CHAIN, ABSORBED = "unit", "anchor", "chain", "absorbed"
 
 class _Info:
     """Matching state of one node."""
-    __slots__ = ("node", "path", "side", "parent", "children", "kind", "unit_of", "main_sig",
+    __slots__ = ("node", "path", "side", "parent", "children", "subs", "kind", "unit_of", "main_sig",
                  "partner", "token", "sig", "fuzzy_sig", "inputs_differ")
 
     def __init__(self, node: PlanNode, path: str, side: str, parent: Optional["_Info"]):
         self.node, self.path, self.side, self.parent = node, path, side, parent
+        # children: the operator's real inputs, in order (outer first for a join).
+        # subs: subquery plans attached to it (InitPlan / SubPlan). PostgreSQL lists
+        # them before the inputs, so keeping them apart makes children[0] / [1]
+        # always mean the outer / inner input.
         self.children: List[_Info] = []
+        self.subs: List[_Info] = []
         self.kind = CHAIN
         self.unit_of: Optional[_Info] = None   # for ABSORBED: the Bitmap Heap Scan
         self.partner: Optional[_Info] = None
@@ -482,6 +487,11 @@ class _Info:
     @property
     def type(self) -> str:
         return self.node.node_type
+
+    @property
+    def all_children(self) -> List["_Info"]:
+        """Inputs and subquery plans together."""
+        return self.children + self.subs
 
     def __repr__(self):
         return f"<{self.side} {self.path} {self.type}>"
@@ -516,8 +526,9 @@ class _Comparer:
     def _index(self, node: PlanNode, path: str, side: str, parent) -> _Info:
         inf = _Info(node, path, side, parent)
         self.info[side].append(inf)
-        inf.children = [self._index(c, f"{path}.{i}", side, inf)
-                        for i, c in enumerate(node.children)]
+        kids = [self._index(c, f"{path}.{i}", side, inf) for i, c in enumerate(node.children)]
+        inf.children = [k for k in kids if not _is_subplan(k.node)]
+        inf.subs = [k for k in kids if _is_subplan(k.node)]
         return inf
 
     def _classify(self, inf: _Info, heap: Optional[_Info] = None) -> None:
@@ -530,7 +541,7 @@ class _Comparer:
         else:
             inf.kind = CHAIN
         owner = inf if inf.type == "Bitmap Heap Scan" else (heap if inf.kind == ABSORBED else None)
-        for c in inf.children:
+        for c in inf.all_children:
             self._classify(c, owner)
 
     def _preds(self, inf: _Info) -> List[Predicate]:
@@ -589,8 +600,7 @@ class _Comparer:
             cur = stack.pop()
             if cur.kind == UNIT:
                 out.append(cur.node.relation or cur.type)
-            stack.extend(c for c in reversed(cur.children)
-                         if not (main_only and _is_subplan(c.node)))
+            stack.extend(reversed(cur.children if main_only else cur.all_children))
         return out
 
     def _rel_text(self, inf: _Info) -> str:
@@ -650,7 +660,7 @@ class _Comparer:
             x = stack.pop()
             if x.kind == UNIT and x is not inf and x.token:
                 out.add(x.token)
-            stack.extend(x.children)
+            stack.extend(x.all_children)
         return out
 
     def _index_names(self, inf: _Info) -> Set[str]:
@@ -717,7 +727,7 @@ class _Comparer:
             sig.add(inf.token)
             main.add(inf.token)
             fuzzy.add(inf.token if inf.partner else "t:" + self._unit_key(inf))
-        for c in inf.children:
+        for c in inf.all_children:
             self._compute_sigs(c)
             sig |= c.sig
             fuzzy |= c.fuzzy_sig
@@ -767,10 +777,12 @@ class _Comparer:
 
     # Step 4: match chains and bitmap sub-nodes
     def _chain_above(self, inf: _Info) -> List[_Info]:
-        chain, cur = [], inf.parent
-        while cur is not None and cur.kind == CHAIN:
+        chain, child, cur = [], inf, inf.parent
+        # Stop at the node a subquery plan is attached to: its operators belong to
+        # the main plan's chain, not to the subquery's.
+        while cur is not None and cur.kind == CHAIN and child not in cur.subs:
             chain.append(cur)
-            cur = cur.parent
+            child, cur = cur, cur.parent
         return chain
 
     def _chain_similarity(self, p: _Info, a: _Info) -> float:
@@ -965,20 +977,17 @@ class _Comparer:
     # Plan-level findings
     def _join_order_text(self, inf: _Info) -> str:
         abbr = {"Hash Join": "HJ", "Nested Loop": "NL", "Merge Join": "MJ"}
-        cur = inf
-        while cur.kind == CHAIN:
+        cur, subs = inf, []
+        while cur.kind == CHAIN:            # subqueries attached along the way
+            subs += cur.subs
             cur = cur.children[0]
+        subs += [c for c in cur.subs if c.kind != ABSORBED]
         if cur.kind == UNIT:
-            name = cur.node.relation or cur.type
-            subs = [self._join_order_text(c) for c in cur.children if c.kind != ABSORBED]
-            return name + (f"[{', '.join(subs)}]" if subs else "")
-        main = [c for c in cur.children if not _is_subplan(c.node)]
-        subs = [c for c in cur.children if _is_subplan(c.node)]
-        if len(main) == 1:      # e.g. Sort with an InitPlan
-            text = self._join_order_text(main[0])
+            text = cur.node.relation or cur.type
+            subs += [c for c in cur.children if c.kind != ABSORBED]
         else:
             label = abbr.get(cur.type, cur.type)
-            text = f"{label}({', '.join(self._join_order_text(c) for c in main)})"
+            text = f"{label}({', '.join(self._join_order_text(c) for c in cur.children)})"
         if subs:
             text += f"[{', '.join(self._join_order_text(c) for c in subs)}]"
         return text
@@ -1087,10 +1096,12 @@ class _Comparer:
 
     @staticmethod
     def _total_rows(inf: _Info) -> bool:
-        """False below a Gather (rows per worker) or on a Nested Loop inner side (rows per loop)."""
+        """False below a Gather (rows per worker), on a Nested Loop inner side (rows per
+        loop) or below a Limit (PostgreSQL gives the rows of a complete run, but the Limit
+        stops it early, so the AI's smaller number can be right)."""
         child, cur = inf, inf.parent
         while cur is not None:
-            if cur.type in PARALLEL_TYPES:
+            if cur.type in PARALLEL_TYPES or cur.type == "Limit":
                 return False
             if cur.type == "Nested Loop" and len(cur.children) == 2 and cur.children[1] is child:
                 return False

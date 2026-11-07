@@ -1,0 +1,337 @@
+{
+ "id": "K2",
+ "category": "K. Miscellaneous",
+ "purpose": "Join with an inline VALUES list (Values Scan)",
+ "sql": "SELECT v.label, o.o_totalprice\nFROM (VALUES (1, 'first'), (7, 'seventh'), (32, 'thirty-second')) AS v(k, label)\nJOIN orders o ON o.o_orderkey = v.k",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Nested Loop",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Join Type": "Inner",
+    "Startup Cost": 0.43,
+    "Total Cost": 25.37,
+    "Plan Rows": 3,
+    "Plan Width": 40,
+    "Disabled": false,
+    "Inner Unique": true,
+    "Plans": [
+     {
+      "Node Type": "Values Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Alias": "*VALUES*",
+      "Startup Cost": 0.0,
+      "Total Cost": 0.04,
+      "Plan Rows": 3,
+      "Plan Width": 36,
+      "Disabled": false
+     },
+     {
+      "Node Type": "Index Scan",
+      "Parent Relationship": "Inner",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Scan Direction": "Forward",
+      "Index Name": "orders_pkey",
+      "Relation Name": "orders",
+      "Alias": "o",
+      "Startup Cost": 0.43,
+      "Total Cost": 8.45,
+      "Plan Rows": 1,
+      "Plan Width": 12,
+      "Disabled": false,
+      "Index Cond": "(o_orderkey = \"*VALUES*\".column1)"
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Nested Loop",
+  "raw_type": "Nested Loop",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 25.37,
+  "rows": 3,
+  "children": [
+   {
+    "node_type": "Values Scan",
+    "raw_type": "Values Scan",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Alias": "*VALUES*"
+    },
+    "cost": 0.04,
+    "rows": 3,
+    "children": [],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Index Scan",
+    "raw_type": "Index Scan",
+    "relation": "orders",
+    "index_name": "orders_pkey",
+    "join_type": null,
+    "conditions": {
+     "Index Cond": "(o_orderkey = \"*VALUES*\".column1)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Inner",
+     "Scan Direction": "Forward",
+     "Alias": "o"
+    },
+    "cost": 8.45,
+    "rows": 1,
+    "children": [],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Hash Join\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": \"Inner\",\n  \"strategy\": null,\n  \"conditions\": {\n    \"Hash Cond\": \"o.o_orderkey = v.k\"\n  },\n  \"keys\": [],\n  \"estimated_rows\": 3,\n  \"parent_relationship\": null,\n  \"reason\": \"The optimizer uses a Hash Join to join the small values set with the orders table.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"orders\",\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {\n        \"Filter\": \"o_orderkey = ANY ('{1,7,32}'::integer[])\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 3,\n      \"parent_relationship\": null,\n      \"reason\": \"The orders table is scanned to find the matching keys.\",\n      \"children\": []\n    },\n    {\n      \"node_type\": \"Hash\",\n      \"relation\": null,\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {},\n      \"keys\": [],\n      \"estimated_rows\": 3,\n      \"parent_relationship\": null,\n      \"reason\": \"The values set is small and is hashed for the join.\",\n      \"children\": [\n        {\n          \"node_type\": \"Values Scan\",\n          \"relation\": null,\n          \"index_name\": null,\n          \"join_type\": null,\n          \"strategy\": null,\n          \"conditions\": {},\n          \"keys\": [],\n          \"estimated_rows\": 3,\n          \"parent_relationship\": null,\n          \"reason\": \"The values are scanned from the provided constant list.\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Hash Cond": "o.o_orderkey = v.k"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "The optimizer uses a Hash Join to join the small values set with the orders table.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 3.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "orders",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "o_orderkey = ANY ('{1,7,32}'::integer[])"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "The orders table is scanned to find the matching keys."
+    },
+    "cost": null,
+    "rows": 3.0,
+    "children": [],
+    "source": "ai"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "The values set is small and is hashed for the join."
+    },
+    "cost": null,
+    "rows": 3.0,
+    "children": [
+     {
+      "node_type": "Values Scan",
+      "raw_type": "Values Scan",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "The values are scanned from the provided constant list."
+      },
+      "cost": null,
+      "rows": 3.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.7143,
+   "ted_rate": 0.5714,
+   "pg_nodes": 3,
+   "ai_nodes": 4,
+   "matched_pairs": 3,
+   "identical_pairs": 1,
+   "changed_pairs": 2,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 1,
+   "access_method_agreement": 0.0,
+   "join_algorithm_agreement": 0.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "NL(Values Scan, orders)",
+   "ai": "HJ(orders, Values Scan)"
+  },
+  "differences": [
+   {
+    "category": "Join algorithm",
+    "text": "The join of (Values Scan, orders): PostgreSQL uses Nested Loop of (Values Scan) with (orders). The AI uses Hash Join of (orders) with (Values Scan). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"The optimizer uses a Hash Join to join the small values set with the orders table.\"",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Join input order",
+    "text": "Join of (Values Scan, orders): outer and inner inputs are swapped. PostgreSQL's outer input is (Values Scan).",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Conditions",
+    "text": "Nested Loop of (Values Scan) with (orders): The AI applies o_orderkey = k here, PostgreSQL does not.",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Access method",
+    "text": "Table orders: PostgreSQL uses Index Scan on orders using orders_pkey. The AI uses Seq Scan on orders. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"The orders table is scanned to find the matching keys.\"",
+    "pg_path": "0.1",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Conditions",
+    "text": "Index Scan on orders using orders_pkey: PostgreSQL applies o_orderkey = *values*.column1 here, the AI does not. The AI applies o_orderkey = any '{1,7,32}' here, PostgreSQL does not.",
+    "pg_path": "0.1",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash over (Values Scan) (builds the in-memory hash table for a Hash Join). The AI's reason: \"The values set is small and is hashed for the join.\"",
+    "pg_path": null,
+    "ai_path": "0.1"
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Values Scan over (Values Scan)."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "The join of (Values Scan, orders): PostgreSQL uses Nested Loop of (Values Scan) with (orders). The AI uses Hash Join of (orders) with (Values Scan). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"The optimizer uses a Hash Join to join the small values set with the orders table.\"",
+     "Join of (Values Scan, orders): outer and inner inputs are swapped. PostgreSQL's outer input is (Values Scan).",
+     "Nested Loop of (Values Scan) with (orders): The AI applies o_orderkey = k here, PostgreSQL does not."
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table orders: PostgreSQL uses Index Scan on orders using orders_pkey. The AI uses Seq Scan on orders. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"The orders table is scanned to find the matching keys.\"",
+     "Index Scan on orders using orders_pkey: PostgreSQL applies o_orderkey = *values*.column1 here, the AI does not. The AI applies o_orderkey = any '{1,7,32}' here, PostgreSQL does not."
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash over (Values Scan) (builds the in-memory hash table for a Hash Join). The AI's reason: \"The values set is small and is hashed for the join.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed",
+    "0.0": "same",
+    "0.1": "changed"
+   },
+   "ai": {
+    "0": "changed",
+    "0.1.0": "same",
+    "0.0": "changed",
+    "0.1": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 71% (tree edit distance rate: 57%). 1 of 3 PostgreSQL nodes have an identical counterpart in the AI plan's 4 nodes.\n\nPostgreSQL join order: NL(Values Scan, orders)\nAI join order:         HJ(orders, Values Scan)\n\nDIFFERENCES\n1. [Join algorithm] The join of (Values Scan, orders): PostgreSQL uses Nested Loop of (Values Scan) with (orders). The AI uses Hash Join of (orders) with (Values Scan). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"The optimizer uses a Hash Join to join the small values set with the orders table.\"\n2. [Join input order] Join of (Values Scan, orders): outer and inner inputs are swapped. PostgreSQL's outer input is (Values Scan).\n3. [Conditions] Nested Loop of (Values Scan) with (orders): The AI applies o_orderkey = k here, PostgreSQL does not.\n4. [Access method] Table orders: PostgreSQL uses Index Scan on orders using orders_pkey. The AI uses Seq Scan on orders. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"The orders table is scanned to find the matching keys.\"\n5. [Conditions] Index Scan on orders using orders_pkey: PostgreSQL applies o_orderkey = *values*.column1 here, the AI does not. The AI applies o_orderkey = any '{1,7,32}' here, PostgreSQL does not.\n6. [Extra operator] Only the AI plan has Hash over (Values Scan) (builds the in-memory hash table for a Hash Join). The AI's reason: \"The values set is small and is hashed for the join.\"\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Values Scan over (Values Scan).",
+ "timings": {
+  "postgres": 0.003,
+  "ai": 2.249,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.7143,
+  "ted_rate": 0.5714,
+  "pg_nodes": 3,
+  "ai_nodes": 4,
+  "identical_pairs": 1,
+  "changed_pairs": 2,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 1,
+  "access_method_agreement": 0.0,
+  "join_algorithm_agreement": 0.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Join algorithm",
+  "Join input order",
+  "Conditions",
+  "Access method",
+  "Conditions",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.7143,
+   0.7143,
+   0.7143
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

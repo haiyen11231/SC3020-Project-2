@@ -1,0 +1,395 @@
+{
+ "id": "H3",
+ "category": "H. Set operation",
+ "purpose": "EXCEPT on part keys (SetOp Except)",
+ "sql": "SELECT p_partkey FROM part WHERE p_size = 50\nEXCEPT\nSELECT ps_partkey FROM partsupp WHERE ps_availqty < 100",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "SetOp",
+    "Strategy": "Hashed",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Command": "Except",
+    "Startup Cost": 30192.38,
+    "Total Cost": 30202.41,
+    "Plan Rows": 4013,
+    "Plan Width": 4,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Seq Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Relation Name": "part",
+      "Alias": "part",
+      "Startup Cost": 0.0,
+      "Total Cost": 6620.0,
+      "Plan Rows": 4013,
+      "Plan Width": 4,
+      "Disabled": false,
+      "Filter": "(p_size = 50)"
+     },
+     {
+      "Node Type": "Gather",
+      "Parent Relationship": "Inner",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 1000.0,
+      "Total Cost": 23541.77,
+      "Plan Rows": 8231,
+      "Plan Width": 4,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Single Copy": false,
+      "Plans": [
+       {
+        "Node Type": "Seq Scan",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": true,
+        "Async Capable": false,
+        "Relation Name": "partsupp",
+        "Alias": "partsupp",
+        "Startup Cost": 0.0,
+        "Total Cost": 21718.67,
+        "Plan Rows": 3430,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Filter": "(ps_availqty < 100)"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "SetOp",
+  "raw_type": "SetOp",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Hashed"
+  },
+  "cost": 30202.41,
+  "rows": 4013,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "part",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "(p_size = 50)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Alias": "part"
+    },
+    "cost": 6620.0,
+    "rows": 4013,
+    "children": [],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Gather",
+    "raw_type": "Gather",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Inner"
+    },
+    "cost": 23541.77,
+    "rows": 8231,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "partsupp",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "(ps_availqty < 100)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer",
+       "Alias": "partsupp"
+      },
+      "cost": 21718.67,
+      "rows": 3430,
+      "children": [],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"SetOp\",\n  \"strategy\": \"Hashed\",\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 4000,\n  \"reason\": \"The EXCEPT operator is implemented using a Hashed SetOp node to remove duplicates and perform the set difference.\",\n  \"children\": [\n    {\n      \"node_type\": \"Aggregate\",\n      \"strategy\": \"Hashed\",\n      \"conditions\": {},\n      \"keys\": [\n        \"p_partkey\"\n      ],\n      \"estimated_rows\": 4000,\n      \"reason\": \"Aggregate the results of the first query to prepare for the set operation.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"part\",\n          \"index_name\": null,\n          \"conditions\": {\n            \"Filter\": \"p_size = 50\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 4000,\n          \"reason\": \"Sequential scan is chosen for the part table as there is no index on p_size.\",\n          \"children\": []\n        }\n      ]\n    },\n    {\n      \"node_type\": \"Aggregate\",\n      \"strategy\": \"Hashed\",\n      \"conditions\": {},\n      \"keys\": [\n        \"ps_partkey\"\n      ],\n      \"estimated_rows\": 8000,\n      \"reason\": \"Aggregate the results of the second query to prepare for the set operation.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"partsupp\",\n          \"index_name\": null,\n          \"conditions\": {\n            \"Filter\": \"ps_availqty < 100\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 8000,\n          \"reason\": \"Sequential scan is chosen for the partsupp table as there is no index on ps_availqty.\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "SetOp",
+  "raw_type": "SetOp",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Hashed",
+   "AI Reason": "The EXCEPT operator is implemented using a Hashed SetOp node to remove duplicates and perform the set difference."
+  },
+  "cost": null,
+  "rows": 4000.0,
+  "children": [
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "p_partkey"
+    ],
+    "extra": {
+     "Strategy": "Hashed",
+     "AI Reason": "Aggregate the results of the first query to prepare for the set operation."
+    },
+    "cost": null,
+    "rows": 4000.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "part",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "p_size = 50"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Sequential scan is chosen for the part table as there is no index on p_size."
+      },
+      "cost": null,
+      "rows": 4000.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   },
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "ps_partkey"
+    ],
+    "extra": {
+     "Strategy": "Hashed",
+     "AI Reason": "Aggregate the results of the second query to prepare for the set operation."
+    },
+    "cost": null,
+    "rows": 8000.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "partsupp",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "ps_availqty < 100"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Sequential scan is chosen for the partsupp table as there is no index on ps_availqty."
+      },
+      "cost": null,
+      "rows": 8000.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.3333,
+   "ted_rate": 0.3333,
+   "pg_nodes": 4,
+   "ai_nodes": 5,
+   "matched_pairs": 3,
+   "identical_pairs": 3,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 1,
+   "ai_only_nodes": 2,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "SetOp(part, partsupp)",
+   "ai": "SetOp(part, partsupp)"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (partsupp) (collects rows from parallel worker processes).",
+    "pg_path": "0.1",
+    "ai_path": null
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Aggregate (Hashed) over (part) (computes aggregates (GROUP BY, SUM, COUNT, ...)). The AI's reason: \"Aggregate the results of the first query to prepare for the set operation.\"",
+    "pg_path": null,
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Aggregate (Hashed) over (partsupp) (computes aggregates (GROUP BY, SUM, COUNT, ...)). The AI's reason: \"Aggregate the results of the second query to prepare for the set operation.\"",
+    "pg_path": null,
+    "ai_path": "0.1"
+   }
+  ],
+  "similarities": [
+   "Both plans use SetOp (Hashed) over (part, partsupp).",
+   "Both plans use Seq Scan on part.",
+   "Both plans use Seq Scan on partsupp."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (partsupp) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.1.0",
+    "ai_path": "0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Aggregate (Hashed) over (part) (computes aggregates (GROUP BY, SUM, COUNT, ...)). The AI's reason: \"Aggregate the results of the first query to prepare for the set operation.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Aggregate (Hashed) over (partsupp) (computes aggregates (GROUP BY, SUM, COUNT, ...)). The AI's reason: \"Aggregate the results of the second query to prepare for the set operation.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "same",
+    "0.1": "postgres_only",
+    "0.1.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0.0": "same",
+    "0.1.0": "same",
+    "0.0": "ai_only",
+    "0.1": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 33% (tree edit distance rate: 33%). 3 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 5 nodes.\n\nPostgreSQL join order: SetOp(part, partsupp)\nAI join order:         SetOp(part, partsupp)\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.\n2. [Missing operator] Only the PostgreSQL plan has Gather over (partsupp) (collects rows from parallel worker processes).\n3. [Extra operator] Only the AI plan has Aggregate (Hashed) over (part) (computes aggregates (GROUP BY, SUM, COUNT, ...)). The AI's reason: \"Aggregate the results of the first query to prepare for the set operation.\"\n4. [Extra operator] Only the AI plan has Aggregate (Hashed) over (partsupp) (computes aggregates (GROUP BY, SUM, COUNT, ...)). The AI's reason: \"Aggregate the results of the second query to prepare for the set operation.\"\n\nSIMILARITIES\n- Both plans use SetOp (Hashed) over (part, partsupp).\n- Both plans use Seq Scan on part.\n- Both plans use Seq Scan on partsupp.",
+ "timings": {
+  "postgres": 0.012,
+  "ai": 3.772,
+  "comparison": 0.004
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.3333,
+  "ted_rate": 0.3333,
+  "pg_nodes": 4,
+  "ai_nodes": 5,
+  "identical_pairs": 3,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 1,
+  "ai_only_nodes": 2,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Missing operator",
+  "Extra operator",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.3333,
+   0.3333,
+   0.3333
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

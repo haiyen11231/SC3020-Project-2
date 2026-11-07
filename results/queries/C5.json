@@ -1,0 +1,915 @@
+{
+ "id": "C5",
+ "category": "C. Multi-way join",
+ "purpose": "Star-shaped join, fact table with three filtered dimensions",
+ "sql": "SELECT o.o_orderpriority, sum(l.l_quantity) AS qty\nFROM lineitem l\nJOIN part p     ON p.p_partkey = l.l_partkey\nJOIN supplier s ON s.s_suppkey = l.l_suppkey\nJOIN orders o   ON o.o_orderkey = l.l_orderkey\nWHERE p.p_brand = 'Brand#23'\n  AND p.p_container = 'MED BOX'\n  AND s.s_acctbal < 0\nGROUP BY o.o_orderpriority",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Sorted",
+    "Partial Mode": "Finalize",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 150995.53,
+    "Total Cost": 150998.74,
+    "Plan Rows": 5,
+    "Plan Width": 48,
+    "Disabled": false,
+    "Group Key": [
+     "o.o_orderpriority"
+    ],
+    "Plans": [
+     {
+      "Node Type": "Gather Merge",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 150995.53,
+      "Total Cost": 150998.58,
+      "Plan Rows": 12,
+      "Plan Width": 48,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Plans": [
+       {
+        "Node Type": "Aggregate",
+        "Strategy": "Sorted",
+        "Partial Mode": "Partial",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 149995.51,
+        "Total Cost": 149997.17,
+        "Plan Rows": 5,
+        "Plan Width": 48,
+        "Disabled": false,
+        "Group Key": [
+         "o.o_orderpriority"
+        ],
+        "Plans": [
+         {
+          "Node Type": "Sort",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 149995.51,
+          "Total Cost": 149996.04,
+          "Plan Rows": 214,
+          "Plan Width": 21,
+          "Disabled": false,
+          "Sort Key": [
+           "o.o_orderpriority"
+          ],
+          "Plans": [
+           {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 5730.56,
+            "Total Cost": 149987.22,
+            "Plan Rows": 214,
+            "Plan Width": 21,
+            "Disabled": false,
+            "Inner Unique": true,
+            "Plans": [
+             {
+              "Node Type": "Hash Join",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Join Type": "Inner",
+              "Startup Cost": 5730.14,
+              "Total Cost": 149887.68,
+              "Plan Rows": 214,
+              "Plan Width": 9,
+              "Disabled": false,
+              "Inner Unique": true,
+              "Hash Cond": "(l.l_suppkey = s.s_suppkey)",
+              "Plans": [
+               {
+                "Node Type": "Hash Join",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": true,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 5371.0,
+                "Total Cost": 149522.24,
+                "Plan Rows": 2400,
+                "Plan Width": 13,
+                "Disabled": false,
+                "Inner Unique": true,
+                "Hash Cond": "(l.l_partkey = p.p_partkey)",
+                "Plans": [
+                 {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": true,
+                  "Async Capable": false,
+                  "Relation Name": "lineitem",
+                  "Alias": "l",
+                  "Startup Cost": 0.0,
+                  "Total Cost": 137587.64,
+                  "Plan Rows": 2500364,
+                  "Plan Width": 17,
+                  "Disabled": false
+                 },
+                 {
+                  "Node Type": "Hash",
+                  "Parent Relationship": "Inner",
+                  "Parallel Aware": true,
+                  "Async Capable": false,
+                  "Startup Cost": 5370.0,
+                  "Total Cost": 5370.0,
+                  "Plan Rows": 80,
+                  "Plan Width": 4,
+                  "Disabled": false,
+                  "Plans": [
+                   {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": true,
+                    "Async Capable": false,
+                    "Relation Name": "part",
+                    "Alias": "p",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 5370.0,
+                    "Plan Rows": 80,
+                    "Plan Width": 4,
+                    "Disabled": false,
+                    "Filter": "((p_brand = 'Brand#23'::bpchar) AND (p_container = 'MED BOX'::bpchar))"
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "Node Type": "Hash",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 348.0,
+                "Total Cost": 348.0,
+                "Plan Rows": 891,
+                "Plan Width": 4,
+                "Disabled": false,
+                "Plans": [
+                 {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "supplier",
+                  "Alias": "s",
+                  "Startup Cost": 0.0,
+                  "Total Cost": 348.0,
+                  "Plan Rows": 891,
+                  "Plan Width": 4,
+                  "Disabled": false,
+                  "Filter": "(s_acctbal < '0'::numeric)"
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "Node Type": "Index Scan",
+              "Parent Relationship": "Inner",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "orders_pkey",
+              "Relation Name": "orders",
+              "Alias": "o",
+              "Startup Cost": 0.43,
+              "Total Cost": 0.47,
+              "Plan Rows": 1,
+              "Plan Width": 20,
+              "Disabled": false,
+              "Index Cond": "(o_orderkey = l.l_orderkey)"
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "o.o_orderpriority"
+  ],
+  "extra": {
+   "Strategy": "Sorted",
+   "Partial Mode": "Finalize"
+  },
+  "cost": 150998.74,
+  "rows": 5,
+  "children": [
+   {
+    "node_type": "Gather Merge",
+    "raw_type": "Gather Merge",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 150998.58,
+    "rows": 12,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "o.o_orderpriority"
+      ],
+      "extra": {
+       "Strategy": "Sorted",
+       "Partial Mode": "Partial",
+       "Parent Relationship": "Outer"
+      },
+      "cost": 149997.17,
+      "rows": 5,
+      "children": [
+       {
+        "node_type": "Sort",
+        "raw_type": "Sort",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [
+         "o.o_orderpriority"
+        ],
+        "extra": {
+         "Parent Relationship": "Outer"
+        },
+        "cost": 149996.04,
+        "rows": 214,
+        "children": [
+         {
+          "node_type": "Nested Loop",
+          "raw_type": "Nested Loop",
+          "relation": null,
+          "index_name": null,
+          "join_type": "Inner",
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer"
+          },
+          "cost": 149987.22,
+          "rows": 214,
+          "children": [
+           {
+            "node_type": "Hash Join",
+            "raw_type": "Hash Join",
+            "relation": null,
+            "index_name": null,
+            "join_type": "Inner",
+            "conditions": {
+             "Hash Cond": "(l.l_suppkey = s.s_suppkey)"
+            },
+            "keys": [],
+            "extra": {
+             "Parent Relationship": "Outer"
+            },
+            "cost": 149887.68,
+            "rows": 214,
+            "children": [
+             {
+              "node_type": "Hash Join",
+              "raw_type": "Hash Join",
+              "relation": null,
+              "index_name": null,
+              "join_type": "Inner",
+              "conditions": {
+               "Hash Cond": "(l.l_partkey = p.p_partkey)"
+              },
+              "keys": [],
+              "extra": {
+               "Parent Relationship": "Outer"
+              },
+              "cost": 149522.24,
+              "rows": 2400,
+              "children": [
+               {
+                "node_type": "Seq Scan",
+                "raw_type": "Seq Scan",
+                "relation": "lineitem",
+                "index_name": null,
+                "join_type": null,
+                "conditions": {},
+                "keys": [],
+                "extra": {
+                 "Parent Relationship": "Outer",
+                 "Alias": "l"
+                },
+                "cost": 137587.64,
+                "rows": 2500364,
+                "children": [],
+                "source": "postgres"
+               },
+               {
+                "node_type": "Hash",
+                "raw_type": "Hash",
+                "relation": null,
+                "index_name": null,
+                "join_type": null,
+                "conditions": {},
+                "keys": [],
+                "extra": {
+                 "Parent Relationship": "Inner"
+                },
+                "cost": 5370.0,
+                "rows": 80,
+                "children": [
+                 {
+                  "node_type": "Seq Scan",
+                  "raw_type": "Seq Scan",
+                  "relation": "part",
+                  "index_name": null,
+                  "join_type": null,
+                  "conditions": {
+                   "Filter": "((p_brand = 'Brand#23'::bpchar) AND (p_container = 'MED BOX'::bpchar))"
+                  },
+                  "keys": [],
+                  "extra": {
+                   "Parent Relationship": "Outer",
+                   "Alias": "p"
+                  },
+                  "cost": 5370.0,
+                  "rows": 80,
+                  "children": [],
+                  "source": "postgres"
+                 }
+                ],
+                "source": "postgres"
+               }
+              ],
+              "source": "postgres"
+             },
+             {
+              "node_type": "Hash",
+              "raw_type": "Hash",
+              "relation": null,
+              "index_name": null,
+              "join_type": null,
+              "conditions": {},
+              "keys": [],
+              "extra": {
+               "Parent Relationship": "Inner"
+              },
+              "cost": 348.0,
+              "rows": 891,
+              "children": [
+               {
+                "node_type": "Seq Scan",
+                "raw_type": "Seq Scan",
+                "relation": "supplier",
+                "index_name": null,
+                "join_type": null,
+                "conditions": {
+                 "Filter": "(s_acctbal < '0'::numeric)"
+                },
+                "keys": [],
+                "extra": {
+                 "Parent Relationship": "Outer",
+                 "Alias": "s"
+                },
+                "cost": 348.0,
+                "rows": 891,
+                "children": [],
+                "source": "postgres"
+               }
+              ],
+              "source": "postgres"
+             }
+            ],
+            "source": "postgres"
+           },
+           {
+            "node_type": "Index Scan",
+            "raw_type": "Index Scan",
+            "relation": "orders",
+            "index_name": "orders_pkey",
+            "join_type": null,
+            "conditions": {
+             "Index Cond": "(o_orderkey = l.l_orderkey)"
+            },
+            "keys": [],
+            "extra": {
+             "Parent Relationship": "Inner",
+             "Scan Direction": "Forward",
+             "Alias": "o"
+            },
+            "cost": 0.47,
+            "rows": 1,
+            "children": [],
+            "source": "postgres"
+           }
+          ],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Hashed\",\n  \"keys\": [\"o.o_orderpriority\"],\n  \"estimated_rows\": 5,\n  \"conditions\": {},\n  \"reason\": \"Aggregate by order priority using hash aggregation.\",\n  \"children\": [\n    {\n      \"node_type\": \"Hash Join\",\n      \"join_type\": \"Inner\",\n      \"conditions\": {\"Hash Cond\": \"l.l_orderkey = o.o_orderkey\"},\n      \"estimated_rows\": 1200,\n      \"reason\": \"Join lineitem with orders using hash join.\",\n      \"children\": [\n        {\n          \"node_type\": \"Hash Join\",\n          \"join_type\": \"Inner\",\n          \"conditions\": {\"Hash Cond\": \"l.l_suppkey = s.s_suppkey\"},\n          \"estimated_rows\": 1200,\n          \"reason\": \"Join lineitem with filtered supplier using hash join.\",\n          \"children\": [\n            {\n              \"node_type\": \"Hash Join\",\n              \"join_type\": \"Inner\",\n              \"conditions\": {\"Hash Cond\": \"l.l_partkey = p.p_partkey\"},\n              \"estimated_rows\": 1200,\n              \"reason\": \"Join lineitem with filtered part using hash join.\",\n              \"children\": [\n                {\n                  \"node_type\": \"Seq Scan\",\n                  \"relation\": \"lineitem\",\n                  \"estimated_rows\": 6000874,\n                  \"conditions\": {},\n                  \"reason\": \"Full scan of lineitem.\"\n                },\n                {\n                  \"node_type\": \"Hash\",\n                  \"estimated_rows\": 100,\n                  \"reason\": \"Hash table for part filter.\",\n                  \"children\": [\n                    {\n                      \"node_type\": \"Seq Scan\",\n                      \"relation\": \"part\",\n                      \"estimated_rows\": 100,\n                      \"conditions\": {\"Filter\": \"p_brand = 'Brand#23' AND p_container = 'MED BOX'\"},\n                      \"reason\": \"Filter part by brand and container.\"\n                    }\n                  ]\n                }\n              ]\n            },\n            {\n              \"node_type\": \"Hash\",\n              \"estimated_rows\": 500,\n              \"reason\": \"Hash table for supplier filter.\",\n              \"children\": [\n                {\n                  \"node_type\": \"Seq Scan\",\n                  \"relation\": \"supplier\",\n                  \"estimated_rows\": 500,\n                  \"conditions\": {\"Filter\": \"s_acctbal < 0\"},\n                  \"reason\": \"Filter supplier by account balance.\"\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"node_type\": \"Hash\",\n          \"estimated_rows\": 1500000,\n          \"reason\": \"Hash table for orders.\",\n          \"children\": [\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"orders\",\n              \"estimated_rows\": 1500000,\n              \"conditions\": {},\n              \"reason\": \"Full scan of orders.\"\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "o.o_orderpriority"
+  ],
+  "extra": {
+   "Strategy": "Hashed",
+   "AI Reason": "Aggregate by order priority using hash aggregation.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 5.0,
+  "children": [
+   {
+    "node_type": "Hash Join",
+    "raw_type": "Hash Join",
+    "relation": null,
+    "index_name": null,
+    "join_type": "Inner",
+    "conditions": {
+     "Hash Cond": "l.l_orderkey = o.o_orderkey"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Join lineitem with orders using hash join."
+    },
+    "cost": null,
+    "rows": 1200.0,
+    "children": [
+     {
+      "node_type": "Hash Join",
+      "raw_type": "Hash Join",
+      "relation": null,
+      "index_name": null,
+      "join_type": "Inner",
+      "conditions": {
+       "Hash Cond": "l.l_suppkey = s.s_suppkey"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Join lineitem with filtered supplier using hash join."
+      },
+      "cost": null,
+      "rows": 1200.0,
+      "children": [
+       {
+        "node_type": "Hash Join",
+        "raw_type": "Hash Join",
+        "relation": null,
+        "index_name": null,
+        "join_type": "Inner",
+        "conditions": {
+         "Hash Cond": "l.l_partkey = p.p_partkey"
+        },
+        "keys": [],
+        "extra": {
+         "AI Reason": "Join lineitem with filtered part using hash join."
+        },
+        "cost": null,
+        "rows": 1200.0,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "lineitem",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Full scan of lineitem."
+          },
+          "cost": null,
+          "rows": 6000874.0,
+          "children": [],
+          "source": "ai"
+         },
+         {
+          "node_type": "Hash",
+          "raw_type": "Hash",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Hash table for part filter."
+          },
+          "cost": null,
+          "rows": 100.0,
+          "children": [
+           {
+            "node_type": "Seq Scan",
+            "raw_type": "Seq Scan",
+            "relation": "part",
+            "index_name": null,
+            "join_type": null,
+            "conditions": {
+             "Filter": "p_brand = 'Brand#23' AND p_container = 'MED BOX'"
+            },
+            "keys": [],
+            "extra": {
+             "AI Reason": "Filter part by brand and container."
+            },
+            "cost": null,
+            "rows": 100.0,
+            "children": [],
+            "source": "ai"
+           }
+          ],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       },
+       {
+        "node_type": "Hash",
+        "raw_type": "Hash",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Hash table for supplier filter."
+        },
+        "cost": null,
+        "rows": 500.0,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "supplier",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {
+           "Filter": "s_acctbal < 0"
+          },
+          "keys": [],
+          "extra": {
+           "AI Reason": "Filter supplier by account balance."
+          },
+          "cost": null,
+          "rows": 500.0,
+          "children": [],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     },
+     {
+      "node_type": "Hash",
+      "raw_type": "Hash",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Hash table for orders."
+      },
+      "cost": null,
+      "rows": 1500000.0,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "orders",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Full scan of orders."
+        },
+        "cost": null,
+        "rows": 1500000.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.375,
+   "ted_rate": 0.25,
+   "pg_nodes": 13,
+   "ai_nodes": 11,
+   "matched_pairs": 10,
+   "identical_pairs": 7,
+   "changed_pairs": 3,
+   "postgres_only_nodes": 3,
+   "ai_only_nodes": 1,
+   "access_method_agreement": 0.75,
+   "join_algorithm_agreement": 0.6667,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "NL(HJ(HJ(lineitem, part), supplier), orders)",
+   "ai": "HJ(HJ(HJ(lineitem, part), supplier), orders)"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Sorted, Finalize) over (lineitem, part, supplier, orders): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate by order priority using hash aggregation.\"",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Join algorithm",
+    "text": "The join of (lineitem, part, supplier, orders): PostgreSQL uses Nested Loop of (lineitem, part, supplier) with (orders). The AI uses Hash Join of (lineitem, part, supplier) with (orders). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Join lineitem with orders using hash join.\"",
+    "pg_path": "0.0.0.0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Access method",
+    "text": "Table orders: PostgreSQL uses Index Scan on orders using orders_pkey. The AI uses Seq Scan on orders. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of orders.\"",
+    "pg_path": "0.0.0.0.0.1",
+    "ai_path": "0.0.1.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (lineitem, part, supplier, orders) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Sorted, Partial) over (lineitem, part, supplier, orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Sort over (lineitem, part, supplier, orders) (sorts its input).",
+    "pg_path": "0.0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash over (orders) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for orders.\"",
+    "pg_path": null,
+    "ai_path": "0.0.1"
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Hash Join of (lineitem, part) with (supplier).",
+   "Both plans use Hash Join of (lineitem) with (part).",
+   "Both plans use Seq Scan on lineitem.",
+   "Both plans use Seq Scan on part.",
+   "Both plans use Seq Scan on supplier."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Sorted, Finalize) over (lineitem, part, supplier, orders): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate by order priority using hash aggregation.\""
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (lineitem, part, supplier, orders) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Sorted, Partial) over (lineitem, part, supplier, orders) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Sort over (lineitem, part, supplier, orders) (sorts its input)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "The join of (lineitem, part, supplier, orders): PostgreSQL uses Nested Loop of (lineitem, part, supplier) with (orders). The AI uses Hash Join of (lineitem, part, supplier) with (orders). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Join lineitem with orders using hash join.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0.0",
+    "ai_path": "0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0",
+    "ai_path": "0.0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0.0",
+    "ai_path": "0.0.0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0.1",
+    "ai_path": "0.0.0.0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0.1.0",
+    "ai_path": "0.0.0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.1",
+    "ai_path": "0.0.0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.1.0",
+    "ai_path": "0.0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.1",
+    "ai_path": "0.0.1.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table orders: PostgreSQL uses Index Scan on orders using orders_pkey. The AI uses Seq Scan on orders. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of orders.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash over (orders) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for orders.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "postgres_only",
+    "0.0.0.0.0": "changed",
+    "0.0.0.0.0.0": "same",
+    "0.0.0.0.0.0.0": "same",
+    "0.0.0.0.0.0.0.0": "same",
+    "0.0.0.0.0.0.0.1": "same",
+    "0.0.0.0.0.0.0.1.0": "same",
+    "0.0.0.0.0.0.1": "same",
+    "0.0.0.0.0.0.1.0": "same",
+    "0.0.0.0.0.1": "changed"
+   },
+   "ai": {
+    "0": "changed",
+    "0.0": "changed",
+    "0.0.0": "same",
+    "0.0.0.0": "same",
+    "0.0.0.0.0": "same",
+    "0.0.0.0.1": "same",
+    "0.0.0.0.1.0": "same",
+    "0.0.0.1": "same",
+    "0.0.0.1.0": "same",
+    "0.0.1.0": "changed",
+    "0.0.1": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 38% (tree edit distance rate: 25%). 7 of 13 PostgreSQL nodes have an identical counterpart in the AI plan's 11 nodes.\n\nPostgreSQL join order: NL(HJ(HJ(lineitem, part), supplier), orders)\nAI join order:         HJ(HJ(HJ(lineitem, part), supplier), orders)\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.\n2. [Aggregation strategy] Aggregate (Sorted, Finalize) over (lineitem, part, supplier, orders): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Aggregate by order priority using hash aggregation.\"\n3. [Join algorithm] The join of (lineitem, part, supplier, orders): PostgreSQL uses Nested Loop of (lineitem, part, supplier) with (orders). The AI uses Hash Join of (lineitem, part, supplier) with (orders). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"Join lineitem with orders using hash join.\"\n4. [Access method] Table orders: PostgreSQL uses Index Scan on orders using orders_pkey. The AI uses Seq Scan on orders. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Full scan of orders.\"\n5. [Missing operator] Only the PostgreSQL plan has Gather Merge over (lineitem, part, supplier, orders) (collects sorted rows from parallel workers, keeping the order).\n6. [Missing operator] Only the PostgreSQL plan has Aggregate (Sorted, Partial) over (lineitem, part, supplier, orders) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n7. [Missing operator] Only the PostgreSQL plan has Sort over (lineitem, part, supplier, orders) (sorts its input).\n8. [Extra operator] Only the AI plan has Hash over (orders) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for orders.\"\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Hash Join of (lineitem, part) with (supplier).\n- Both plans use Hash Join of (lineitem) with (part).\n- Both plans use Seq Scan on lineitem.\n- Both plans use Seq Scan on part.\n- Both plans use Seq Scan on supplier.",
+ "timings": {
+  "postgres": 0.005,
+  "ai": 2.714,
+  "comparison": 0.005
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.375,
+  "ted_rate": 0.25,
+  "pg_nodes": 13,
+  "ai_nodes": 11,
+  "identical_pairs": 7,
+  "changed_pairs": 3,
+  "postgres_only_nodes": 3,
+  "ai_only_nodes": 1,
+  "access_method_agreement": 0.75,
+  "join_algorithm_agreement": 0.6667,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Aggregation strategy",
+  "Join algorithm",
+  "Access method",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.375,
+   0.375,
+   0.375
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

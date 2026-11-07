@@ -1,0 +1,327 @@
+{
+ "id": "I2",
+ "category": "I. Window function",
+ "purpose": "Running total with a ROWS frame over one customer's orders",
+ "sql": "SELECT o_orderdate, o_totalprice,\n       sum(o_totalprice) OVER (ORDER BY o_orderdate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total\nFROM orders\nWHERE o_custkey = 3001",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "WindowAgg",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 34942.56,
+    "Total Cost": 34942.84,
+    "Plan Rows": 17,
+    "Plan Width": 44,
+    "Disabled": false,
+    "Window": "w1 AS (ORDER BY o_orderdate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)",
+    "Plans": [
+     {
+      "Node Type": "Sort",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 34942.55,
+      "Total Cost": 34942.59,
+      "Plan Rows": 17,
+      "Plan Width": 12,
+      "Disabled": false,
+      "Sort Key": [
+       "o_orderdate"
+      ],
+      "Plans": [
+       {
+        "Node Type": "Gather",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 1000.0,
+        "Total Cost": 34942.2,
+        "Plan Rows": 17,
+        "Plan Width": 12,
+        "Disabled": false,
+        "Workers Planned": 2,
+        "Single Copy": false,
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": true,
+          "Async Capable": false,
+          "Relation Name": "orders",
+          "Alias": "orders",
+          "Startup Cost": 0.0,
+          "Total Cost": 33940.5,
+          "Plan Rows": 7,
+          "Plan Width": 12,
+          "Disabled": false,
+          "Filter": "(o_custkey = 3001)"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "WindowAgg",
+  "raw_type": "WindowAgg",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 34942.84,
+  "rows": 17,
+  "children": [
+   {
+    "node_type": "Sort",
+    "raw_type": "Sort",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "o_orderdate"
+    ],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 34942.59,
+    "rows": 17,
+    "children": [
+     {
+      "node_type": "Gather",
+      "raw_type": "Gather",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 34942.2,
+      "rows": 17,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "orders",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "(o_custkey = 3001)"
+        },
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "orders"
+        },
+        "cost": 33940.5,
+        "rows": 7,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"WindowAgg\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {},\n  \"keys\": [\n    \"o_orderdate\"\n  ],\n  \"estimated_rows\": 18,\n  \"parent_relationship\": null,\n  \"reason\": \"Window function requires sorting by the window order clause.\",\n  \"children\": [\n    {\n      \"node_type\": \"Sort\",\n      \"relation\": null,\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {},\n      \"keys\": [\n        \"o_orderdate\"\n      ],\n      \"estimated_rows\": 18,\n      \"parent_relationship\": null,\n      \"reason\": \"Window function requires input to be sorted by o_orderdate.\",\n      \"children\": [\n        {\n          \"node_type\": \"Index Scan\",\n          \"relation\": \"orders\",\n          \"index_name\": \"orders_pkey\",\n          \"join_type\": null,\n          \"strategy\": null,\n          \"conditions\": {\n            \"Filter\": \"o_custkey = 3001\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 18,\n          \"parent_relationship\": null,\n          \"reason\": \"Filtering by o_custkey on orders table.\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "WindowAgg",
+  "raw_type": "WindowAgg",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "o_orderdate"
+  ],
+  "extra": {
+   "AI Reason": "Window function requires sorting by the window order clause."
+  },
+  "cost": null,
+  "rows": 18.0,
+  "children": [
+   {
+    "node_type": "Sort",
+    "raw_type": "Sort",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "o_orderdate"
+    ],
+    "extra": {
+     "AI Reason": "Window function requires input to be sorted by o_orderdate."
+    },
+    "cost": null,
+    "rows": 18.0,
+    "children": [
+     {
+      "node_type": "Index Scan",
+      "raw_type": "Index Scan",
+      "relation": "orders",
+      "index_name": "orders_pkey",
+      "join_type": null,
+      "conditions": {
+       "Filter": "o_custkey = 3001"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Filtering by o_custkey on orders table."
+      },
+      "cost": null,
+      "rows": 18.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.4286,
+   "ted_rate": 0.2857,
+   "pg_nodes": 4,
+   "ai_nodes": 3,
+   "matched_pairs": 3,
+   "identical_pairs": 2,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 1,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 0.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.06,
+   "max_q_error": 1.06
+  },
+  "join_order": {
+   "postgres": "orders",
+   "ai": "orders"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Access method",
+    "text": "Table orders: PostgreSQL uses Seq Scan on orders. The AI uses Index Scan on orders using orders_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Filtering by o_custkey on orders table.\"",
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table orders: PostgreSQL uses Seq Scan on orders. The AI uses Index Scan on orders using orders_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Filtering by o_custkey on orders table.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "same",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "changed"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same",
+    "0.0.0": "changed"
+   }
+  }
+ },
+ "explanation": "Difference rate: 43% (tree edit distance rate: 29%). 2 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 3 nodes.\n\nPostgreSQL join order: orders\nAI join order:         orders\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.\n2. [Access method] Table orders: PostgreSQL uses Seq Scan on orders. The AI uses Index Scan on orders using orders_pkey. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Filtering by o_custkey on orders table.\"\n3. [Missing operator] Only the PostgreSQL plan has Gather over (orders) (collects rows from parallel worker processes).",
+ "timings": {
+  "postgres": 0.001,
+  "ai": 4.817,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.4286,
+  "ted_rate": 0.2857,
+  "pg_nodes": 4,
+  "ai_nodes": 3,
+  "identical_pairs": 2,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 1,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 0.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.06,
+  "max_q_error": 1.06
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Access method",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.4286,
+   0.4286,
+   0.4286
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

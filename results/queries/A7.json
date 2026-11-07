@@ -1,0 +1,377 @@
+{
+ "id": "A7",
+ "category": "A. Selection / access path",
+ "purpose": "IN-list on the leading primary-key column (Index Scan or Bitmap scan)",
+ "sql": "SELECT l_orderkey, l_linenumber, l_quantity\nFROM lineitem\nWHERE l_orderkey IN (1, 32, 70000, 4000000, 5999975)",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Index Scan",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Scan Direction": "Forward",
+    "Index Name": "lineitem_pkey",
+    "Relation Name": "lineitem",
+    "Alias": "lineitem",
+    "Startup Cost": 0.43,
+    "Total Cost": 161.06,
+    "Plan Rows": 77,
+    "Plan Width": 13,
+    "Disabled": false,
+    "Index Cond": "(l_orderkey = ANY ('{1,32,70000,4000000,5999975}'::integer[]))"
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Index Scan",
+  "raw_type": "Index Scan",
+  "relation": "lineitem",
+  "index_name": "lineitem_pkey",
+  "join_type": null,
+  "conditions": {
+   "Index Cond": "(l_orderkey = ANY ('{1,32,70000,4000000,5999975}'::integer[]))"
+  },
+  "keys": [],
+  "extra": {
+   "Scan Direction": "Forward",
+   "Alias": "lineitem"
+  },
+  "cost": 161.06,
+  "rows": 77,
+  "children": [],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Bitmap Heap Scan\",\n  \"relation\": \"lineitem\",\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {\n    \"Filter\": \"((l_orderkey = 1) OR (l_orderkey = 32) OR (l_orderkey = 70000) OR (l_orderkey = 4000000) OR (l_orderkey = 5999975))\"\n  },\n  \"keys\": [],\n  \"estimated_rows\": 15,\n  \"parent_relationship\": null,\n  \"reason\": \"The query filters on a small set of specific order keys, making a bitmap scan efficient for retrieving the relevant lineitem rows.\",\n  \"children\": [\n    {\n      \"node_type\": \"BitmapOr\",\n      \"relation\": null,\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {},\n      \"keys\": [],\n      \"estimated_rows\": 15,\n      \"parent_relationship\": null,\n      \"reason\": \"Combining multiple index scans for the specific order keys.\",\n      \"children\": [\n        {\n          \"node_type\": \"Bitmap Index Scan\",\n          \"relation\": \"lineitem\",\n          \"index_name\": \"lineitem_pkey\",\n          \"join_type\": null,\n          \"strategy\": null,\n          \"conditions\": {\n            \"Index Cond\": \"(l_orderkey = 1)\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 3,\n          \"parent_relationship\": null,\n          \"reason\": \"Accessing the primary key index for the specific order key.\",\n          \"children\": []\n        },\n        {\n          \"node_type\": \"Bitmap Index Scan\",\n          \"relation\": \"lineitem\",\n          \"index_name\": \"lineitem_pkey\",\n          \"join_type\": null,\n          \"strategy\": null,\n          \"conditions\": {\n            \"Index Cond\": \"(l_orderkey = 32)\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 3,\n          \"parent_relationship\": null,\n          \"reason\": \"Accessing the primary key index for the specific order key.\",\n          \"children\": []\n        },\n        {\n          \"node_type\": \"Bitmap Index Scan\",\n          \"relation\": \"lineitem\",\n          \"index_name\": \"lineitem_pkey\",\n          \"join_type\": null,\n          \"strategy\": null,\n          \"conditions\": {\n            \"Index Cond\": \"(l_orderkey = 70000)\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 3,\n          \"parent_relationship\": null,\n          \"reason\": \"Accessing the primary key index for the specific order key.\",\n          \"children\": []\n        },\n        {\n          \"node_type\": \"Bitmap Index Scan\",\n          \"relation\": \"lineitem\",\n          \"index_name\": \"lineitem_pkey\",\n          \"join_type\": null,\n          \"strategy\": null,\n          \"conditions\": {\n            \"Index Cond\": \"(l_orderkey = 4000000)\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 3,\n          \"parent_relationship\": null,\n          \"reason\": \"Accessing the primary key index for the specific order key.\",\n          \"children\": []\n        },\n        {\n          \"node_type\": \"Bitmap Index Scan\",\n          \"relation\": \"lineitem\",\n          \"index_name\": \"lineitem_pkey\",\n          \"join_type\": null,\n          \"strategy\": null,\n          \"conditions\": {\n            \"Index Cond\": \"(l_orderkey = 5999975)\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 3,\n          \"parent_relationship\": null,\n          \"reason\": \"Accessing the primary key index for the specific order key.\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Bitmap Heap Scan",
+  "raw_type": "Bitmap Heap Scan",
+  "relation": "lineitem",
+  "index_name": null,
+  "join_type": null,
+  "conditions": {
+   "Filter": "((l_orderkey = 1) OR (l_orderkey = 32) OR (l_orderkey = 70000) OR (l_orderkey = 4000000) OR (l_orderkey = 5999975))"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query filters on a small set of specific order keys, making a bitmap scan efficient for retrieving the relevant lineitem rows.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 15.0,
+  "children": [
+   {
+    "node_type": "BitmapOr",
+    "raw_type": "BitmapOr",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "Combining multiple index scans for the specific order keys."
+    },
+    "cost": null,
+    "rows": 15.0,
+    "children": [
+     {
+      "node_type": "Bitmap Index Scan",
+      "raw_type": "Bitmap Index Scan",
+      "relation": null,
+      "index_name": "lineitem_pkey",
+      "join_type": null,
+      "conditions": {
+       "Index Cond": "(l_orderkey = 1)"
+      },
+      "keys": [],
+      "extra": {
+       "Name": "lineitem",
+       "AI Reason": "Accessing the primary key index for the specific order key."
+      },
+      "cost": null,
+      "rows": 3.0,
+      "children": [],
+      "source": "ai"
+     },
+     {
+      "node_type": "Bitmap Index Scan",
+      "raw_type": "Bitmap Index Scan",
+      "relation": null,
+      "index_name": "lineitem_pkey",
+      "join_type": null,
+      "conditions": {
+       "Index Cond": "(l_orderkey = 32)"
+      },
+      "keys": [],
+      "extra": {
+       "Name": "lineitem",
+       "AI Reason": "Accessing the primary key index for the specific order key."
+      },
+      "cost": null,
+      "rows": 3.0,
+      "children": [],
+      "source": "ai"
+     },
+     {
+      "node_type": "Bitmap Index Scan",
+      "raw_type": "Bitmap Index Scan",
+      "relation": null,
+      "index_name": "lineitem_pkey",
+      "join_type": null,
+      "conditions": {
+       "Index Cond": "(l_orderkey = 70000)"
+      },
+      "keys": [],
+      "extra": {
+       "Name": "lineitem",
+       "AI Reason": "Accessing the primary key index for the specific order key."
+      },
+      "cost": null,
+      "rows": 3.0,
+      "children": [],
+      "source": "ai"
+     },
+     {
+      "node_type": "Bitmap Index Scan",
+      "raw_type": "Bitmap Index Scan",
+      "relation": null,
+      "index_name": "lineitem_pkey",
+      "join_type": null,
+      "conditions": {
+       "Index Cond": "(l_orderkey = 4000000)"
+      },
+      "keys": [],
+      "extra": {
+       "Name": "lineitem",
+       "AI Reason": "Accessing the primary key index for the specific order key."
+      },
+      "cost": null,
+      "rows": 3.0,
+      "children": [],
+      "source": "ai"
+     },
+     {
+      "node_type": "Bitmap Index Scan",
+      "raw_type": "Bitmap Index Scan",
+      "relation": null,
+      "index_name": "lineitem_pkey",
+      "join_type": null,
+      "conditions": {
+       "Index Cond": "(l_orderkey = 5999975)"
+      },
+      "keys": [],
+      "extra": {
+       "Name": "lineitem",
+       "AI Reason": "Accessing the primary key index for the specific order key."
+      },
+      "cost": null,
+      "rows": 3.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 1.0,
+   "ted_rate": 0.875,
+   "pg_nodes": 1,
+   "ai_nodes": 7,
+   "matched_pairs": 1,
+   "identical_pairs": 0,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 6,
+   "access_method_agreement": 0.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 5.13,
+   "max_q_error": 5.13
+  },
+  "join_order": {
+   "postgres": "lineitem",
+   "ai": "lineitem"
+  },
+  "differences": [
+   {
+    "category": "Access method",
+    "text": "Table lineitem: PostgreSQL uses Index Scan on lineitem using lineitem_pkey. The AI uses Bitmap Heap Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"The query filters on a small set of specific order keys, making a bitmap scan efficient for retrieving the relevant lineitem rows.\"",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Conditions",
+    "text": "Index Scan on lineitem using lineitem_pkey: PostgreSQL applies l_orderkey = any '{1,32,70000,4000000,5999975}' here, the AI does not.",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has BitmapOr (unites the row locations found by several bitmap index scans). The AI's reason: \"Combining multiple index scans for the specific order keys.\"",
+    "pg_path": null,
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\"",
+    "pg_path": null,
+    "ai_path": "0.0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\"",
+    "pg_path": null,
+    "ai_path": "0.0.1"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\"",
+    "pg_path": null,
+    "ai_path": "0.0.2"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\"",
+    "pg_path": null,
+    "ai_path": "0.0.3"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\"",
+    "pg_path": null,
+    "ai_path": "0.0.4"
+   }
+  ],
+  "similarities": [],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table lineitem: PostgreSQL uses Index Scan on lineitem using lineitem_pkey. The AI uses Bitmap Heap Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"The query filters on a small set of specific order keys, making a bitmap scan efficient for retrieving the relevant lineitem rows.\"",
+     "Index Scan on lineitem using lineitem_pkey: PostgreSQL applies l_orderkey = any '{1,32,70000,4000000,5999975}' here, the AI does not."
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has BitmapOr (unites the row locations found by several bitmap index scans). The AI's reason: \"Combining multiple index scans for the specific order keys.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.2",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.3",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.4",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed"
+   },
+   "ai": {
+    "0": "changed",
+    "0.0": "ai_only",
+    "0.0.0": "ai_only",
+    "0.0.1": "ai_only",
+    "0.0.2": "ai_only",
+    "0.0.3": "ai_only",
+    "0.0.4": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 100% (tree edit distance rate: 88%). 0 of 1 PostgreSQL nodes have an identical counterpart in the AI plan's 7 nodes.\n\nPostgreSQL join order: lineitem\nAI join order:         lineitem\n\nDIFFERENCES\n1. [Access method] Table lineitem: PostgreSQL uses Index Scan on lineitem using lineitem_pkey. The AI uses Bitmap Heap Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"The query filters on a small set of specific order keys, making a bitmap scan efficient for retrieving the relevant lineitem rows.\"\n2. [Conditions] Index Scan on lineitem using lineitem_pkey: PostgreSQL applies l_orderkey = any '{1,32,70000,4000000,5999975}' here, the AI does not.\n3. [Extra operator] Only the AI plan has BitmapOr (unites the row locations found by several bitmap index scans). The AI's reason: \"Combining multiple index scans for the specific order keys.\"\n4. [Extra operator] Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\"\n5. [Extra operator] Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\"\n6. [Extra operator] Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\"\n7. [Extra operator] Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\"\n8. [Extra operator] Only the AI plan has Bitmap Index Scan on lineitem_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Accessing the primary key index for the specific order key.\"",
+ "timings": {
+  "postgres": 0.006,
+  "ai": 3.052,
+  "comparison": 0.002
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 1.0,
+  "ted_rate": 0.875,
+  "pg_nodes": 1,
+  "ai_nodes": 7,
+  "identical_pairs": 0,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 6,
+  "access_method_agreement": 0.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 5.13,
+  "max_q_error": 5.13
+ },
+ "difference_categories": [
+  "Access method",
+  "Conditions",
+  "Extra operator",
+  "Extra operator",
+  "Extra operator",
+  "Extra operator",
+  "Extra operator",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

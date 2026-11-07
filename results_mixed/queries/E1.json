@@ -1,0 +1,311 @@
+{
+ "id": "E1",
+ "category": "E. Sorting / Top-N",
+ "purpose": "ORDER BY a column without an index plus LIMIT (top-N heapsort, Gather Merge)",
+ "sql": "SELECT o_orderkey, o_custkey, o_totalprice\nFROM orders\nORDER BY o_totalprice DESC\nLIMIT 20",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Limit",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 50009.05,
+    "Total Cost": 50011.38,
+    "Plan Rows": 20,
+    "Plan Width": 16,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Gather Merge",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 50009.05,
+      "Total Cost": 224708.77,
+      "Plan Rows": 1500000,
+      "Plan Width": 16,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Plans": [
+       {
+        "Node Type": "Sort",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 49009.03,
+        "Total Cost": 50571.53,
+        "Plan Rows": 625000,
+        "Plan Width": 16,
+        "Disabled": false,
+        "Sort Key": [
+         "o_totalprice DESC"
+        ],
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": true,
+          "Async Capable": false,
+          "Relation Name": "orders",
+          "Alias": "orders",
+          "Startup Cost": 0.0,
+          "Total Cost": 32378.0,
+          "Plan Rows": 625000,
+          "Plan Width": 16,
+          "Disabled": false
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 50011.38,
+  "rows": 20,
+  "children": [
+   {
+    "node_type": "Gather Merge",
+    "raw_type": "Gather Merge",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 224708.77,
+    "rows": 1500000,
+    "children": [
+     {
+      "node_type": "Sort",
+      "raw_type": "Sort",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "o_totalprice DESC"
+      ],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 50571.53,
+      "rows": 625000,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "orders",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "orders"
+        },
+        "cost": 32378.0,
+        "rows": 625000,
+        "children": [],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Limit\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 20,\n  \"parent_relationship\": null,\n  \"reason\": \"The query requires the top 20 rows based on o_totalprice, which is best achieved by sorting the entire table and taking the top 20.\",\n  \"children\": [\n    {\n      \"node_type\": \"Sort\",\n      \"relation\": null,\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {},\n      \"keys\": [\n        \"o_totalprice DESC\"\n      ],\n      \"estimated_rows\": 1500000,\n      \"parent_relationship\": null,\n      \"reason\": \"Sorting is required to satisfy the ORDER BY clause.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"orders\",\n          \"index_name\": null,\n          \"join_type\": null,\n          \"strategy\": null,\n          \"conditions\": {},\n          \"keys\": [],\n          \"estimated_rows\": 1500000,\n          \"parent_relationship\": null,\n          \"reason\": \"A sequential scan is the most efficient way to read all rows from the orders table.\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Limit",
+  "raw_type": "Limit",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "AI Reason": "The query requires the top 20 rows based on o_totalprice, which is best achieved by sorting the entire table and taking the top 20."
+  },
+  "cost": null,
+  "rows": 20.0,
+  "children": [
+   {
+    "node_type": "Sort",
+    "raw_type": "Sort",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "o_totalprice DESC"
+    ],
+    "extra": {
+     "AI Reason": "Sorting is required to satisfy the ORDER BY clause."
+    },
+    "cost": null,
+    "rows": 1500000.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "orders",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "A sequential scan is the most efficient way to read all rows from the orders table."
+      },
+      "cost": null,
+      "rows": 1500000.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.1429,
+   "ted_rate": 0.1429,
+   "pg_nodes": 4,
+   "ai_nodes": 3,
+   "matched_pairs": 3,
+   "identical_pairs": 3,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 1,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "orders",
+   "ai": "orders"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (orders) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on orders."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (orders) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": "0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "postgres_only",
+    "0.0.0": "same",
+    "0.0.0.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same",
+    "0.0.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 14% (tree edit distance rate: 14%). 3 of 4 PostgreSQL nodes have an identical counterpart in the AI plan's 3 nodes.\n\nPostgreSQL join order: orders\nAI join order:         orders\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge). The AI plan runs in a single process.\n2. [Missing operator] Only the PostgreSQL plan has Gather Merge over (orders) (collects sorted rows from parallel workers, keeping the order).\n\nSIMILARITIES\n- Both plans use Seq Scan on orders.",
+ "timings": {
+  "postgres": 0.002,
+  "ai": 5.147,
+  "comparison": 0.002
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.1429,
+  "ted_rate": 0.1429,
+  "pg_nodes": 4,
+  "ai_nodes": 3,
+  "identical_pairs": 3,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 1,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.1429,
+   0.1429,
+   0.1429
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

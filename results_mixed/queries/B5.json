@@ -1,0 +1,309 @@
+{
+ "id": "B5",
+ "category": "B. Two-table join",
+ "purpose": "Non-equality (theta) self-join; only Nested Loop can do it",
+ "sql": "SELECT n1.n_name AS lower_nation, n2.n_name AS higher_nation\nFROM nation n1\nJOIN nation n2 ON n1.n_nationkey < n2.n_nationkey AND n1.n_regionkey = n2.n_regionkey",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Hash Join",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Join Type": "Inner",
+    "Startup Cost": 1.56,
+    "Total Cost": 4.59,
+    "Plan Rows": 42,
+    "Plan Width": 52,
+    "Disabled": false,
+    "Inner Unique": false,
+    "Hash Cond": "(n1.n_regionkey = n2.n_regionkey)",
+    "Join Filter": "(n1.n_nationkey < n2.n_nationkey)",
+    "Plans": [
+     {
+      "Node Type": "Seq Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Relation Name": "nation",
+      "Alias": "n1",
+      "Startup Cost": 0.0,
+      "Total Cost": 1.25,
+      "Plan Rows": 25,
+      "Plan Width": 34,
+      "Disabled": false
+     },
+     {
+      "Node Type": "Hash",
+      "Parent Relationship": "Inner",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 1.25,
+      "Total Cost": 1.25,
+      "Plan Rows": 25,
+      "Plan Width": 34,
+      "Disabled": false,
+      "Plans": [
+       {
+        "Node Type": "Seq Scan",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Relation Name": "nation",
+        "Alias": "n2",
+        "Startup Cost": 0.0,
+        "Total Cost": 1.25,
+        "Plan Rows": 25,
+        "Plan Width": 34,
+        "Disabled": false
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Hash Cond": "(n1.n_regionkey = n2.n_regionkey)",
+   "Join Filter": "(n1.n_nationkey < n2.n_nationkey)"
+  },
+  "keys": [],
+  "extra": {},
+  "cost": 4.59,
+  "rows": 42,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "nation",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Alias": "n1"
+    },
+    "cost": 1.25,
+    "rows": 25,
+    "children": [],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Inner"
+    },
+    "cost": 1.25,
+    "rows": 25,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "nation",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer",
+       "Alias": "n2"
+      },
+      "cost": 1.25,
+      "rows": 25,
+      "children": [],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Hash Join\",\n  \"join_type\": \"Inner\",\n  \"conditions\": {\n    \"Hash Cond\": \"n1.n_regionkey = n2.n_regionkey\",\n    \"Join Filter\": \"n1.n_nationkey < n2.n_nationkey\"\n  },\n  \"estimated_rows\": 25,\n  \"reason\": \"The optimizer chooses a hash join for the self-join on nation, filtering the cross-region matches via a join filter.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"nation\",\n      \"estimated_rows\": 25,\n      \"conditions\": {},\n      \"children\": []\n    },\n    {\n      \"node_type\": \"Hash\",\n      \"estimated_rows\": 25,\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"nation\",\n          \"estimated_rows\": 25,\n          \"conditions\": {},\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Hash Cond": "n1.n_regionkey = n2.n_regionkey",
+   "Join Filter": "n1.n_nationkey < n2.n_nationkey"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "The optimizer chooses a hash join for the self-join on nation, filtering the cross-region matches via a join filter."
+  },
+  "cost": null,
+  "rows": 25.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "nation",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {},
+    "cost": null,
+    "rows": 25.0,
+    "children": [],
+    "source": "ai"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {},
+    "cost": null,
+    "rows": 25.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "nation",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {},
+      "cost": null,
+      "rows": 25.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.0,
+   "ted_rate": 0.0,
+   "pg_nodes": 4,
+   "ai_nodes": 4,
+   "matched_pairs": 4,
+   "identical_pairs": 4,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.0,
+   "max_q_error": 1.68
+  },
+  "join_order": {
+   "postgres": "HJ(nation, nation)",
+   "ai": "HJ(nation, nation)"
+  },
+  "differences": [],
+  "similarities": [
+   "The plans are identical.",
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Hash Join of (nation) with (nation).",
+   "Both plans use Seq Scan on nation (2 times)."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1",
+    "ai_path": "0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1.0",
+    "ai_path": "0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "same",
+    "0.1": "same",
+    "0.1.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same",
+    "0.1": "same",
+    "0.1.0": "same"
+   }
+  }
+ },
+ "explanation": "The two plans are identical in structure, operators and details.\n\nPostgreSQL join order: HJ(nation, nation)\nAI join order:         HJ(nation, nation)\n\nSIMILARITIES\n- The plans are identical.\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Hash Join of (nation) with (nation).\n- Both plans use Seq Scan on nation (2 times).",
+ "timings": {
+  "postgres": 0.014,
+  "ai": 92.241,
+  "comparison": 0.002
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.0,
+  "ted_rate": 0.0,
+  "pg_nodes": 4,
+  "ai_nodes": 4,
+  "identical_pairs": 4,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.0,
+  "max_q_error": 1.68
+ },
+ "difference_categories": [],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

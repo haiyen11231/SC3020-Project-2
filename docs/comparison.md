@@ -90,6 +90,7 @@ Matching nodes by their position in the tree fails as soon as the AI joins table
    - A *unit* reads a base table (Seq Scan, Index Scan, Bitmap Heap Scan, ...), or is another leaf. The Bitmap Index Scans under a Bitmap Heap Scan belong to that unit.
    - An *anchor* combines two or more inputs (joins, Append, ...).
    - A *chain* node has exactly one input (Hash, Sort, Aggregate, Gather, Limit, ...). It belongs to the unit or anchor directly below it.
+   - Subquery plans attached to a node (InitPlan / SubPlan) are not counted as its inputs. PostgreSQL lists them before the real inputs, so they are kept apart; otherwise a join carrying a subquery would take the subquery as its outer input. They are classified and matched like any other subtree.
 2. **Match units.** Units are grouped by table. Within a group, the best one-to-one assignment is chosen by a score that rewards the same operator, the same index, the same predicates, the same literal values, and the same already-matched join partners. Tables read once are matched first, so their matches provide the context that separates self-joins (for example `nation n1` / `nation n2`).
 3. **Match anchors by signature.** An anchor's signature is the set of matched units below it. Two joins with the same signature produce the same intermediate result, so they correspond even if the algorithm or the input order differs. Joins left over (because the join order differs) are paired only if their inputs overlap by at least 50% (Jaccard), and are reported as "inputs differ". Otherwise they stay unmatched.
 4. **Match chains.** Above each matched pair, the two lists of one-input operators are aligned with a weighted LCS dynamic programme that keeps their order. For example, PostgreSQL's `Aggregate (Finalize) - Gather - Aggregate (Partial)` against the AI's single `Aggregate` matches the final aggregates and leaves Gather and the partial aggregate as PostgreSQL-only. The Hash nodes of a hash join whose build side differs are paired as changed.
@@ -111,7 +112,7 @@ Matching nodes by their position in the tree fails as soon as the AI joins table
 
 A join condition that PostgreSQL places on the inner index scan of a Nested Loop is counted at the Nested Loop. That way it equals the same condition written on a Hash Join. An `ORDER BY` alias (`revenue`) matches the expression PostgreSQL prints (`sum(...)`).
 
-**Cardinality estimates.** PostgreSQL's row estimates below a Gather are per worker, and on the inner side of a Nested Loop they are per loop. Those nodes are left out of the q-error, so that per-worker or per-loop numbers are never compared with the AI's totals.
+**Cardinality estimates.** PostgreSQL's row estimates below a Gather are per worker, on the inner side of a Nested Loop they are per loop, and below a Limit they describe a complete run that the Limit cuts short. Those nodes are left out of the q-error, so that per-worker or per-loop numbers are never compared with the AI's totals.
 
 **Cost.** Unit matching tries every assignment within one table, which takes at most 7! orders and in practice only a few. Above 7 reads of one table it switches to a greedy assignment. Chain alignment is O(a·b) per chain, and the tree edit distance is O(n²) for these tree shapes. Two 40-table plans (240 nodes) compare in under 0.1 s.
 

@@ -1,0 +1,199 @@
+{
+ "id": "A4",
+ "category": "A. Selection / access path",
+ "purpose": "Very selective filter on a column WITHOUT an index (only a Seq Scan is possible)",
+ "sql": "SELECT c_name, c_phone, c_acctbal\nFROM customer\nWHERE c_acctbal > 9990",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Gather",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 1000.0,
+    "Total Cost": 5394.25,
+    "Plan Rows": 130,
+    "Plan Width": 41,
+    "Disabled": false,
+    "Workers Planned": 2,
+    "Single Copy": false,
+    "Plans": [
+     {
+      "Node Type": "Seq Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": true,
+      "Async Capable": false,
+      "Relation Name": "customer",
+      "Alias": "customer",
+      "Startup Cost": 0.0,
+      "Total Cost": 4381.25,
+      "Plan Rows": 54,
+      "Plan Width": 41,
+      "Disabled": false,
+      "Filter": "(c_acctbal > '9990'::numeric)"
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Gather",
+  "raw_type": "Gather",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {},
+  "cost": 5394.25,
+  "rows": 130,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "customer",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "(c_acctbal > '9990'::numeric)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Alias": "customer"
+    },
+    "cost": 4381.25,
+    "rows": 54,
+    "children": [],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Seq Scan\",\n  \"relation\": \"customer\",\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {\n    \"Filter\": \"c_acctbal > 9990\"\n  },\n  \"keys\": [],\n  \"estimated_rows\": 15,\n  \"parent_relationship\": null,\n  \"reason\": \"A sequential scan is the most efficient way to access the customer table as there is no index on c_acctbal and the filter is not highly selective.\",\n  \"children\": []\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Seq Scan",
+  "raw_type": "Seq Scan",
+  "relation": "customer",
+  "index_name": null,
+  "join_type": null,
+  "conditions": {
+   "Filter": "c_acctbal > 9990"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "A sequential scan is the most efficient way to access the customer table as there is no index on c_acctbal and the filter is not highly selective.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 15.0,
+  "children": [],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.3333,
+   "ted_rate": 0.3333,
+   "pg_nodes": 2,
+   "ai_nodes": 1,
+   "matched_pairs": 1,
+   "identical_pairs": 1,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 1,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": null,
+   "max_q_error": null
+  },
+  "join_order": {
+   "postgres": "customer",
+   "ai": "customer"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather over (customer) (collects rows from parallel worker processes).",
+    "pg_path": "0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans use Seq Scan on customer."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather over (customer) (collects rows from parallel worker processes)."
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "postgres_only",
+    "0.0": "same"
+   },
+   "ai": {
+    "0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 33% (tree edit distance rate: 33%). 1 of 2 PostgreSQL nodes have an identical counterpart in the AI plan's 1 nodes.\n\nPostgreSQL join order: customer\nAI join order:         customer\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather). The AI plan runs in a single process.\n2. [Missing operator] Only the PostgreSQL plan has Gather over (customer) (collects rows from parallel worker processes).\n\nSIMILARITIES\n- Both plans use Seq Scan on customer.",
+ "timings": {
+  "postgres": 0.006,
+  "ai": 1.619,
+  "comparison": 0.0
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.3333,
+  "ted_rate": 0.3333,
+  "pg_nodes": 2,
+  "ai_nodes": 1,
+  "identical_pairs": 1,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 1,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": null,
+  "max_q_error": null
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.3333,
+   0.3333,
+   0.3333
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

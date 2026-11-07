@@ -1,0 +1,499 @@
+{
+ "id": "C1",
+ "category": "C. Multi-way join",
+ "purpose": "3-way join along a foreign-key chain with a filter on the smallest table",
+ "sql": "SELECT s.s_name, s.s_acctbal, n.n_name\nFROM region r\nJOIN nation n   ON n.n_regionkey = r.r_regionkey\nJOIN supplier s ON s.s_nationkey = n.n_nationkey\nWHERE r.r_name = 'ASIA'\n  AND s.s_acctbal > 9000",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Hash Join",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Join Type": "Inner",
+    "Startup Cost": 2.51,
+    "Total Cost": 355.72,
+    "Plan Rows": 181,
+    "Plan Width": 58,
+    "Disabled": false,
+    "Inner Unique": false,
+    "Hash Cond": "(s.s_nationkey = n.n_nationkey)",
+    "Plans": [
+     {
+      "Node Type": "Seq Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Relation Name": "supplier",
+      "Alias": "s",
+      "Startup Cost": 0.0,
+      "Total Cost": 348.0,
+      "Plan Rows": 907,
+      "Plan Width": 36,
+      "Disabled": false,
+      "Filter": "(s_acctbal > '9000'::numeric)"
+     },
+     {
+      "Node Type": "Hash",
+      "Parent Relationship": "Inner",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 2.45,
+      "Total Cost": 2.45,
+      "Plan Rows": 5,
+      "Plan Width": 30,
+      "Disabled": false,
+      "Plans": [
+       {
+        "Node Type": "Hash Join",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Join Type": "Inner",
+        "Startup Cost": 1.07,
+        "Total Cost": 2.45,
+        "Plan Rows": 5,
+        "Plan Width": 30,
+        "Disabled": false,
+        "Inner Unique": true,
+        "Hash Cond": "(n.n_regionkey = r.r_regionkey)",
+        "Plans": [
+         {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Relation Name": "nation",
+          "Alias": "n",
+          "Startup Cost": 0.0,
+          "Total Cost": 1.25,
+          "Plan Rows": 25,
+          "Plan Width": 34,
+          "Disabled": false
+         },
+         {
+          "Node Type": "Hash",
+          "Parent Relationship": "Inner",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 1.06,
+          "Total Cost": 1.06,
+          "Plan Rows": 1,
+          "Plan Width": 4,
+          "Disabled": false,
+          "Plans": [
+           {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "region",
+            "Alias": "r",
+            "Startup Cost": 0.0,
+            "Total Cost": 1.06,
+            "Plan Rows": 1,
+            "Plan Width": 4,
+            "Disabled": false,
+            "Filter": "(r_name = 'ASIA'::bpchar)"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Hash Cond": "(s.s_nationkey = n.n_nationkey)"
+  },
+  "keys": [],
+  "extra": {},
+  "cost": 355.72,
+  "rows": 181,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "supplier",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "(s_acctbal > '9000'::numeric)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Alias": "s"
+    },
+    "cost": 348.0,
+    "rows": 907,
+    "children": [],
+    "source": "postgres"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Inner"
+    },
+    "cost": 2.45,
+    "rows": 5,
+    "children": [
+     {
+      "node_type": "Hash Join",
+      "raw_type": "Hash Join",
+      "relation": null,
+      "index_name": null,
+      "join_type": "Inner",
+      "conditions": {
+       "Hash Cond": "(n.n_regionkey = r.r_regionkey)"
+      },
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 2.45,
+      "rows": 5,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "nation",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Outer",
+         "Alias": "n"
+        },
+        "cost": 1.25,
+        "rows": 25,
+        "children": [],
+        "source": "postgres"
+       },
+       {
+        "node_type": "Hash",
+        "raw_type": "Hash",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "Parent Relationship": "Inner"
+        },
+        "cost": 1.06,
+        "rows": 1,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "region",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {
+           "Filter": "(r_name = 'ASIA'::bpchar)"
+          },
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer",
+           "Alias": "r"
+          },
+          "cost": 1.06,
+          "rows": 1,
+          "children": [],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Hash Join\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": \"Inner\",\n  \"strategy\": null,\n  \"conditions\": {\n    \"Hash Cond\": \"s.s_nationkey = n.n_nationkey\"\n  },\n  \"keys\": [],\n  \"estimated_rows\": 720,\n  \"parent_relationship\": null,\n  \"reason\": \"Hash join is efficient for joining supplier and nation tables after filtering.\",\n  \"children\": [\n    {\n      \"node_type\": \"Seq Scan\",\n      \"relation\": \"supplier\",\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {\n        \"Filter\": \"s_acctbal > 9000\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 900,\n      \"parent_relationship\": null,\n      \"reason\": \"Sequential scan is appropriate for filtering supplier table by account balance.\",\n      \"children\": []\n    },\n    {\n      \"node_type\": \"Hash\",\n      \"relation\": null,\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {},\n      \"keys\": [],\n      \"estimated_rows\": 5,\n      \"parent_relationship\": null,\n      \"reason\": \"Building a hash table for the nation-region join result.\",\n      \"children\": [\n        {\n          \"node_type\": \"Hash Join\",\n          \"relation\": null,\n          \"index_name\": null,\n          \"join_type\": \"Inner\",\n          \"strategy\": null,\n          \"conditions\": {\n            \"Hash Cond\": \"n.n_regionkey = r.r_regionkey\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 5,\n          \"parent_relationship\": null,\n          \"reason\": \"Joining nation and region tables.\",\n          \"children\": [\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"nation\",\n              \"index_name\": null,\n              \"join_type\": null,\n              \"strategy\": null,\n              \"conditions\": {},\n              \"keys\": [],\n              \"estimated_rows\": 25,\n              \"parent_relationship\": null,\n              \"reason\": \"Scanning small nation table.\",\n              \"children\": []\n            },\n            {\n              \"node_type\": \"Hash\",\n              \"relation\": null,\n              \"index_name\": null,\n              \"join_type\": null,\n              \"strategy\": null,\n              \"conditions\": {},\n              \"keys\": [],\n              \"estimated_rows\": 1,\n              \"parent_relationship\": null,\n              \"reason\": \"Building hash table for region filter.\",\n              \"children\": [\n                {\n                  \"node_type\": \"Seq Scan\",\n                  \"relation\": \"region\",\n                  \"index_name\": null,\n                  \"join_type\": null,\n                  \"strategy\": null,\n                  \"conditions\": {\n                    \"Filter\": \"r_name = 'ASIA'\"\n                  },\n                  \"keys\": [],\n                  \"estimated_rows\": 1,\n                  \"parent_relationship\": null,\n                  \"reason\": \"Filtering region table for 'ASIA'.\",\n                  \"children\": []\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Hash Join",
+  "raw_type": "Hash Join",
+  "relation": null,
+  "index_name": null,
+  "join_type": "Inner",
+  "conditions": {
+   "Hash Cond": "s.s_nationkey = n.n_nationkey"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "Hash join is efficient for joining supplier and nation tables after filtering."
+  },
+  "cost": null,
+  "rows": 720.0,
+  "children": [
+   {
+    "node_type": "Seq Scan",
+    "raw_type": "Seq Scan",
+    "relation": "supplier",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "s_acctbal > 9000"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Sequential scan is appropriate for filtering supplier table by account balance."
+    },
+    "cost": null,
+    "rows": 900.0,
+    "children": [],
+    "source": "ai"
+   },
+   {
+    "node_type": "Hash",
+    "raw_type": "Hash",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "AI Reason": "Building a hash table for the nation-region join result."
+    },
+    "cost": null,
+    "rows": 5.0,
+    "children": [
+     {
+      "node_type": "Hash Join",
+      "raw_type": "Hash Join",
+      "relation": null,
+      "index_name": null,
+      "join_type": "Inner",
+      "conditions": {
+       "Hash Cond": "n.n_regionkey = r.r_regionkey"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Joining nation and region tables."
+      },
+      "cost": null,
+      "rows": 5.0,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "nation",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Scanning small nation table."
+        },
+        "cost": null,
+        "rows": 25.0,
+        "children": [],
+        "source": "ai"
+       },
+       {
+        "node_type": "Hash",
+        "raw_type": "Hash",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Building hash table for region filter."
+        },
+        "cost": null,
+        "rows": 1.0,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "region",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {
+           "Filter": "r_name = 'ASIA'"
+          },
+          "keys": [],
+          "extra": {
+           "AI Reason": "Filtering region table for 'ASIA'."
+          },
+          "cost": null,
+          "rows": 1.0,
+          "children": [],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.0,
+   "ted_rate": 0.0,
+   "pg_nodes": 7,
+   "ai_nodes": 7,
+   "matched_pairs": 7,
+   "identical_pairs": 7,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.0,
+   "max_q_error": 3.98
+  },
+  "join_order": {
+   "postgres": "HJ(supplier, HJ(nation, region))",
+   "ai": "HJ(supplier, HJ(nation, region))"
+  },
+  "differences": [],
+  "similarities": [
+   "The plans are identical.",
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Hash Join of (supplier) with (nation, region).",
+   "Both plans use Seq Scan on supplier.",
+   "Both plans use Hash Join of (nation) with (region).",
+   "Both plans use Seq Scan on nation.",
+   "Both plans use Seq Scan on region."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1",
+    "ai_path": "0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1.0",
+    "ai_path": "0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1.0.0",
+    "ai_path": "0.1.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1.0.1",
+    "ai_path": "0.1.0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.1.0.1.0",
+    "ai_path": "0.1.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "same",
+    "0.1": "same",
+    "0.1.0": "same",
+    "0.1.0.0": "same",
+    "0.1.0.1": "same",
+    "0.1.0.1.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "same",
+    "0.1": "same",
+    "0.1.0": "same",
+    "0.1.0.0": "same",
+    "0.1.0.1": "same",
+    "0.1.0.1.0": "same"
+   }
+  }
+ },
+ "explanation": "The two plans are identical in structure, operators and details.\n\nPostgreSQL join order: HJ(supplier, HJ(nation, region))\nAI join order:         HJ(supplier, HJ(nation, region))\n\nSIMILARITIES\n- The plans are identical.\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Hash Join of (supplier) with (nation, region).\n- Both plans use Seq Scan on supplier.\n- Both plans use Hash Join of (nation) with (region).\n- Both plans use Seq Scan on nation.\n- Both plans use Seq Scan on region.",
+ "timings": {
+  "postgres": 0.028,
+  "ai": 4.493,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.0,
+  "ted_rate": 0.0,
+  "pg_nodes": 7,
+  "ai_nodes": 7,
+  "identical_pairs": 7,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.0,
+  "max_q_error": 3.98
+ },
+ "difference_categories": [],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

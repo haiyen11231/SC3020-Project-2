@@ -1,0 +1,561 @@
+{
+ "id": "F3",
+ "category": "F. Subquery",
+ "purpose": "Correlated EXISTS (expected: semi join)",
+ "sql": "SELECT o_orderpriority, count(*) AS late_orders\nFROM orders o\nWHERE o.o_orderdate >= DATE '1996-10-01' AND o.o_orderdate < DATE '1997-01-01'\n  AND EXISTS (SELECT 1 FROM lineitem l\n              WHERE l.l_orderkey = o.o_orderkey AND l.l_receiptdate > l.l_commitdate + 30)\nGROUP BY o_orderpriority",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Sorted",
+    "Partial Mode": "Finalize",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 87515.35,
+    "Total Cost": 87564.05,
+    "Plan Rows": 5,
+    "Plan Width": 24,
+    "Disabled": false,
+    "Group Key": [
+     "o.o_orderpriority"
+    ],
+    "Plans": [
+     {
+      "Node Type": "Gather Merge",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 87515.35,
+      "Total Cost": 87563.94,
+      "Plan Rows": 12,
+      "Plan Width": 24,
+      "Disabled": false,
+      "Workers Planned": 2,
+      "Plans": [
+       {
+        "Node Type": "Aggregate",
+        "Strategy": "Sorted",
+        "Partial Mode": "Partial",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 86515.32,
+        "Total Cost": 86562.53,
+        "Plan Rows": 5,
+        "Plan Width": 24,
+        "Disabled": false,
+        "Group Key": [
+         "o.o_orderpriority"
+        ],
+        "Plans": [
+         {
+          "Node Type": "Sort",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 86515.32,
+          "Total Cost": 86531.04,
+          "Plan Rows": 6288,
+          "Plan Width": 16,
+          "Disabled": false,
+          "Sort Key": [
+           "o.o_orderpriority"
+          ],
+          "Plans": [
+           {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Semi",
+            "Startup Cost": 0.43,
+            "Total Cost": 86118.6,
+            "Plan Rows": 6288,
+            "Plan Width": 16,
+            "Disabled": false,
+            "Inner Unique": false,
+            "Plans": [
+             {
+              "Node Type": "Seq Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": true,
+              "Async Capable": false,
+              "Relation Name": "orders",
+              "Alias": "o",
+              "Startup Cost": 0.0,
+              "Total Cost": 35503.0,
+              "Plan Rows": 24268,
+              "Plan Width": 20,
+              "Disabled": false,
+              "Filter": "((o_orderdate >= '1996-10-01'::date) AND (o_orderdate < '1997-01-01'::date))"
+             },
+             {
+              "Node Type": "Index Scan",
+              "Parent Relationship": "Inner",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "lineitem_pkey",
+              "Relation Name": "lineitem",
+              "Alias": "l",
+              "Startup Cost": 0.43,
+              "Total Cost": 7.53,
+              "Plan Rows": 5,
+              "Plan Width": 4,
+              "Disabled": false,
+              "Index Cond": "(l_orderkey = o.o_orderkey)",
+              "Filter": "(l_receiptdate > (l_commitdate + 30))"
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "o.o_orderpriority"
+  ],
+  "extra": {
+   "Strategy": "Sorted",
+   "Partial Mode": "Finalize"
+  },
+  "cost": 87564.05,
+  "rows": 5,
+  "children": [
+   {
+    "node_type": "Gather Merge",
+    "raw_type": "Gather Merge",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer"
+    },
+    "cost": 87563.94,
+    "rows": 12,
+    "children": [
+     {
+      "node_type": "Aggregate",
+      "raw_type": "Aggregate",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [
+       "o.o_orderpriority"
+      ],
+      "extra": {
+       "Strategy": "Sorted",
+       "Partial Mode": "Partial",
+       "Parent Relationship": "Outer"
+      },
+      "cost": 86562.53,
+      "rows": 5,
+      "children": [
+       {
+        "node_type": "Sort",
+        "raw_type": "Sort",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [
+         "o.o_orderpriority"
+        ],
+        "extra": {
+         "Parent Relationship": "Outer"
+        },
+        "cost": 86531.04,
+        "rows": 6288,
+        "children": [
+         {
+          "node_type": "Nested Loop",
+          "raw_type": "Nested Loop",
+          "relation": null,
+          "index_name": null,
+          "join_type": "Semi",
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "Parent Relationship": "Outer"
+          },
+          "cost": 86118.6,
+          "rows": 6288,
+          "children": [
+           {
+            "node_type": "Seq Scan",
+            "raw_type": "Seq Scan",
+            "relation": "orders",
+            "index_name": null,
+            "join_type": null,
+            "conditions": {
+             "Filter": "((o_orderdate >= '1996-10-01'::date) AND (o_orderdate < '1997-01-01'::date))"
+            },
+            "keys": [],
+            "extra": {
+             "Parent Relationship": "Outer",
+             "Alias": "o"
+            },
+            "cost": 35503.0,
+            "rows": 24268,
+            "children": [],
+            "source": "postgres"
+           },
+           {
+            "node_type": "Index Scan",
+            "raw_type": "Index Scan",
+            "relation": "lineitem",
+            "index_name": "lineitem_pkey",
+            "join_type": null,
+            "conditions": {
+             "Index Cond": "(l_orderkey = o.o_orderkey)",
+             "Filter": "(l_receiptdate > (l_commitdate + 30))"
+            },
+            "keys": [],
+            "extra": {
+             "Parent Relationship": "Inner",
+             "Scan Direction": "Forward",
+             "Alias": "l"
+            },
+            "cost": 7.53,
+            "rows": 5,
+            "children": [],
+            "source": "postgres"
+           }
+          ],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Hashed\",\n  \"keys\": [\"o_orderpriority\"],\n  \"estimated_rows\": 5,\n  \"conditions\": {},\n  \"reason\": \"The query requires grouping by order priority and counting, using a hash aggregate for efficiency.\",\n  \"children\": [\n    {\n      \"node_type\": \"Hash Join\",\n      \"join_type\": \"Semi\",\n      \"conditions\": {\"Hash Cond\": \"o.o_orderkey = l.l_orderkey\"},\n      \"estimated_rows\": 150000,\n      \"reason\": \"A semi-join is used to efficiently filter orders that have at least one late lineitem.\",\n      \"children\": [\n        {\n          \"node_type\": \"Seq Scan\",\n          \"relation\": \"orders\",\n          \"conditions\": {\"Filter\": \"o_orderdate >= '1996-10-01'::date AND o_orderdate < '1997-01-01'::date\"},\n          \"estimated_rows\": 150000,\n          \"reason\": \"Sequential scan is chosen for the orders table due to the date range filter.\",\n          \"children\": []\n        },\n        {\n          \"node_type\": \"Hash\",\n          \"estimated_rows\": 300000,\n          \"reason\": \"Hash table for the semi-join build side.\",\n          \"children\": [\n            {\n              \"node_type\": \"Seq Scan\",\n              \"relation\": \"lineitem\",\n              \"conditions\": {\"Filter\": \"l_receiptdate > (l_commitdate + 30)\"},\n              \"estimated_rows\": 300000,\n              \"reason\": \"Sequential scan of lineitem to find all late items.\",\n              \"children\": []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "o_orderpriority"
+  ],
+  "extra": {
+   "Strategy": "Hashed",
+   "AI Reason": "The query requires grouping by order priority and counting, using a hash aggregate for efficiency."
+  },
+  "cost": null,
+  "rows": 5.0,
+  "children": [
+   {
+    "node_type": "Hash Join",
+    "raw_type": "Hash Join",
+    "relation": null,
+    "index_name": null,
+    "join_type": "Semi",
+    "conditions": {
+     "Hash Cond": "o.o_orderkey = l.l_orderkey"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "A semi-join is used to efficiently filter orders that have at least one late lineitem."
+    },
+    "cost": null,
+    "rows": 150000.0,
+    "children": [
+     {
+      "node_type": "Seq Scan",
+      "raw_type": "Seq Scan",
+      "relation": "orders",
+      "index_name": null,
+      "join_type": null,
+      "conditions": {
+       "Filter": "o_orderdate >= '1996-10-01'::date AND o_orderdate < '1997-01-01'::date"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Sequential scan is chosen for the orders table due to the date range filter."
+      },
+      "cost": null,
+      "rows": 150000.0,
+      "children": [],
+      "source": "ai"
+     },
+     {
+      "node_type": "Hash",
+      "raw_type": "Hash",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "AI Reason": "Hash table for the semi-join build side."
+      },
+      "cost": null,
+      "rows": 300000.0,
+      "children": [
+       {
+        "node_type": "Seq Scan",
+        "raw_type": "Seq Scan",
+        "relation": "lineitem",
+        "index_name": null,
+        "join_type": null,
+        "conditions": {
+         "Filter": "l_receiptdate > (l_commitdate + 30)"
+        },
+        "keys": [],
+        "extra": {
+         "AI Reason": "Sequential scan of lineitem to find all late items."
+        },
+        "cost": null,
+        "rows": 300000.0,
+        "children": [],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.75,
+   "ted_rate": 0.5,
+   "pg_nodes": 7,
+   "ai_nodes": 5,
+   "matched_pairs": 4,
+   "identical_pairs": 1,
+   "changed_pairs": 3,
+   "postgres_only_nodes": 3,
+   "ai_only_nodes": 1,
+   "access_method_agreement": 0.5,
+   "join_algorithm_agreement": 0.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "NL(orders, lineitem)",
+   "ai": "HJ(orders, lineitem)"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Sorted, Finalize) over (orders, lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query requires grouping by order priority and counting, using a hash aggregate for efficiency.\"",
+    "pg_path": "0",
+    "ai_path": "0"
+   },
+   {
+    "category": "Join algorithm",
+    "text": "The join of (orders, lineitem): PostgreSQL uses Nested Loop of (orders) with (lineitem). The AI uses Hash Join of (orders) with (lineitem). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"A semi-join is used to efficiently filter orders that have at least one late lineitem.\"",
+    "pg_path": "0.0.0.0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Access method",
+    "text": "Table lineitem: PostgreSQL uses Index Scan on lineitem using lineitem_pkey. The AI uses Seq Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Sequential scan of lineitem to find all late items.\"",
+    "pg_path": "0.0.0.0.0.1",
+    "ai_path": "0.0.1.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (orders, lineitem) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Sorted, Partial) over (orders, lineitem) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Sort over (orders, lineitem) (sorts its input).",
+    "pg_path": "0.0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Hash over (lineitem) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for the semi-join build side.\"",
+    "pg_path": null,
+    "ai_path": "0.0.1"
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Seq Scan on orders."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Sorted, Finalize) over (orders, lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query requires grouping by order priority and counting, using a hash aggregate for efficiency.\""
+    ]
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (orders, lineitem) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Sorted, Partial) over (orders, lineitem) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Sort over (orders, lineitem) (sorts its input)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "The join of (orders, lineitem): PostgreSQL uses Nested Loop of (orders) with (lineitem). The AI uses Hash Join of (orders) with (lineitem). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"A semi-join is used to efficiently filter orders that have at least one late lineitem.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0.0",
+    "ai_path": "0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.1",
+    "ai_path": "0.0.1.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table lineitem: PostgreSQL uses Index Scan on lineitem using lineitem_pkey. The AI uses Seq Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Sequential scan of lineitem to find all late items.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.1",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Hash over (lineitem) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for the semi-join build side.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "changed",
+    "0.0": "postgres_only",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "postgres_only",
+    "0.0.0.0.0": "changed",
+    "0.0.0.0.0.0": "same",
+    "0.0.0.0.0.1": "changed"
+   },
+   "ai": {
+    "0": "changed",
+    "0.0": "changed",
+    "0.0.0": "same",
+    "0.0.1.0": "changed",
+    "0.0.1": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 75% (tree edit distance rate: 50%). 1 of 7 PostgreSQL nodes have an identical counterpart in the AI plan's 5 nodes.\n\nPostgreSQL join order: NL(orders, lineitem)\nAI join order:         HJ(orders, lineitem)\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.\n2. [Aggregation strategy] Aggregate (Sorted, Finalize) over (orders, lineitem): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"The query requires grouping by order priority and counting, using a hash aggregate for efficiency.\"\n3. [Join algorithm] The join of (orders, lineitem): PostgreSQL uses Nested Loop of (orders) with (lineitem). The AI uses Hash Join of (orders) with (lineitem). Hash join suits large inputs. Nested loop suits a small outer input, especially with an index on the inner side. Merge join suits sorted inputs. The AI's reason: \"A semi-join is used to efficiently filter orders that have at least one late lineitem.\"\n4. [Access method] Table lineitem: PostgreSQL uses Index Scan on lineitem using lineitem_pkey. The AI uses Seq Scan on lineitem. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Sequential scan of lineitem to find all late items.\"\n5. [Missing operator] Only the PostgreSQL plan has Gather Merge over (orders, lineitem) (collects sorted rows from parallel workers, keeping the order).\n6. [Missing operator] Only the PostgreSQL plan has Aggregate (Sorted, Partial) over (orders, lineitem) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n7. [Missing operator] Only the PostgreSQL plan has Sort over (orders, lineitem) (sorts its input).\n8. [Extra operator] Only the AI plan has Hash over (lineitem) (builds the in-memory hash table for a Hash Join). The AI's reason: \"Hash table for the semi-join build side.\"\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Seq Scan on orders.",
+ "timings": {
+  "postgres": 0.007,
+  "ai": 3.207,
+  "comparison": 0.003
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.75,
+  "ted_rate": 0.5,
+  "pg_nodes": 7,
+  "ai_nodes": 5,
+  "identical_pairs": 1,
+  "changed_pairs": 3,
+  "postgres_only_nodes": 3,
+  "ai_only_nodes": 1,
+  "access_method_agreement": 0.5,
+  "join_algorithm_agreement": 0.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Aggregation strategy",
+  "Join algorithm",
+  "Access method",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.75,
+   0.75,
+   0.75
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

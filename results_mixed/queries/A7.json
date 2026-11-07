@@ -1,0 +1,145 @@
+{
+ "id": "A7",
+ "category": "A. Selection / access path",
+ "purpose": "IN-list on the leading primary-key column (Index Scan or Bitmap scan)",
+ "sql": "SELECT l_orderkey, l_linenumber, l_quantity\nFROM lineitem\nWHERE l_orderkey IN (1, 32, 70000, 4000000, 5999975)",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Index Scan",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Scan Direction": "Forward",
+    "Index Name": "lineitem_pkey",
+    "Relation Name": "lineitem",
+    "Alias": "lineitem",
+    "Startup Cost": 0.43,
+    "Total Cost": 161.06,
+    "Plan Rows": 77,
+    "Plan Width": 13,
+    "Disabled": false,
+    "Index Cond": "(l_orderkey = ANY ('{1,32,70000,4000000,5999975}'::integer[]))"
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Index Scan",
+  "raw_type": "Index Scan",
+  "relation": "lineitem",
+  "index_name": "lineitem_pkey",
+  "join_type": null,
+  "conditions": {
+   "Index Cond": "(l_orderkey = ANY ('{1,32,70000,4000000,5999975}'::integer[]))"
+  },
+  "keys": [],
+  "extra": {
+   "Scan Direction": "Forward",
+   "Alias": "lineitem"
+  },
+  "cost": 161.06,
+  "rows": 77,
+  "children": [],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Index Scan\",\n  \"relation\": \"lineitem\",\n  \"index_name\": \"lineitem_pkey\",\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {\n    \"Index Cond\": \"(l_orderkey = ANY ('{1, 32, 70000, 4000000, 5999975}'::integer[]))\"\n  },\n  \"keys\": [],\n  \"estimated_rows\": 20,\n  \"parent_relationship\": null,\n  \"reason\": \"Index Scan using the leading column of lineitem_pkey is the most efficient method to retrieve matching rows for a small list of key values.\",\n  \"children\": []\n}",
+ "ai_model": "gemini-3.6-flash",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Index Scan",
+  "raw_type": "Index Scan",
+  "relation": "lineitem",
+  "index_name": "lineitem_pkey",
+  "join_type": null,
+  "conditions": {
+   "Index Cond": "(l_orderkey = ANY ('{1, 32, 70000, 4000000, 5999975}'::integer[]))"
+  },
+  "keys": [],
+  "extra": {
+   "AI Reason": "Index Scan using the leading column of lineitem_pkey is the most efficient method to retrieve matching rows for a small list of key values."
+  },
+  "cost": null,
+  "rows": 20.0,
+  "children": [],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.0,
+   "ted_rate": 0.0,
+   "pg_nodes": 1,
+   "ai_nodes": 1,
+   "matched_pairs": 1,
+   "identical_pairs": 1,
+   "changed_pairs": 0,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 3.85,
+   "max_q_error": 3.85
+  },
+  "join_order": {
+   "postgres": "lineitem",
+   "ai": "lineitem"
+  },
+  "differences": [],
+  "similarities": [
+   "The plans are identical.",
+   "Both plans use Index Scan on lineitem using lineitem_pkey."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same"
+   },
+   "ai": {
+    "0": "same"
+   }
+  }
+ },
+ "explanation": "The two plans are identical in structure, operators and details.\n\nPostgreSQL join order: lineitem\nAI join order:         lineitem\n\nSIMILARITIES\n- The plans are identical.\n- Both plans use Index Scan on lineitem using lineitem_pkey.",
+ "timings": {
+  "postgres": 0.002,
+  "ai": 9.974,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.0,
+  "ted_rate": 0.0,
+  "pg_nodes": 1,
+  "ai_nodes": 1,
+  "identical_pairs": 1,
+  "changed_pairs": 0,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 3.85,
+  "max_q_error": 3.85
+ },
+ "difference_categories": [],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.6667,
+  "distinct_ai_answers": 2,
+  "difference_rates": [
+   0.0,
+   1.0,
+   1.0
+  ],
+  "difference_rate_stdev": 0.4714
+ }
+}

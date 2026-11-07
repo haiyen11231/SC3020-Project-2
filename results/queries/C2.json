@@ -1,0 +1,980 @@
+{
+ "id": "C2",
+ "category": "C. Multi-way join",
+ "purpose": "4-way join, revenue of returned items per customer nation for one quarter",
+ "sql": "SELECT n.n_name, sum(l.l_extendedprice * (1 - l.l_discount)) AS lost_revenue\nFROM customer c\nJOIN orders o   ON o.o_custkey = c.c_custkey\nJOIN lineitem l ON l.l_orderkey = o.o_orderkey\nJOIN nation n   ON n.n_nationkey = c.c_nationkey\nWHERE o.o_orderdate >= DATE '1994-04-01'\n  AND o.o_orderdate <  DATE '1994-07-01'\n  AND l.l_returnflag = 'R'\nGROUP BY n.n_name\nORDER BY lost_revenue DESC",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Sort",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 189335.04,
+    "Total Cost": 189335.1,
+    "Plan Rows": 25,
+    "Plan Width": 58,
+    "Disabled": false,
+    "Sort Key": [
+     "(sum((l.l_extendedprice * ('1'::numeric - l.l_discount)))) DESC"
+    ],
+    "Plans": [
+     {
+      "Node Type": "Aggregate",
+      "Strategy": "Sorted",
+      "Partial Mode": "Finalize",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 189039.13,
+      "Total Cost": 189334.46,
+      "Plan Rows": 25,
+      "Plan Width": 58,
+      "Disabled": false,
+      "Group Key": [
+       "n.n_name"
+      ],
+      "Plans": [
+       {
+        "Node Type": "Gather Merge",
+        "Parent Relationship": "Outer",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 189039.13,
+        "Total Cost": 189333.69,
+        "Plan Rows": 60,
+        "Plan Width": 58,
+        "Disabled": false,
+        "Workers Planned": 2,
+        "Plans": [
+         {
+          "Node Type": "Aggregate",
+          "Strategy": "Sorted",
+          "Partial Mode": "Partial",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 188039.11,
+          "Total Cost": 188326.75,
+          "Plan Rows": 25,
+          "Plan Width": 58,
+          "Disabled": false,
+          "Group Key": [
+           "n.n_name"
+          ],
+          "Plans": [
+           {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 188039.11,
+            "Total Cost": 188096.57,
+            "Plan Rows": 22986,
+            "Plan Width": 38,
+            "Disabled": false,
+            "Sort Key": [
+             "n.n_name"
+            ],
+            "Plans": [
+             {
+              "Node Type": "Hash Join",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Join Type": "Inner",
+              "Startup Cost": 40805.64,
+              "Total Cost": 186373.95,
+              "Plan Rows": 22986,
+              "Plan Width": 38,
+              "Disabled": false,
+              "Inner Unique": true,
+              "Hash Cond": "(c.c_nationkey = n.n_nationkey)",
+              "Plans": [
+               {
+                "Node Type": "Hash Join",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": true,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 40804.07,
+                "Total Cost": 186301.82,
+                "Plan Rows": 22986,
+                "Plan Width": 16,
+                "Disabled": false,
+                "Inner Unique": true,
+                "Hash Cond": "(o.o_custkey = c.c_custkey)",
+                "Plans": [
+                 {
+                  "Node Type": "Hash Join",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": true,
+                  "Async Capable": false,
+                  "Join Type": "Inner",
+                  "Startup Cost": 35797.82,
+                  "Total Cost": 181235.24,
+                  "Plan Rows": 22986,
+                  "Plan Width": 16,
+                  "Disabled": false,
+                  "Inner Unique": true,
+                  "Hash Cond": "(l.l_orderkey = o.o_orderkey)",
+                  "Plans": [
+                   {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": true,
+                    "Async Capable": false,
+                    "Relation Name": "lineitem",
+                    "Alias": "l",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 143838.55,
+                    "Plan Rows": 609089,
+                    "Plan Width": 16,
+                    "Disabled": false,
+                    "Filter": "(l_returnflag = 'R'::bpchar)"
+                   },
+                   {
+                    "Node Type": "Hash",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": true,
+                    "Async Capable": false,
+                    "Startup Cost": 35503.0,
+                    "Total Cost": 35503.0,
+                    "Plan Rows": 23586,
+                    "Plan Width": 8,
+                    "Disabled": false,
+                    "Plans": [
+                     {
+                      "Node Type": "Seq Scan",
+                      "Parent Relationship": "Outer",
+                      "Parallel Aware": true,
+                      "Async Capable": false,
+                      "Relation Name": "orders",
+                      "Alias": "o",
+                      "Startup Cost": 0.0,
+                      "Total Cost": 35503.0,
+                      "Plan Rows": 23586,
+                      "Plan Width": 8,
+                      "Disabled": false,
+                      "Filter": "((o_orderdate >= '1994-04-01'::date) AND (o_orderdate < '1994-07-01'::date))"
+                     }
+                    ]
+                   }
+                  ]
+                 },
+                 {
+                  "Node Type": "Hash",
+                  "Parent Relationship": "Inner",
+                  "Parallel Aware": true,
+                  "Async Capable": false,
+                  "Startup Cost": 4225.0,
+                  "Total Cost": 4225.0,
+                  "Plan Rows": 62500,
+                  "Plan Width": 8,
+                  "Disabled": false,
+                  "Plans": [
+                   {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": true,
+                    "Async Capable": false,
+                    "Relation Name": "customer",
+                    "Alias": "c",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 4225.0,
+                    "Plan Rows": 62500,
+                    "Plan Width": 8,
+                    "Disabled": false
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "Node Type": "Hash",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 1.25,
+                "Total Cost": 1.25,
+                "Plan Rows": 25,
+                "Plan Width": 30,
+                "Disabled": false,
+                "Plans": [
+                 {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "nation",
+                  "Alias": "n",
+                  "Startup Cost": 0.0,
+                  "Total Cost": 1.25,
+                  "Plan Rows": 25,
+                  "Plan Width": 30,
+                  "Disabled": false
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Sort",
+  "raw_type": "Sort",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "(sum((l.l_extendedprice * ('1'::numeric - l.l_discount)))) DESC"
+  ],
+  "extra": {},
+  "cost": 189335.1,
+  "rows": 25,
+  "children": [
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "n.n_name"
+    ],
+    "extra": {
+     "Strategy": "Sorted",
+     "Partial Mode": "Finalize",
+     "Parent Relationship": "Outer"
+    },
+    "cost": 189334.46,
+    "rows": 25,
+    "children": [
+     {
+      "node_type": "Gather Merge",
+      "raw_type": "Gather Merge",
+      "relation": null,
+      "index_name": null,
+      "join_type": null,
+      "conditions": {},
+      "keys": [],
+      "extra": {
+       "Parent Relationship": "Outer"
+      },
+      "cost": 189333.69,
+      "rows": 60,
+      "children": [
+       {
+        "node_type": "Aggregate",
+        "raw_type": "Aggregate",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [
+         "n.n_name"
+        ],
+        "extra": {
+         "Strategy": "Sorted",
+         "Partial Mode": "Partial",
+         "Parent Relationship": "Outer"
+        },
+        "cost": 188326.75,
+        "rows": 25,
+        "children": [
+         {
+          "node_type": "Sort",
+          "raw_type": "Sort",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [
+           "n.n_name"
+          ],
+          "extra": {
+           "Parent Relationship": "Outer"
+          },
+          "cost": 188096.57,
+          "rows": 22986,
+          "children": [
+           {
+            "node_type": "Hash Join",
+            "raw_type": "Hash Join",
+            "relation": null,
+            "index_name": null,
+            "join_type": "Inner",
+            "conditions": {
+             "Hash Cond": "(c.c_nationkey = n.n_nationkey)"
+            },
+            "keys": [],
+            "extra": {
+             "Parent Relationship": "Outer"
+            },
+            "cost": 186373.95,
+            "rows": 22986,
+            "children": [
+             {
+              "node_type": "Hash Join",
+              "raw_type": "Hash Join",
+              "relation": null,
+              "index_name": null,
+              "join_type": "Inner",
+              "conditions": {
+               "Hash Cond": "(o.o_custkey = c.c_custkey)"
+              },
+              "keys": [],
+              "extra": {
+               "Parent Relationship": "Outer"
+              },
+              "cost": 186301.82,
+              "rows": 22986,
+              "children": [
+               {
+                "node_type": "Hash Join",
+                "raw_type": "Hash Join",
+                "relation": null,
+                "index_name": null,
+                "join_type": "Inner",
+                "conditions": {
+                 "Hash Cond": "(l.l_orderkey = o.o_orderkey)"
+                },
+                "keys": [],
+                "extra": {
+                 "Parent Relationship": "Outer"
+                },
+                "cost": 181235.24,
+                "rows": 22986,
+                "children": [
+                 {
+                  "node_type": "Seq Scan",
+                  "raw_type": "Seq Scan",
+                  "relation": "lineitem",
+                  "index_name": null,
+                  "join_type": null,
+                  "conditions": {
+                   "Filter": "(l_returnflag = 'R'::bpchar)"
+                  },
+                  "keys": [],
+                  "extra": {
+                   "Parent Relationship": "Outer",
+                   "Alias": "l"
+                  },
+                  "cost": 143838.55,
+                  "rows": 609089,
+                  "children": [],
+                  "source": "postgres"
+                 },
+                 {
+                  "node_type": "Hash",
+                  "raw_type": "Hash",
+                  "relation": null,
+                  "index_name": null,
+                  "join_type": null,
+                  "conditions": {},
+                  "keys": [],
+                  "extra": {
+                   "Parent Relationship": "Inner"
+                  },
+                  "cost": 35503.0,
+                  "rows": 23586,
+                  "children": [
+                   {
+                    "node_type": "Seq Scan",
+                    "raw_type": "Seq Scan",
+                    "relation": "orders",
+                    "index_name": null,
+                    "join_type": null,
+                    "conditions": {
+                     "Filter": "((o_orderdate >= '1994-04-01'::date) AND (o_orderdate < '1994-07-01'::date))"
+                    },
+                    "keys": [],
+                    "extra": {
+                     "Parent Relationship": "Outer",
+                     "Alias": "o"
+                    },
+                    "cost": 35503.0,
+                    "rows": 23586,
+                    "children": [],
+                    "source": "postgres"
+                   }
+                  ],
+                  "source": "postgres"
+                 }
+                ],
+                "source": "postgres"
+               },
+               {
+                "node_type": "Hash",
+                "raw_type": "Hash",
+                "relation": null,
+                "index_name": null,
+                "join_type": null,
+                "conditions": {},
+                "keys": [],
+                "extra": {
+                 "Parent Relationship": "Inner"
+                },
+                "cost": 4225.0,
+                "rows": 62500,
+                "children": [
+                 {
+                  "node_type": "Seq Scan",
+                  "raw_type": "Seq Scan",
+                  "relation": "customer",
+                  "index_name": null,
+                  "join_type": null,
+                  "conditions": {},
+                  "keys": [],
+                  "extra": {
+                   "Parent Relationship": "Outer",
+                   "Alias": "c"
+                  },
+                  "cost": 4225.0,
+                  "rows": 62500,
+                  "children": [],
+                  "source": "postgres"
+                 }
+                ],
+                "source": "postgres"
+               }
+              ],
+              "source": "postgres"
+             },
+             {
+              "node_type": "Hash",
+              "raw_type": "Hash",
+              "relation": null,
+              "index_name": null,
+              "join_type": null,
+              "conditions": {},
+              "keys": [],
+              "extra": {
+               "Parent Relationship": "Inner"
+              },
+              "cost": 1.25,
+              "rows": 25,
+              "children": [
+               {
+                "node_type": "Seq Scan",
+                "raw_type": "Seq Scan",
+                "relation": "nation",
+                "index_name": null,
+                "join_type": null,
+                "conditions": {},
+                "keys": [],
+                "extra": {
+                 "Parent Relationship": "Outer",
+                 "Alias": "n"
+                },
+                "cost": 1.25,
+                "rows": 25,
+                "children": [],
+                "source": "postgres"
+               }
+              ],
+              "source": "postgres"
+             }
+            ],
+            "source": "postgres"
+           }
+          ],
+          "source": "postgres"
+         }
+        ],
+        "source": "postgres"
+       }
+      ],
+      "source": "postgres"
+     }
+    ],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Sort\",\n  \"relation\": null,\n  \"index_name\": null,\n  \"join_type\": null,\n  \"strategy\": null,\n  \"conditions\": {},\n  \"keys\": [\"lost_revenue DESC\"],\n  \"estimated_rows\": 25,\n  \"parent_relationship\": null,\n  \"reason\": \"The query requires an ORDER BY on the aggregated result.\",\n  \"children\": [\n    {\n      \"node_type\": \"Aggregate\",\n      \"relation\": null,\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": \"Hashed\",\n      \"conditions\": {},\n      \"keys\": [\"n.n_name\"],\n      \"estimated_rows\": 25,\n      \"parent_relationship\": null,\n      \"reason\": \"Grouping by nation name to calculate total lost revenue.\",\n      \"children\": [\n        {\n          \"node_type\": \"Hash Join\",\n          \"relation\": null,\n          \"index_name\": null,\n          \"join_type\": \"Inner\",\n          \"strategy\": null,\n          \"conditions\": {\"Hash Cond\": \"c.c_nationkey = n.n_nationkey\"},\n          \"keys\": [],\n          \"estimated_rows\": 150000,\n          \"parent_relationship\": null,\n          \"reason\": \"Joining customer data with nation names.\",\n          \"children\": [\n            {\n              \"node_type\": \"Hash Join\",\n              \"relation\": null,\n              \"index_name\": null,\n              \"join_type\": \"Inner\",\n              \"strategy\": null,\n              \"conditions\": {\"Hash Cond\": \"o.o_custkey = c.c_custkey\"},\n              \"keys\": [],\n              \"estimated_rows\": 150000,\n              \"parent_relationship\": null,\n              \"reason\": \"Joining orders with customers.\",\n              \"children\": [\n                {\n                  \"node_type\": \"Hash Join\",\n                  \"relation\": null,\n                  \"index_name\": null,\n                  \"join_type\": \"Inner\",\n                  \"strategy\": null,\n                  \"conditions\": {\"Hash Cond\": \"l.l_orderkey = o.o_orderkey\"},\n                  \"keys\": [],\n                  \"estimated_rows\": 150000,\n                  \"parent_relationship\": null,\n                  \"reason\": \"Joining lineitems with filtered orders.\",\n                  \"children\": [\n                    {\n                      \"node_type\": \"Seq Scan\",\n                      \"relation\": \"lineitem\",\n                      \"index_name\": null,\n                      \"join_type\": null,\n                      \"strategy\": null,\n                      \"conditions\": {\"Filter\": \"l_returnflag = 'R'\"},\n                      \"keys\": [],\n                      \"estimated_rows\": 857267,\n                      \"parent_relationship\": null,\n                      \"reason\": \"Scanning lineitem for returnflag filter.\",\n                      \"children\": []\n                    },\n                    {\n                      \"node_type\": \"Hash\",\n                      \"relation\": null,\n                      \"index_name\": null,\n                      \"join_type\": null,\n                      \"strategy\": null,\n                      \"conditions\": {},\n                      \"keys\": [],\n                      \"estimated_rows\": 75000,\n                      \"parent_relationship\": null,\n                      \"reason\": \"Hashing filtered orders for join.\",\n                      \"children\": [\n                        {\n                          \"node_type\": \"Seq Scan\",\n                          \"relation\": \"orders\",\n                          \"index_name\": null,\n                          \"join_type\": null,\n                          \"strategy\": null,\n                          \"conditions\": {\"Filter\": \"o_orderdate >= '1994-04-01' AND o_orderdate < '1994-07-01'\"},\n                          \"keys\": [],\n                          \"estimated_rows\": 75000,\n                          \"parent_relationship\": null,\n                          \"reason\": \"Scanning orders with date range filter.\",\n                          \"children\": []\n                        }\n                      ]\n                    }\n                  ]\n                },\n                {\n                  \"node_type\": \"Hash\",\n                  \"relation\": null,\n                  \"index_name\": null,\n                  \"join_type\": null,\n                  \"strategy\": null,\n                  \"conditions\": {},\n                  \"keys\": [],\n                  \"estimated_rows\": 150000,\n                  \"parent_relationship\": null,\n                  \"reason\": \"Hashing customers for join.\",\n                  \"children\": [\n                    {\n                      \"node_type\": \"Seq Scan\",\n                      \"relation\": \"customer\",\n                      \"index_name\": null,\n                      \"join_type\": null,\n                      \"strategy\": null,\n                      \"conditions\": {},\n                      \"keys\": [],\n                      \"estimated_rows\": 150000,\n                      \"parent_relationship\": null,\n                      \"reason\": \"Scanning all customers.\",\n                      \"children\": []\n                    }\n                  ]\n                }\n              ]\n            },\n            {\n              \"node_type\": \"Hash\",\n              \"relation\": null,\n              \"index_name\": null,\n              \"join_type\": null,\n              \"strategy\": null,\n              \"conditions\": {},\n              \"keys\": [],\n              \"estimated_rows\": 25,\n              \"parent_relationship\": null,\n              \"reason\": \"Hashing nations for join.\",\n              \"children\": [\n                {\n                  \"node_type\": \"Seq Scan\",\n                  \"relation\": \"nation\",\n                  \"index_name\": null,\n                  \"join_type\": null,\n                  \"strategy\": null,\n                  \"conditions\": {},\n                  \"keys\": [],\n                  \"estimated_rows\": 25,\n                  \"parent_relationship\": null,\n                  \"reason\": \"Scanning all nations.\",\n                  \"children\": []\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Sort",
+  "raw_type": "Sort",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [
+   "lost_revenue DESC"
+  ],
+  "extra": {
+   "AI Reason": "The query requires an ORDER BY on the aggregated result.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 25.0,
+  "children": [
+   {
+    "node_type": "Aggregate",
+    "raw_type": "Aggregate",
+    "relation": null,
+    "index_name": null,
+    "join_type": null,
+    "conditions": {},
+    "keys": [
+     "n.n_name"
+    ],
+    "extra": {
+     "Strategy": "Hashed",
+     "AI Reason": "Grouping by nation name to calculate total lost revenue."
+    },
+    "cost": null,
+    "rows": 25.0,
+    "children": [
+     {
+      "node_type": "Hash Join",
+      "raw_type": "Hash Join",
+      "relation": null,
+      "index_name": null,
+      "join_type": "Inner",
+      "conditions": {
+       "Hash Cond": "c.c_nationkey = n.n_nationkey"
+      },
+      "keys": [],
+      "extra": {
+       "AI Reason": "Joining customer data with nation names."
+      },
+      "cost": null,
+      "rows": 150000.0,
+      "children": [
+       {
+        "node_type": "Hash Join",
+        "raw_type": "Hash Join",
+        "relation": null,
+        "index_name": null,
+        "join_type": "Inner",
+        "conditions": {
+         "Hash Cond": "o.o_custkey = c.c_custkey"
+        },
+        "keys": [],
+        "extra": {
+         "AI Reason": "Joining orders with customers."
+        },
+        "cost": null,
+        "rows": 150000.0,
+        "children": [
+         {
+          "node_type": "Hash Join",
+          "raw_type": "Hash Join",
+          "relation": null,
+          "index_name": null,
+          "join_type": "Inner",
+          "conditions": {
+           "Hash Cond": "l.l_orderkey = o.o_orderkey"
+          },
+          "keys": [],
+          "extra": {
+           "AI Reason": "Joining lineitems with filtered orders."
+          },
+          "cost": null,
+          "rows": 150000.0,
+          "children": [
+           {
+            "node_type": "Seq Scan",
+            "raw_type": "Seq Scan",
+            "relation": "lineitem",
+            "index_name": null,
+            "join_type": null,
+            "conditions": {
+             "Filter": "l_returnflag = 'R'"
+            },
+            "keys": [],
+            "extra": {
+             "AI Reason": "Scanning lineitem for returnflag filter."
+            },
+            "cost": null,
+            "rows": 857267.0,
+            "children": [],
+            "source": "ai"
+           },
+           {
+            "node_type": "Hash",
+            "raw_type": "Hash",
+            "relation": null,
+            "index_name": null,
+            "join_type": null,
+            "conditions": {},
+            "keys": [],
+            "extra": {
+             "AI Reason": "Hashing filtered orders for join."
+            },
+            "cost": null,
+            "rows": 75000.0,
+            "children": [
+             {
+              "node_type": "Seq Scan",
+              "raw_type": "Seq Scan",
+              "relation": "orders",
+              "index_name": null,
+              "join_type": null,
+              "conditions": {
+               "Filter": "o_orderdate >= '1994-04-01' AND o_orderdate < '1994-07-01'"
+              },
+              "keys": [],
+              "extra": {
+               "AI Reason": "Scanning orders with date range filter."
+              },
+              "cost": null,
+              "rows": 75000.0,
+              "children": [],
+              "source": "ai"
+             }
+            ],
+            "source": "ai"
+           }
+          ],
+          "source": "ai"
+         },
+         {
+          "node_type": "Hash",
+          "raw_type": "Hash",
+          "relation": null,
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Hashing customers for join."
+          },
+          "cost": null,
+          "rows": 150000.0,
+          "children": [
+           {
+            "node_type": "Seq Scan",
+            "raw_type": "Seq Scan",
+            "relation": "customer",
+            "index_name": null,
+            "join_type": null,
+            "conditions": {},
+            "keys": [],
+            "extra": {
+             "AI Reason": "Scanning all customers."
+            },
+            "cost": null,
+            "rows": 150000.0,
+            "children": [],
+            "source": "ai"
+           }
+          ],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       },
+       {
+        "node_type": "Hash",
+        "raw_type": "Hash",
+        "relation": null,
+        "index_name": null,
+        "join_type": null,
+        "conditions": {},
+        "keys": [],
+        "extra": {
+         "AI Reason": "Hashing nations for join."
+        },
+        "cost": null,
+        "rows": 25.0,
+        "children": [
+         {
+          "node_type": "Seq Scan",
+          "raw_type": "Seq Scan",
+          "relation": "nation",
+          "index_name": null,
+          "join_type": null,
+          "conditions": {},
+          "keys": [],
+          "extra": {
+           "AI Reason": "Scanning all nations."
+          },
+          "cost": null,
+          "rows": 25.0,
+          "children": [],
+          "source": "ai"
+         }
+        ],
+        "source": "ai"
+       }
+      ],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.1481,
+   "ted_rate": 0.1111,
+   "pg_nodes": 15,
+   "ai_nodes": 12,
+   "matched_pairs": 12,
+   "identical_pairs": 11,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 3,
+   "ai_only_nodes": 0,
+   "access_method_agreement": 1.0,
+   "join_algorithm_agreement": 1.0,
+   "join_order_agreement": 1.0,
+   "median_q_error": 1.0,
+   "max_q_error": 1.0
+  },
+  "join_order": {
+   "postgres": "HJ(HJ(HJ(lineitem, orders), customer), nation)",
+   "ai": "HJ(HJ(HJ(lineitem, orders), customer), nation)"
+  },
+  "differences": [
+   {
+    "category": "Parallelism",
+    "text": "PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.",
+    "pg_path": null,
+    "ai_path": null
+   },
+   {
+    "category": "Aggregation strategy",
+    "text": "Aggregate (Sorted, Finalize) over (lineitem, orders, customer, nation): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Grouping by nation name to calculate total lost revenue.\"",
+    "pg_path": "0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Gather Merge over (lineitem, orders, customer, nation) (collects sorted rows from parallel workers, keeping the order).",
+    "pg_path": "0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Aggregate (Sorted, Partial) over (lineitem, orders, customer, nation) (computes aggregates (GROUP BY, SUM, COUNT, ...)).",
+    "pg_path": "0.0.0.0",
+    "ai_path": null
+   },
+   {
+    "category": "Missing operator",
+    "text": "Only the PostgreSQL plan has Sort over (lineitem, orders, customer, nation) (sorts its input).",
+    "pg_path": "0.0.0.0.0",
+    "ai_path": null
+   }
+  ],
+  "similarities": [
+   "Both plans join the tables in the same order (every intermediate join result is the same).",
+   "Both plans use Hash Join of (lineitem, orders, customer) with (nation).",
+   "Both plans use Hash Join of (lineitem, orders) with (customer).",
+   "Both plans use Hash Join of (lineitem) with (orders).",
+   "Both plans use Seq Scan on lineitem.",
+   "Both plans use Seq Scan on orders.",
+   "Both plans use Seq Scan on customer.",
+   "Both plans use Seq Scan on nation."
+  ],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 0.5,
+    "notes": [
+     "Aggregate (Sorted, Finalize) over (lineitem, orders, customer, nation): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Grouping by nation name to calculate total lost revenue.\""
+    ]
+   },
+   {
+    "pg_path": "0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Gather Merge over (lineitem, orders, customer, nation) (collects sorted rows from parallel workers, keeping the order)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Aggregate (Sorted, Partial) over (lineitem, orders, customer, nation) (computes aggregates (GROUP BY, SUM, COUNT, ...))."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0",
+    "ai_path": null,
+    "status": "postgres_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the PostgreSQL plan has Sort over (lineitem, orders, customer, nation) (sorts its input)."
+    ]
+   },
+   {
+    "pg_path": "0.0.0.0.0.0",
+    "ai_path": "0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0",
+    "ai_path": "0.0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0.0",
+    "ai_path": "0.0.0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0.0.0",
+    "ai_path": "0.0.0.0.0.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0.0.1",
+    "ai_path": "0.0.0.0.0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0.0.1.0",
+    "ai_path": "0.0.0.0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0.1",
+    "ai_path": "0.0.0.0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.0.1.0",
+    "ai_path": "0.0.0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.1",
+    "ai_path": "0.0.0.1",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0.0.0.0.0.1.0",
+    "ai_path": "0.0.0.1.0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "changed",
+    "0.0.0": "postgres_only",
+    "0.0.0.0": "postgres_only",
+    "0.0.0.0.0": "postgres_only",
+    "0.0.0.0.0.0": "same",
+    "0.0.0.0.0.0.0": "same",
+    "0.0.0.0.0.0.0.0": "same",
+    "0.0.0.0.0.0.0.0.0": "same",
+    "0.0.0.0.0.0.0.0.1": "same",
+    "0.0.0.0.0.0.0.0.1.0": "same",
+    "0.0.0.0.0.0.0.1": "same",
+    "0.0.0.0.0.0.0.1.0": "same",
+    "0.0.0.0.0.0.1": "same",
+    "0.0.0.0.0.0.1.0": "same"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "changed",
+    "0.0.0": "same",
+    "0.0.0.0": "same",
+    "0.0.0.0.0": "same",
+    "0.0.0.0.0.0": "same",
+    "0.0.0.0.0.1": "same",
+    "0.0.0.0.0.1.0": "same",
+    "0.0.0.0.1": "same",
+    "0.0.0.0.1.0": "same",
+    "0.0.0.1": "same",
+    "0.0.0.1.0": "same"
+   }
+  }
+ },
+ "explanation": "Difference rate: 15% (tree edit distance rate: 11%). 11 of 15 PostgreSQL nodes have an identical counterpart in the AI plan's 12 nodes.\n\nPostgreSQL join order: HJ(HJ(HJ(lineitem, orders), customer), nation)\nAI join order:         HJ(HJ(HJ(lineitem, orders), customer), nation)\n\nDIFFERENCES\n1. [Parallelism] PostgreSQL runs part of the plan in parallel (Gather Merge), with partial aggregation in each worker. The AI plan runs in a single process.\n2. [Aggregation strategy] Aggregate (Sorted, Finalize) over (lineitem, orders, customer, nation): PostgreSQL uses Sorted aggregation, the AI uses Hashed. Hashed aggregation needs no sorted input but more memory. Sorted aggregation needs sorted input but little memory. The AI's reason: \"Grouping by nation name to calculate total lost revenue.\"\n3. [Missing operator] Only the PostgreSQL plan has Gather Merge over (lineitem, orders, customer, nation) (collects sorted rows from parallel workers, keeping the order).\n4. [Missing operator] Only the PostgreSQL plan has Aggregate (Sorted, Partial) over (lineitem, orders, customer, nation) (computes aggregates (GROUP BY, SUM, COUNT, ...)).\n5. [Missing operator] Only the PostgreSQL plan has Sort over (lineitem, orders, customer, nation) (sorts its input).\n\nSIMILARITIES\n- Both plans join the tables in the same order (every intermediate join result is the same).\n- Both plans use Hash Join of (lineitem, orders, customer) with (nation).\n- Both plans use Hash Join of (lineitem, orders) with (customer).\n- Both plans use Hash Join of (lineitem) with (orders).\n- Both plans use Seq Scan on lineitem.\n- Both plans use Seq Scan on orders.\n- Both plans use Seq Scan on customer.\n- Both plans use Seq Scan on nation.",
+ "timings": {
+  "postgres": 0.007,
+  "ai": 3.872,
+  "comparison": 0.004
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.1481,
+  "ted_rate": 0.1111,
+  "pg_nodes": 15,
+  "ai_nodes": 12,
+  "identical_pairs": 11,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 3,
+  "ai_only_nodes": 0,
+  "access_method_agreement": 1.0,
+  "join_algorithm_agreement": 1.0,
+  "join_order_agreement": 1.0,
+  "median_q_error": 1.0,
+  "max_q_error": 1.0
+ },
+ "difference_categories": [
+  "Parallelism",
+  "Aggregation strategy",
+  "Missing operator",
+  "Missing operator",
+  "Missing operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.1481,
+   0.1481,
+   0.1481
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}

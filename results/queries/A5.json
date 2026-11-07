@@ -1,0 +1,252 @@
+{
+ "id": "A5",
+ "category": "A. Selection / access path",
+ "purpose": "Only key columns are read (candidate for Index Only Scan)",
+ "sql": "SELECT count(*)\nFROM partsupp\nWHERE ps_partkey < 200",
+ "error": null,
+ "database": "tpch",
+ "pg_raw": [
+  {
+   "Plan": {
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Simple",
+    "Parallel Aware": false,
+    "Async Capable": false,
+    "Startup Cost": 36.28,
+    "Total Cost": 36.29,
+    "Plan Rows": 1,
+    "Plan Width": 8,
+    "Disabled": false,
+    "Plans": [
+     {
+      "Node Type": "Index Only Scan",
+      "Parent Relationship": "Outer",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Scan Direction": "Forward",
+      "Index Name": "partsupp_pkey",
+      "Relation Name": "partsupp",
+      "Alias": "partsupp",
+      "Startup Cost": 0.42,
+      "Total Cost": 34.01,
+      "Plan Rows": 905,
+      "Plan Width": 0,
+      "Disabled": false,
+      "Index Cond": "(ps_partkey < 200)"
+     }
+    ]
+   }
+  }
+ ],
+ "pg_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "Partial Mode": "Simple"
+  },
+  "cost": 36.29,
+  "rows": 1,
+  "children": [
+   {
+    "node_type": "Index Only Scan",
+    "raw_type": "Index Only Scan",
+    "relation": "partsupp",
+    "index_name": "partsupp_pkey",
+    "join_type": null,
+    "conditions": {
+     "Index Cond": "(ps_partkey < 200)"
+    },
+    "keys": [],
+    "extra": {
+     "Parent Relationship": "Outer",
+     "Scan Direction": "Forward",
+     "Alias": "partsupp"
+    },
+    "cost": 34.01,
+    "rows": 905,
+    "children": [],
+    "source": "postgres"
+   }
+  ],
+  "source": "postgres"
+ },
+ "ai_raw": "{\n  \"node_type\": \"Aggregate\",\n  \"strategy\": \"Plain\",\n  \"conditions\": {},\n  \"keys\": [],\n  \"estimated_rows\": 1,\n  \"parent_relationship\": null,\n  \"reason\": \"Aggregate the count of rows satisfying the filter condition.\",\n  \"children\": [\n    {\n      \"node_type\": \"Bitmap Heap Scan\",\n      \"relation\": \"partsupp\",\n      \"index_name\": null,\n      \"join_type\": null,\n      \"strategy\": null,\n      \"conditions\": {\n        \"Filter\": \"ps_partkey < 200\"\n      },\n      \"keys\": [],\n      \"estimated_rows\": 800,\n      \"parent_relationship\": null,\n      \"reason\": \"Bitmap heap scan is efficient for range scans on partsupp table.\",\n      \"children\": [\n        {\n          \"node_type\": \"Bitmap Index Scan\",\n          \"relation\": \"partsupp\",\n          \"index_name\": \"partsupp_pkey\",\n          \"join_type\": null,\n          \"strategy\": null,\n          \"conditions\": {\n            \"Index Cond\": \"ps_partkey < 200\"\n          },\n          \"keys\": [],\n          \"estimated_rows\": 800,\n          \"parent_relationship\": null,\n          \"reason\": \"Use the primary key index to identify relevant partsupp rows.\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}",
+ "ai_model": "gemini-3.1-flash-lite",
+ "ai_error": null,
+ "ai_plan": {
+  "node_type": "Aggregate",
+  "raw_type": "Aggregate",
+  "relation": null,
+  "index_name": null,
+  "join_type": null,
+  "conditions": {},
+  "keys": [],
+  "extra": {
+   "Strategy": "Plain",
+   "AI Reason": "Aggregate the count of rows satisfying the filter condition.",
+   "AI Model": "gemini-3.1-flash-lite"
+  },
+  "cost": null,
+  "rows": 1.0,
+  "children": [
+   {
+    "node_type": "Bitmap Heap Scan",
+    "raw_type": "Bitmap Heap Scan",
+    "relation": "partsupp",
+    "index_name": null,
+    "join_type": null,
+    "conditions": {
+     "Filter": "ps_partkey < 200"
+    },
+    "keys": [],
+    "extra": {
+     "AI Reason": "Bitmap heap scan is efficient for range scans on partsupp table."
+    },
+    "cost": null,
+    "rows": 800.0,
+    "children": [
+     {
+      "node_type": "Bitmap Index Scan",
+      "raw_type": "Bitmap Index Scan",
+      "relation": null,
+      "index_name": "partsupp_pkey",
+      "join_type": null,
+      "conditions": {
+       "Index Cond": "ps_partkey < 200"
+      },
+      "keys": [],
+      "extra": {
+       "Name": "partsupp",
+       "AI Reason": "Use the primary key index to identify relevant partsupp rows."
+      },
+      "cost": null,
+      "rows": 800.0,
+      "children": [],
+      "source": "ai"
+     }
+    ],
+    "source": "ai"
+   }
+  ],
+  "source": "ai"
+ },
+ "comparison": {
+  "metrics": {
+   "difference_rate": 0.6,
+   "ted_rate": 0.4,
+   "pg_nodes": 2,
+   "ai_nodes": 3,
+   "matched_pairs": 2,
+   "identical_pairs": 1,
+   "changed_pairs": 1,
+   "postgres_only_nodes": 0,
+   "ai_only_nodes": 1,
+   "access_method_agreement": 0.0,
+   "join_algorithm_agreement": null,
+   "join_order_agreement": null,
+   "median_q_error": 1.07,
+   "max_q_error": 1.13
+  },
+  "join_order": {
+   "postgres": "partsupp",
+   "ai": "partsupp"
+  },
+  "differences": [
+   {
+    "category": "Access method",
+    "text": "Table partsupp: PostgreSQL uses Index Only Scan on partsupp using partsupp_pkey. The AI uses Bitmap Heap Scan on partsupp. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Bitmap heap scan is efficient for range scans on partsupp table.\"",
+    "pg_path": "0.0",
+    "ai_path": "0.0"
+   },
+   {
+    "category": "Extra operator",
+    "text": "Only the AI plan has Bitmap Index Scan on partsupp_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Use the primary key index to identify relevant partsupp rows.\"",
+    "pg_path": null,
+    "ai_path": "0.0.0"
+   }
+  ],
+  "similarities": [],
+  "matches": [
+   {
+    "pg_path": "0",
+    "ai_path": "0",
+    "status": "same",
+    "cost": 0.0,
+    "notes": []
+   },
+   {
+    "pg_path": "0.0",
+    "ai_path": "0.0",
+    "status": "changed",
+    "cost": 1.0,
+    "notes": [
+     "Table partsupp: PostgreSQL uses Index Only Scan on partsupp using partsupp_pkey. The AI uses Bitmap Heap Scan on partsupp. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Bitmap heap scan is efficient for range scans on partsupp table.\""
+    ]
+   },
+   {
+    "pg_path": null,
+    "ai_path": "0.0.0",
+    "status": "ai_only",
+    "cost": 1.0,
+    "notes": [
+     "Only the AI plan has Bitmap Index Scan on partsupp_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Use the primary key index to identify relevant partsupp rows.\""
+    ]
+   }
+  ],
+  "node_status": {
+   "postgres": {
+    "0": "same",
+    "0.0": "changed"
+   },
+   "ai": {
+    "0": "same",
+    "0.0": "changed",
+    "0.0.0": "ai_only"
+   }
+  }
+ },
+ "explanation": "Difference rate: 60% (tree edit distance rate: 40%). 1 of 2 PostgreSQL nodes have an identical counterpart in the AI plan's 3 nodes.\n\nPostgreSQL join order: partsupp\nAI join order:         partsupp\n\nDIFFERENCES\n1. [Access method] Table partsupp: PostgreSQL uses Index Only Scan on partsupp using partsupp_pkey. The AI uses Bitmap Heap Scan on partsupp. A sequential scan wins when many rows qualify. An index scan wins when few rows qualify. A bitmap scan sits in between. The AI's reason: \"Bitmap heap scan is efficient for range scans on partsupp table.\"\n2. [Extra operator] Only the AI plan has Bitmap Index Scan on partsupp_pkey (finds matching row locations in an index for a Bitmap Heap Scan). The AI's reason: \"Use the primary key index to identify relevant partsupp rows.\"",
+ "timings": {
+  "postgres": 0.007,
+  "ai": 4.604,
+  "comparison": 0.001
+ },
+ "ai_warnings": [],
+ "metrics": {
+  "difference_rate": 0.6,
+  "ted_rate": 0.4,
+  "pg_nodes": 2,
+  "ai_nodes": 3,
+  "identical_pairs": 1,
+  "changed_pairs": 1,
+  "postgres_only_nodes": 0,
+  "ai_only_nodes": 1,
+  "access_method_agreement": 0.0,
+  "join_algorithm_agreement": null,
+  "join_order_agreement": null,
+  "median_q_error": 1.07,
+  "max_q_error": 1.13
+ },
+ "difference_categories": [
+  "Access method",
+  "Extra operator"
+ ],
+ "stability": {
+  "runs": 3,
+  "mean_ai_vs_ai_rate": 0.0,
+  "distinct_ai_answers": 1,
+  "difference_rates": [
+   0.6,
+   0.6,
+   0.6
+  ],
+  "difference_rate_stdev": 0.0
+ }
+}
