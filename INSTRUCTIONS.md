@@ -60,9 +60,21 @@ must be fixed and comes with a hint. Add `--ai` to also send one test question t
 python project.py
 ```
 
-The GUI opens. Choose the database, type an SQL query in the Query panel and run it.
-The PostgreSQL plan appears at once. The AI plan takes 10 to 60 seconds the first time;
-the same query on the same database is answered from the saved copy in `.ai_cache/` afterwards.
+The window opens and connects by itself with the settings in `.env` (if that fails, a
+small form asks for the password or database). Everything you do is in the left sidebar:
+
+1. **Pick a query** from the example list (built from the connected database), or type
+   your own SQL in the box.
+2. **Press Compare plans** (or Ctrl+Enter). PostgreSQL's plan appears at once; the AI
+   plan takes 10 to 60 seconds the first time and is instant afterwards (answers are
+   saved in `.ai_cache/`).
+3. **Read the results.** The large number at the bottom of the sidebar is the difference
+   rate, with a one-line verdict. The two plans are drawn side by side on the right;
+   colours show how each operator compares (legend above the trees). Click a difference,
+   or any box in a tree, to frame the matching operators in both trees and see details.
+
+*File > Show the example from the project description* works without a database or key.
+*Help > How to use this program* repeats these steps.
 
 **PyCharm:** open the project folder, set the interpreter (File > Settings > Project >
 Python Interpreter) to the Python from step 1, install `psycopg2-binary` there if PyCharm
