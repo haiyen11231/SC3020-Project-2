@@ -177,11 +177,9 @@ class PlanDiagram(ttk.Frame):
             else:
                 status, colour, stroke = None, "#EFF3F9", "#9AACBE"
             active = path == selected_path
-            if active:
-                stroke = "#4D3BDB"
             rect = self.canvas.create_rectangle(x - node_w / 2, y,
                                                 x + node_w / 2, y + node_h,
-                                                fill=colour, outline=stroke,
+                                                fill=colour, outline="#4D3BDB" if active else stroke,
                                                 width=3.7 if active else 2.0)
             self.node_rectangles[path] = (rect, stroke)
             main = self.canvas.create_text(x, y + node_h * 0.30,
@@ -212,15 +210,16 @@ class PlanDiagram(ttk.Frame):
     def _scroll_to(self, x, y) -> None:
         view_width = max(1, self.canvas.winfo_width())
         view_height = max(1, self.canvas.winfo_height())
+        # Tk moveto fractions are relative to the entire scrollregion.
         if self.total_width > view_width:
-            target = min(1, max(0, (x - view_width / 2) /
-                                 (self.total_width - view_width)))
+            target = min(self.total_width - view_width,
+                         max(0, x - view_width / 2)) / self.total_width
             self.canvas.xview_moveto(target)
         else:
             self.canvas.xview_moveto(0)
         if self.total_height > view_height:
-            target = min(1, max(0, (y - view_height / 2) /
-                                 (self.total_height - view_height)))
+            target = min(self.total_height - view_height,
+                         max(0, y - view_height / 2)) / self.total_height
             self.canvas.yview_moveto(target)
         else:
             self.canvas.yview_moveto(0)
