@@ -282,6 +282,15 @@ def collect_examples(conn) -> List[Tuple[str, str]]:
 
 
 
+def local_workload_examples() -> List[Tuple[str, str]]:
+    """Read bundled SQL examples without requiring a database connection."""
+    examples = []
+    for qid, purpose, sql in read_workload_file(WORKLOAD_FILE):
+        short = re.split(r"[,(]", purpose)[0].strip() or purpose
+        examples.append((shorten(f"{qid}: {short}", 46), sql))
+    return examples
+
+
 # ===========================================================================
 # Small building blocks
 # ===========================================================================
@@ -681,6 +690,7 @@ class App:
         self._build_menu()
         self._build_status_bar()          # packed first so it stays at the bottom
         self._build_layout()
+        self._set_examples(local_workload_examples())  # available even before PostgreSQL connects
         self._show_welcome()
         self.root.after(150, self._poll_events)
         self.root.after(250, lambda: self.connect())          # automatic connection
@@ -1048,7 +1058,49 @@ class App:
     def _example_selected(self, _event=None) -> None:
         labels = [label for label, _ in self.examples]
         if self.example_var.get() in labels:
-            self._put_sql(self.examples[labels.index(self.example_var.get())][1])
+            label = self.example_var.get()
+            sql = self.examples[labels.index(label)][1]
+            self._put_sql(sql)
+            self._preview_saved_example(label, sql)
+
+    def _preview_saved_example(self, label: str, sql: str) -> None:
+        """Display a matching bundled QEP result without PostgreSQL or an API call.
+
+        This is a *saved* comparison, not a new execution. If the query has no
+        matching saved result, clear the previous trees instead of leaving a
+        misleading comparison on screen.
+        """
+        match = re.match(r"^([A-Za-z]\d+):", label)
+        qid = match.group(1) if match else None
+        filename = os.path.join(RESULTS_DIR, qid + ".json") if qid else None
+        if filename and os.path.isfile(filename):
+            try:
+                with open(filename, encoding="utf-8") as f:
+                    saved = json.load(f)
+                # Guard against accidentally displaying a result for a different
+                # SQL statement under the same identifier.
+                normalize = lambda s: re.sub(r"\s+", " ", s.strip().rstrip(";").strip()).casefold()
+                if not isinstance(saved, dict) or normalize(saved.get("sql") or "") != normalize(sql):
+                    raise ValueError("Saved query does not match the selected SQL")
+                pg_plan = plan_from_dict(saved["pg_plan"])
+                ai_plan = plan_from_dict(saved["ai_plan"]) if saved.get("ai_plan") else None
+                result = SimpleNamespace(
+                    sql=sql, database=saved.get("database") or "saved result",
+                    pg_plan=pg_plan, ai_plan=ai_plan,
+                    ai_model=saved.get("ai_model"),
+                    ai_error=saved.get("ai_error") or saved.get("error"),
+                    comparison=compare_plans(pg_plan, ai_plan) if ai_plan is not None else None)
+            except (OSError, ValueError, KeyError, TypeError, PlanError):
+                pass  # Missing/malformed previews must not prevent SQL selection.
+            else:
+                self.show_result(result)
+                self.status_var.set(
+                    f"Showing saved result {qid}.json (offline preview; not a live comparison).")
+                return
+        self._show_welcome()
+        self.status_var.set(
+            "No saved QEP for this SQL. Connect to PostgreSQL and press Compare plans "
+            "to generate new results.")
 
     def _put_sql(self, sql: str) -> None:
         self.sql_text.delete("1.0", "end")
