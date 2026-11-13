@@ -319,14 +319,16 @@ class PlanView(tk.Frame):
 
         header = ttk.Frame(self, style="Card.TFrame", padding=(14, 10, 10, 6))
         header.pack(fill="x")
-        ttk.Label(header, text=title, style="CardTitle.TLabel").pack(side="left")
-        self.subtitle_var = tk.StringVar()
-        ttk.Label(header, textvariable=self.subtitle_var,
-                  style="CardMuted.TLabel").pack(side="left", padx=(8, 0))
+        # The zoom buttons are packed first so they always keep their space; a long
+        # subtitle (database or model name) is the part that gets cut instead.
         for text, command in (("+", lambda: self.zoom(1.25)), ("Fit", self.fit_width),
                               ("−", lambda: self.zoom(0.8))):
             ttk.Button(header, text=text, width=3 if len(text) == 1 else 4,
                        style="Small.TButton", command=command).pack(side="right", padx=(4, 0))
+        ttk.Label(header, text=title, style="CardTitle.TLabel").pack(side="left")
+        self.subtitle_var = tk.StringVar()
+        ttk.Label(header, textvariable=self.subtitle_var,
+                  style="CardMuted.TLabel").pack(side="left", padx=(8, 0))
 
         body = tk.Frame(self, bg=CARD)
         body.pack(fill="both", expand=True, padx=(1, 1), pady=(0, 1))
@@ -412,27 +414,8 @@ class PlanView(tk.Frame):
         if self.fit:
             self.scale = max(self.MIN_FIT_SCALE, min(1.0, (view_w - 4) / natural))
         s = self.scale * unit
-        w, h = self.BOX_W * s, self.BOX_H * s
-        gap_x, gap_y, margin = self.GAP_X * s, self.GAP_Y * s, self.MARGIN * s
-        width = 2 * margin + columns * (w + gap_x) - gap_x
-        height = 2 * margin + depth * (h + gap_y) + h
-        offset = max(0.0, (view_w - width) / 2)            # centre a narrow tree
-
-        def top_centre(path: str) -> Tuple[float, float]:
-            column, level = positions[path]
-            return offset + margin + column * (w + gap_x) + w / 2, margin + level * (h + gap_y)
-
+        w = self.BOX_W * s
         nodes = dict(iter_nodes(self.plan))
-        # Edges first, so the boxes are drawn over them. A dashed edge leads to a
-        # subquery plan (InitPlan / SubPlan) rather than a normal input.
-        for path, node in nodes.items():
-            px, py = top_centre(path)
-            for i, child in enumerate(node.children):
-                cx, cy = top_centre(f"{path}.{i}")
-                mid = py + h + gap_y / 2
-                subquery = child.extra.get("Parent Relationship") in ("InitPlan", "SubPlan")
-                canvas.create_line(px, py + h, px, mid, cx, mid, cx, cy, fill=EDGE,
-                                   width=max(1.0, 1.5 * s), dash=(4, 3) if subquery else None)
 
         # Font sizes are in points; a character is about 0.6 of the font height wide,
         # which sets how many characters fit on one line of a box.
@@ -444,6 +427,40 @@ class PlanView(tk.Frame):
         title_chars = max(8, int((w - 12 * unit) / (0.8 * title_size * px_per_pt)))
         small_chars = max(8, int((w - 10 * unit) / (0.75 * small_size * px_per_pt)))
         title_line, small_line = title_size * 1.6 * px_per_pt, small_size * 1.6 * px_per_pt
+        # Up to two lines of operator name, then what it reads, then either the
+        # index it uses or its estimated rows (everything else is in the details).
+        box_lines: Dict[str, list] = {}
+        for path, node in nodes.items():
+            lines = [(text, title_font, INK, title_line)
+                     for text in wrap_words(node_title(node), title_chars)]
+            for text in (node_subtitle(node),
+                         f"using {node.index_name}" if node.index_name else rows_text(node)):
+                if text:
+                    lines.append((shorten(text, small_chars), small_font, MUTED, small_line))
+            box_lines[path] = lines
+        # Every box gets the same height, tall enough for the fullest one.
+        tallest = max(sum(line[3] for line in lines) for lines in box_lines.values())
+        h = max(self.BOX_H * s, tallest + 14 * s)
+        gap_x, gap_y, margin = self.GAP_X * s, self.GAP_Y * s, self.MARGIN * s
+        width = 2 * margin + columns * (w + gap_x) - gap_x
+        height = 2 * margin + depth * (h + gap_y) + h
+        offset = max(0.0, (view_w - width) / 2)            # centre a narrow tree
+
+        def top_centre(path: str) -> Tuple[float, float]:
+            column, level = positions[path]
+            return offset + margin + column * (w + gap_x) + w / 2, margin + level * (h + gap_y)
+
+        # Edges first, so the boxes are drawn over them. A dashed edge leads to a
+        # subquery plan (InitPlan / SubPlan) rather than a normal input.
+        for path, node in nodes.items():
+            px, py = top_centre(path)
+            for i, child in enumerate(node.children):
+                cx, cy = top_centre(f"{path}.{i}")
+                mid = py + h + gap_y / 2
+                subquery = child.extra.get("Parent Relationship") in ("InitPlan", "SubPlan")
+                canvas.create_line(px, py + h, px, mid, cx, mid, cx, cy, fill=EDGE,
+                                   width=max(1.0, 1.5 * s), dash=(4, 3) if subquery else None)
+
         for path, node in nodes.items():
             x, y = top_centre(path)
             status = self._status(path)
@@ -452,14 +469,7 @@ class PlanView(tk.Frame):
             rect = canvas.create_rectangle(x - w / 2, y, x + w / 2, y + h,
                                            fill=STATUS_FILL.get(status, NEUTRAL_FILL),
                                            outline=border, width=2, tags=tags)
-            # Up to two lines of operator name, then what it reads, then either the
-            # index it uses or its estimated rows (everything else is in the details).
-            lines = [(text, title_font, INK, title_line)
-                     for text in wrap_words(node_title(node), title_chars)]
-            for text in (node_subtitle(node),
-                         f"using {node.index_name}" if node.index_name else rows_text(node)):
-                if text:
-                    lines.append((shorten(text, small_chars), small_font, MUTED, small_line))
+            lines = box_lines[path]
             cursor = y + (h - sum(line[3] for line in lines)) / 2
             for text, font, colour, line_height in lines:
                 canvas.create_text(x, cursor + line_height / 2, text=text, font=font,
@@ -887,8 +897,6 @@ class App:
                      bg=STATUS_FILL[status], highlightthickness=2,
                      highlightbackground=STATUS_COLORS[status]).pack(side="left", padx=(0, 6))
             ttk.Label(legend, text=STATUS_SHORT[status]).pack(side="left", padx=(0, 18))
-        ttk.Label(legend, text="Click any box to see its match",
-                  style="Muted.TLabel").pack(side="right")
 
         panes = ttk.Panedwindow(right, orient="vertical")
         panes.pack(fill="both", expand=True)
